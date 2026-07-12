@@ -55,6 +55,13 @@
     .table th, .table td {padding:12px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
     .table th {color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.14em}
     .circle {width:112px;height:112px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:20px;background:radial-gradient(circle,rgba(255,255,255,0.12),rgba(255,255,255,0.04));border:10px solid rgba(110,231,183,0.2)}
+    .macro-rings {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}
+    .macro-ring-card {padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);display:flex;flex-direction:column;align-items:center;gap:8px}
+    .macro-ring {width:64px;height:64px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;position:relative;background:conic-gradient(var(--ring-color) var(--ring-value), rgba(255,255,255,0.08) 0deg)}
+    .macro-ring::before {content:'';position:absolute;inset:8px;border-radius:50%;background:#07131b}
+    .macro-ring span {position:relative;z-index:1}
+    .note-box {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:12px;max-width:320px;color:#d8fcea;font-size:13px;line-height:1.5}
+    .chart-card {margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05)}
     .tiny {font-size:12px;color:var(--muted)}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
@@ -147,7 +154,10 @@
 
       <!-- Calorie Tracking -->
       <div id="tracking" class="page hidden">
-        <div class="header"><div><div class="title">Calorie Tracking</div><div class="muted">Keep your intake visible and intentional</div></div></div>
+        <div class="header">
+          <div><div class="title">Calorie Tracking</div><div class="muted">Keep your intake visible and intentional</div></div>
+          <div class="note-box">Calorie targetta protein targetta ve karbonhidrat ve yağ targetlarınızda en az %90 seviyesine ulaşın.</div>
+        </div>
         <div class="grid" style="grid-template-columns:1.1fr .9fr">
           <div class="card">
             <div class="metric-title">Daily calorie target</div>
@@ -159,6 +169,15 @@
               </div>
             </div>
             <div class="progress-track" style="margin-top:16px"><div id="trackingBar" class="progress-fill" style="width:0%"></div></div>
+            <div class="macro-rings">
+              <div class="macro-ring-card"><div class="macro-ring" id="proteinRing" style="--ring-color:#38bdf8;--ring-value:0deg"><span id="proteinRingText">0%</span></div><div class="tiny">Protein</div></div>
+              <div class="macro-ring-card"><div class="macro-ring" id="carbRing" style="--ring-color:#6ee7b7;--ring-value:0deg"><span id="carbRingText">0%</span></div><div class="tiny">Carbs</div></div>
+              <div class="macro-ring-card"><div class="macro-ring" id="fatRing" style="--ring-color:#f59e0b;--ring-value:0deg"><span id="fatRingText">0%</span></div><div class="tiny">Fat</div></div>
+            </div>
+            <div class="chart-card">
+              <div class="tiny">Daily balance</div>
+              <svg id="trackingChart" viewBox="0 0 280 140" width="100%" height="140"></svg>
+            </div>
             <div class="muted small" style="margin-top:8px">Add meals to get a more accurate daily view.</div>
           </div>
           <div class="card">
@@ -166,6 +185,9 @@
             <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
               <input id="trackingMeal" placeholder="Meal name" />
               <input id="trackingCals" placeholder="Calories" type="number" />
+              <input id="trackingProtein" placeholder="Protein (g)" type="number" />
+              <input id="trackingCarbs" placeholder="Carbs (g)" type="number" />
+              <input id="trackingFat" placeholder="Fat (g)" type="number" />
               <button class="btn" onclick="logMeal()">Add meal</button>
             </div>
             <div id="trackingLog" style="margin-top:14px"></div>
@@ -375,7 +397,11 @@
     function renderDash() {
       const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
       const target = getTargetCalories()
-      const todayTotal = getTodayCalories()
+      const todayEntries = app.dailyLog.filter(item => item.date === new Date().toDateString())
+      const todayTotal = todayEntries.reduce((sum, item) => sum + item.cals, 0)
+      const todayProtein = todayEntries.reduce((sum, item) => sum + (item.protein || 0), 0)
+      const todayCarbs = todayEntries.reduce((sum, item) => sum + (item.carbs || 0), 0)
+      const todayFat = todayEntries.reduce((sum, item) => sum + (item.fat || 0), 0)
       const percent = Math.min(100, Math.round((todayTotal / target) * 100))
 
       if(latest) {
@@ -388,9 +414,9 @@
       qs('dashCalories').innerHTML = `${todayTotal} / ${target} kcal`
       qs('dashCalBar').style.width = percent + '%'
       qs('dashCalText').innerHTML = percent >= 100 ? 'Goal reached' : `${target - todayTotal} kcal left`
-      qs('dashProtein').innerHTML = `${Math.round(todayTotal / 8)}g`
-      qs('dashCarbs').innerHTML = `${Math.round(todayTotal / 3)}g`
-      qs('dashFat').innerHTML = `${Math.round(todayTotal / 12)}g`
+      qs('dashProtein').innerHTML = `${todayProtein}g`
+      qs('dashCarbs').innerHTML = `${todayCarbs}g`
+      qs('dashFat').innerHTML = `${todayFat}g`
       qs('dashGoal').innerHTML = getGoalLabel()
 
       let html = ''
@@ -510,16 +536,59 @@
       alert('Saved!')
     }
 
+    function setMacroRing(element, percent, color) {
+      element.style.setProperty('--ring-color', color)
+      element.style.setProperty('--ring-value', `${percent * 3.6}deg`)
+      element.querySelector('span').textContent = `${percent}%`
+    }
+
+    function renderTrackingChart(calories, caloriesTarget, protein, proteinTarget, carbs, carbsTarget, fat, fatTarget) {
+      const data = [
+        {label:'Calories', value:Math.min(100, Math.round((calories / caloriesTarget) * 100)), color:'#ff6b6b'},
+        {label:'Protein', value:Math.min(100, Math.round((protein / proteinTarget) * 100)), color:'#38bdf8'},
+        {label:'Carbs', value:Math.min(100, Math.round((carbs / carbsTarget) * 100)), color:'#6ee7b7'},
+        {label:'Fat', value:Math.min(100, Math.round((fat / fatTarget) * 100)), color:'#f59e0b'}
+      ]
+
+      const svg = qs('trackingChart')
+      const yPositions = [30, 60, 90, 120]
+      svg.innerHTML = `
+        <rect x="0" y="0" width="280" height="140" rx="16" fill="rgba(255,255,255,0.03)"></rect>
+        ${data.map((item, index) => `
+          <g>
+            <line x1="30" y1="${yPositions[index]}" x2="250" y2="${yPositions[index]}" stroke="${item.color}" stroke-opacity="0.16" stroke-width="2"></line>
+            <line x1="30" y1="${yPositions[index]}" x2="${30 + (item.value / 100) * 220}" y2="${yPositions[index]}" stroke="${item.color}" stroke-width="3"></line>
+            <circle cx="${30 + (item.value / 100) * 220}" cy="${yPositions[index]}" r="5" fill="${item.color}"></circle>
+            <text x="8" y="${yPositions[index] + 4}" fill="#9aa4b2" font-size="11">${item.label}</text>
+          </g>
+        `).join('')}
+      `
+    }
+
     function renderTracking() {
       const today = new Date().toDateString()
       const todayEntries = app.dailyLog.filter(item => item.date === today)
       const total = todayEntries.reduce((sum, item) => sum + item.cals, 0)
+      const proteinTotal = todayEntries.reduce((sum, item) => sum + (item.protein || 0), 0)
+      const carbsTotal = todayEntries.reduce((sum, item) => sum + (item.carbs || 0), 0)
+      const fatTotal = todayEntries.reduce((sum, item) => sum + (item.fat || 0), 0)
       const target = getTargetCalories()
+      const proteinTarget = getPlanDetail().protein
+      const carbsTarget = getPlanDetail().carbs
+      const fatTarget = getPlanDetail().fat
       const percent = Math.min(100, Math.round((total / target) * 100))
+      const proteinPercent = Math.min(100, Math.round((proteinTotal / proteinTarget) * 100))
+      const carbsPercent = Math.min(100, Math.round((carbsTotal / carbsTarget) * 100))
+      const fatPercent = Math.min(100, Math.round((fatTotal / fatTarget) * 100))
+
       qs('trackingCircle').innerHTML = `${percent}%`
       qs('trackingBar').style.width = percent + '%'
       qs('trackingCalories').innerHTML = `${total} / ${target} kcal`
-      qs('trackingMacro').innerHTML = `Protein ${Math.round(total / 8)}g • Carbs ${Math.round(total / 3)}g • Fat ${Math.round(total / 12)}g`
+      qs('trackingMacro').innerHTML = `Protein ${proteinTotal}g • Carbs ${carbsTotal}g • Fat ${fatTotal}g`
+      setMacroRing(qs('proteinRing'), proteinPercent, '#38bdf8')
+      setMacroRing(qs('carbRing'), carbsPercent, '#6ee7b7')
+      setMacroRing(qs('fatRing'), fatPercent, '#f59e0b')
+      renderTrackingChart(total, target, proteinTotal, proteinTarget, carbsTotal, carbsTarget, fatTotal, fatTarget)
 
       if(todayEntries.length > 0) {
         qs('trackingLog').innerHTML = todayEntries.map(item => `<div class="stat"><span>${item.name}</span><span>${item.cals} kcal</span></div>`).join('')
@@ -531,15 +600,21 @@
     function logMeal() {
       const mealName = qs('trackingMeal').value.trim()
       const cals = parseInt(qs('trackingCals').value, 10)
+      const protein = parseInt(qs('trackingProtein').value, 10) || 0
+      const carbs = parseInt(qs('trackingCarbs').value, 10) || 0
+      const fat = parseInt(qs('trackingFat').value, 10) || 0
       if(!mealName || !cals) {
         alert('Please add a meal name and calories.')
         return
       }
       const today = new Date().toDateString()
-      app.dailyLog.push({date:today,name:mealName,cals})
+      app.dailyLog.push({date:today,name:mealName,cals,protein,carbs,fat})
       localStorage.setItem('nq_tracking', JSON.stringify(app.dailyLog))
       qs('trackingMeal').value = ''
       qs('trackingCals').value = ''
+      qs('trackingProtein').value = ''
+      qs('trackingCarbs').value = ''
+      qs('trackingFat').value = ''
       addXP(10)
       renderTracking()
       renderDash()
