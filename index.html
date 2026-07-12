@@ -12,7 +12,7 @@
     body {background:linear-gradient(180deg,#071018 0%, #071922 100%);color:#e6eef6;overflow-x:hidden}
     .app {display:flex;height:100vh}
     .sidebar {width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.04),transparent);padding:24px;border-right:1px solid rgba(255,255,255,0.04);overflow-y:auto}
-    .logo {font-weight:800;font-size:18px;margin-bottom:20px;background:linear-gradient(90deg,var(--accent),#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .logo {font-weight:800;font-size:18px;margin-bottom:20px;background:linear-gradient(90deg,var(--accent),#38bdf8);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav {display:flex;flex-direction:column;gap:6px}
     .nav a {padding:12px;border-radius:10px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent}
     .nav a:hover {background:rgba(255,255,255,0.06);color:#e6eef6}
@@ -156,7 +156,7 @@
       <div id="tracking" class="page hidden">
         <div class="header">
           <div><div class="title">Calorie Tracking</div><div class="muted">Keep your intake visible and intentional</div></div>
-          <div class="note-box">Calorie targetta protein targetta ve karbonhidrat ve yağ targetlarınızda en az %90 seviyesine ulaşın.</div>
+          <div class="note-box">Reach at least 90% of your daily targets for calories, protein, carbohydrates, and fat.</div>
         </div>
         <div class="grid" style="grid-template-columns:1.1fr .9fr">
           <div class="card">
@@ -450,7 +450,7 @@
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
           <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.accent}</span></div>
           <div style="font-size:14px;color:#d7fbea">${plan.subtitle}</div>
-          <div class="muted">${plan.calories} kcal • ${plan.protein}g protein</div>
+          <div class="muted">${plan.calories} kcal • ${plan.protein}g protein • ${plan.carbs}g carbs • ${plan.fat}g fat</div>
           <div><strong>Meals</strong><div class="tiny" style="margin-top:4px">${plan.meals.join(' • ')}</div></div>
           <div><strong>Tips</strong><div class="tiny" style="margin-top:4px">${plan.tips.join(' • ')}</div></div>
           <button class="btn secondary" onclick="setPlan('${plan.id}')">Choose</button>
