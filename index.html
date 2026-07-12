@@ -1,475 +1,383 @@
 <!doctype html>
 <html lang="tr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NutriQuest — Body Analysis v0.2</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      :root{--bg:#0b0f14;--card:#0f1720;--muted:#9aa4b2;--accent:#6ee7b7;--danger:#ff6b6b}
-      html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,"Helvetica Neue",Arial}
-      body{background:linear-gradient(180deg,#071018 0%, #071922 100%);color:#e6eef6}
-      .app{display:flex;min-height:100vh}
-      .sidebar{width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:24px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
-      .logo{font-weight:700;font-size:18px;margin-bottom:18px}
-      .nav{display:flex;flex-direction:column;gap:8px}
-      .nav a{padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;display:flex;justify-content:space-between;align-items:center}
-      .nav a.active{background:rgba(255,255,255,0.02);color:#e6eef6}
-      .content{flex:1;padding:28px;box-sizing:border-box}
-      .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-      .page-title{font-size:20px;font-weight:700}
-      .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
-      .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-      .upload-area{border:2px dashed rgba(255,255,255,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;min-height:180px;border-radius:10px;gap:10px}
-      .btn{background:var(--accent);color:#052018;padding:8px 12px;border-radius:8px;font-weight:600;border:none;cursor:pointer}
-      .muted{color:var(--muted);font-size:13px}
-      .history-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
-      .history-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01)}
-      .big-cards{display:flex;gap:12px}
-      .info-card{flex:1;padding:18px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);text-align:center}
-      .value{font-size:28px;font-weight:700}
-      .delta{font-size:13px;margin-top:8px}
-      .body-score{display:flex;align-items:center;gap:16px}
-      .score-circle{width:96px;height:96px;border-radius:999px;background:linear-gradient(180deg,#071922,rgba(255,255,255,0.02));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
-      .charts{margin-top:18px}
-      .form-row{display:flex;gap:8px;align-items:center}
-      input,select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
-      .small{font-size:13px}
-      .progress{height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
-      .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#38bdf8);width:0%}
-      canvas{background:transparent}
-      footer{opacity:0.6;font-size:12px;margin-top:12px}
-    </style>
-  </head>
-  <body>
-    <div class="app">
-      <aside class="sidebar">
-        <div class="logo">NutriQuest</div>
-        <nav class="nav">
-          <a href="#" id="nav-dashboard">Dashboard</a>
-          <a href="#" id="nav-meals">Meal Library</a>
-          <a href="#" id="nav-plans">Meal Plan</a>
-          <a href="#" id="nav-challenges">Challenges</a>
-          <a href="#" id="nav-achievements">Achievements</a>
-          <a href="#" id="nav-leaderboard">Leaderboard</a>
-          <a href="#" id="nav-profile">Profile</a>
-          <a href="#" id="nav-body" class="active">Body Analysis</a>
-        </nav>
-      </aside>
-      <main class="content">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NutriQuest v0.2 — Gamified Health App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {--accent:#6ee7b7;--muted:#9aa4b2;--danger:#ff6b6b;--warning:#f59e0b}
+    * {margin:0;padding:0;box-sizing:border-box}
+    html, body {height:100%;font-family:Inter,system-ui,-apple-system,sans-serif}
+    body {background:linear-gradient(180deg,#071018 0%, #071922 100%);color:#e6eef6;overflow-x:hidden}
+    .app {display:flex;height:100vh}
+    .sidebar {width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:24px;border-right:1px solid rgba(255,255,255,0.03);overflow-y:auto}
+    .logo {font-weight:800;font-size:18px;margin-bottom:20px;background:linear-gradient(90deg,var(--accent),#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .nav {display:flex;flex-direction:column;gap:6px}
+    .nav a {padding:12px;border-radius:10px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent}
+    .nav a:hover {background:rgba(255,255,255,0.06);color:#e6eef6}
+    .nav a.active {background:rgba(110,231,183,0.1);color:var(--accent);border-left-color:var(--accent)}
+    .content {flex:1;padding:28px;overflow-y:auto}
+    .header {display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .title {font-size:28px;font-weight:800}
+    .badge {background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:8px 16px;border-radius:8px;font-weight:700;font-size:12px;display:inline-block}
+    .grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+    .card {background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .btn {background:var(--accent);color:#052018;padding:12px 20px;border-radius:8px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s}
+    .btn:hover {opacity:0.9;transform:translateY(-2px)}
+    .btn.secondary {background:rgba(255,255,255,0.1);color:#e6eef6}
+    input, select {background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);padding:10px;border-radius:8px;color:inherit;font-size:14px;width:100%}
+    .muted {color:var(--muted);font-size:13px}
+    .small {font-size:13px}
+    .page {animation:fadeIn 0.2s}
+    @keyframes fadeIn {from {opacity:0} to {opacity:1}}
+    .hidden {display:none!important}
+    .xp-bar {height:10px;background:rgba(255,255,255,0.05);border-radius:999px;overflow:hidden;margin-top:8px}
+    .xp-bar > div {height:100%;background:linear-gradient(90deg,var(--accent),#34d399);transition:width 0.4s}
+    .stat {display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:8px}
+    .challenge-item {padding:14px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--accent)}
+    .meal-card {padding:16px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.03)}
+    .achievement-item {display:flex;align-items:center;gap:16px;padding:14px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:10px}
+    .achievement-icon {font-size:32px}
+    footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="logo">🥗 NutriQuest</div>
+      <nav class="nav">
+        <a class="nav-link active" data-page="dashboard">📊 Dashboard</a>
+        <a class="nav-link" data-page="meals">🍽️ Meal Library</a>
+        <a class="nav-link" data-page="plan">📋 Meal Plan</a>
+        <a class="nav-link" data-page="challenges">⚡ Challenges</a>
+        <a class="nav-link" data-page="achievements">🏆 Achievements</a>
+        <a class="nav-link" data-page="leaderboard">🎯 Leaderboard</a>
+        <a class="nav-link" data-page="profile">👤 Profile</a>
+        <a class="nav-link" data-page="body">📈 Body Analysis</a>
+      </nav>
+      <footer style="margin-top:auto">v0.2 Gamified</footer>
+    </aside>
+    <main class="content">
+      <!-- Dashboard -->
+      <div id="dashboard" class="page">
         <div class="header">
-          <div class="page-title">Body Analysis</div>
-          <div class="muted">Premium insights · Dark mode · Animations</div>
+          <div><div class="title">Dashboard</div><div class="muted">Your fitness journey</div></div>
+          <div style="text-align:right"><span class="badge" id="levelBadge">Level 1</span><div style="margin-top:8px;font-size:28px;font-weight:800" id="streakFire">🔥 0</div></div>
         </div>
-
-        <!-- Views: Dashboard and Body Analysis -->
-        <div id="dashboardView" style="display:none">
-          <div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;gap:12px">
-            <div style="flex:1" class="card">
-              <div class="muted small">Body Score</div>
-              <div style="display:flex;align-items:center;justify-content:space-between">
-                <div style="display:flex;align-items:center;gap:12px">
-                  <div class="score-circle" id="dashScore">--</div>
-                  <div><div style="font-weight:700" id="dashGrade">--</div><div class="muted small">Overall wellness index</div></div>
-                </div>
-                <div style="text-align:right"><div class="muted small">Latest weight</div><div style="font-weight:800" id="dashWeight">-- kg</div><div style="margin-top:8px" class="muted small">Last measured</div></div>
-              </div>
-            </div>
-            <div style="width:320px" class="card">
-              <div class="muted small">Water progress</div>
-              <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
-                <div style="flex:1"><div class="progress"><i id="dashWaterBar"></i></div></div>
-                <div style="width:80px;text-align:right" id="dashWaterText">-- ml</div>
-              </div>
-              <div class="muted small" style="margin-top:8px">Track daily hydration progress from Body Analysis</div>
-            </div>
-          </div>
-
-          <div class="card">
-            <strong>Dashboard Charts</strong>
-            <div class="muted small">Quick glance at recent trends</div>
-            <div class="charts" style="margin-top:12px">
-              <canvas id="dashChartWeight" height="100"></canvas>
-            </div>
-          </div>
-        </div>
-
-        <div id="bodyView">
         <div class="grid">
-          <div>
-            <div class="card">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-                <div><strong>Upload latest body analysis (PDF)</strong><div class="muted">Supports InBody, Tanita, SECA, Boditrax</div></div>
-                <div><button id="uploadBtn" class="btn">Upload PDF</button></div>
-              </div>
-              <div id="uploadArea" class="upload-area">
-                <div class="muted">Drag & Drop PDF here or click to choose</div>
-                <div class="muted small">Only PDF files are accepted for now</div>
-                <div style="width:100%"><div class="progress" style="margin-top:10px"><i id="progBar"></i></div></div>
-                <input type="file" id="fileInput" accept="application/pdf" style="display:none">
-                <div id="uploadStatus" class="muted small">No uploads yet</div>
-              </div>
-
-              <div style="margin-top:12px"><strong>Upload History</strong>
-                <div id="history" class="history-list"></div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <strong>Manual Measurement</strong>
-              <div class="muted small">If your PDF isn't parsed yet, add measurement values manually.</div>
-              <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
-                <div class="form-row"><input id="mWeight" placeholder="Weight (kg)"><input id="mFat" placeholder="Fat (%)"></div>
-                <div class="form-row"><input id="mMuscle" placeholder="Muscle (kg)"><input id="mWater" placeholder="Water (%)"></div>
-                <div style="display:flex;gap:8px"><button id="addMeasurement" class="btn">Add Measurement</button><button id="clearData" class="muted">Clear All</button></div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div style="display:flex;gap:12px;margin-bottom:12px">
-              <div class="card" style="flex:2">
-                <div style="display:flex;justify-content:space-between;align-items:center">
-                  <div><strong>Latest Snapshot</strong><div class="muted small">Values from last uploaded report or manual input</div></div>
-                  <div class="body-score">
-                    <div class="score-circle" id="scoreCircle">--</div>
-                    <div style="text-align:right"><div class="muted small">Body Score</div><div id="scoreGrade" style="font-weight:700"></div></div>
-                  </div>
-                </div>
-                <div class="big-cards" style="margin-top:12px">
-                  <div class="info-card"><div class="muted small">Weight</div><div class="value" id="cardWeight">--</div><div class="delta" id="deltaWeight"></div></div>
-                  <div class="info-card"><div class="muted small">Fat %</div><div class="value" id="cardFat">--</div><div class="delta" id="deltaFat"></div></div>
-                  <div class="info-card"><div class="muted small">Muscle</div><div class="value" id="cardMuscle">--</div><div class="delta" id="deltaMuscle"></div></div>
-                  <div class="info-card"><div class="muted small">Water %</div><div class="value" id="cardWater">--</div><div class="delta" id="deltaWater"></div></div>
-                </div>
-              </div>
-
-              <div class="card" style="width:320px">
-                <strong>Goal Builder</strong>
-                <div class="muted small">Choose a target and we calculate targets & macros</div>
-                <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
-                  <select id="goalSelect">
-                    <option value="maintain">Maintain</option>
-                    <option value="fat_loss">Yağ Yakma</option>
-                    <option value="muscle_gain">Kas Kazanımı</option>
-                    <option value="general_health">Genel Sağlık</option>
-                    <option value="sport_basketball">Basketbol</option>
-                    <option value="sport_marathon">Maraton</option>
-                  </select>
-                  <div class="form-row"><input id="gAge" placeholder="Age" type="number"><input id="gHeight" placeholder="Height (cm)" type="number"></div>
-                  <div class="form-row"><input id="gWeight" placeholder="Weight (kg)" type="number"><select id="gActivity"><option value="1.2">Sedentary</option><option value="1.375">Light</option><option value="1.55">Moderate</option><option value="1.725">Active</option><option value="1.9">Very Active</option></select></div>
-                  <div style="display:flex;gap:8px"><button id="calcGoals" class="btn">Calculate</button></div>
-                  <div class="muted small" id="goalResult"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="card">
-              <strong>Progress Charts</strong>
-              <div class="muted small">Weekly and monthly trends</div>
-              <div class="charts">
-                <canvas id="chartWeight" height="120"></canvas>
-                <canvas id="chartFat" height="120" style="margin-top:10px"></canvas>
-                <canvas id="chartMuscle" height="120" style="margin-top:10px"></canvas>
-                <canvas id="chartWater" height="120" style="margin-top:10px"></canvas>
-                <div style="margin-top:10px"><canvas id="chartComparison" height="120"></canvas></div>
-              </div>
-            </div>
-
-            <div class="card" style="margin-top:12px">
-              <strong>Prediction & Nutrition</strong>
-              <div class="muted small">Estimated target date and daily macros</div>
-              <div style="display:flex;gap:12px;margin-top:10px">
-                <div style="flex:1">
-                  <div class="muted small">Estimated target date</div>
-                  <div id="predDate" style="font-weight:700;margin-top:6px">--</div>
-                  <div class="muted small" style="margin-top:8px" id="predWeekly">-- per week</div>
-                </div>
-                <div style="width:220px">
-                  <div class="muted small">Daily calories & macros</div>
-                  <div id="calories" style="font-weight:800;font-size:18px;margin-top:6px">-- kcal</div>
-                  <div class="muted small" id="macros">--</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div class="card"><div class="muted small">XP & Level</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashXP">0 XP</div><div class="xp-bar"><div id="dashXPBar" style="width:0%"></div></div><div class="muted small" style="margin-top:8px" id="dashXPText">0/500 to next</div></div>
+          <div class="card"><div class="muted small">Body Score</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashScore">--</div><div class="muted small" style="margin-top:8px" id="dashGrade">No data yet</div></div>
+          <div class="card"><div class="muted small">Latest Weight</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashWeight">-- kg</div><div class="muted small" style="margin-top:8px">Track in Body Analysis</div></div>
         </div>
+        <div class="card" style="margin-top:16px"><strong>Today's Challenges</strong><div id="todayChalls" style="margin-top:12px"></div></div>
+      </div>
 
-        <footer>Prototype: Body Analysis module (frontend). Reports persisted locally.</footer>
-      </main>
-    </div>
+      <!-- Meal Library -->
+      <div id="meals" class="page hidden">
+        <div class="header"><div><div class="title">Meal Library</div><div class="muted">15 healthy recipes</div></div></div>
+        <div class="grid" id="mealList"></div>
+      </div>
 
-    <script>
-      // Data storage keys
-      const KEY_REPORTS = 'bodyAnalysis.reports'
-      const KEY_PROFILE = 'bodyAnalysis.profile'
+      <!-- Meal Plan -->
+      <div id="plan" class="page hidden">
+        <div class="header"><div><div class="title">Meal Plan</div><div class="muted">Weekly nutrition guide</div></div><button class="btn" onclick="chooseMealPlan()">Choose Plan</button></div>
+        <div id="planContent" style="margin-top:20px"></div>
+      </div>
 
-      function qs(id){return document.getElementById(id)}
+      <!-- Challenges -->
+      <div id="challenges" class="page hidden">
+        <div class="header"><div><div class="title">Challenges</div><div class="muted">Complete & earn XP</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><strong>Daily ⚡</strong><div id="dailyChallenges" style="margin-top:12px"></div></div>
+          <div class="card"><strong>Weekly 📈</strong><div id="weeklyChallenges" style="margin-top:12px"></div></div>
+        </div>
+      </div>
 
-      // Init
-      let reports = JSON.parse(localStorage.getItem(KEY_REPORTS) || '[]')
-      let profile = JSON.parse(localStorage.getItem(KEY_PROFILE) || '{}')
+      <!-- Achievements -->
+      <div id="achievements" class="page hidden">
+        <div class="header"><div><div class="title">Achievements</div><div class="muted">Unlock & collect badges</div></div></div>
+        <div id="achievementsList"></div>
+      </div>
 
-      const uploadArea = qs('uploadArea')
-      const fileInput = qs('fileInput')
-      const progBar = qs('progBar')
-      const uploadStatus = qs('uploadStatus')
-      const historyEl = qs('history')
+      <!-- Leaderboard -->
+      <div id="leaderboard" class="page hidden">
+        <div class="header"><div><div class="title">Leaderboard</div><div class="muted">Top performers</div></div></div>
+        <div class="card"><div id="leaderboardList"></div></div>
+      </div>
 
-      function renderHistory(){
-        historyEl.innerHTML = ''
-        reports.slice().reverse().forEach(r=>{
-          const el = document.createElement('div'); el.className='history-item'
-          const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${r.name}</div><div class="muted small">${new Date(r.date).toLocaleString()}</div>`
-          const right = document.createElement('div'); right.innerHTML = `<button class="muted small" data-id="${r.id}">View</button>`
-          el.appendChild(left); el.appendChild(right)
-          historyEl.appendChild(el)
-        })
-      }
+      <!-- Profile -->
+      <div id="profile" class="page hidden">
+        <div class="header"><div><div class="title">Profile</div><div class="muted">Your stats</div></div></div>
+        <div class="grid">
+          <div class="card"><div class="muted small">Goal</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profGoal">Not set</div></div>
+          <div class="card"><div class="muted small">Streak</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profStreak">0 days 🔥</div></div>
+          <div class="card"><div class="muted small">Level</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profLevel">Level 1</div></div>
+          <div class="card"><div class="muted small">Total XP</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profXP">0 XP</div></div>
+        </div>
+        <div class="card" style="margin-top:16px"><strong>Health Profile</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="profAge" placeholder="Age" type="number"><input id="profHeight" placeholder="Height (cm)" type="number"><input id="profWeight" placeholder="Weight (kg)" type="number"><button class="btn" onclick="saveProfile()">Save</button></div></div>
+      </div>
 
-      function saveReports(){ localStorage.setItem(KEY_REPORTS, JSON.stringify(reports)) }
+      <!-- Body Analysis -->
+      <div id="body" class="page hidden">
+        <div class="header"><div><div class="title">Body Analysis</div><div class="muted">Track metrics</div></div></div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="card"><strong>Add Measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number"><input id="bodyFat" placeholder="Fat %" type="number"><input id="bodyMuscle" placeholder="Muscle (kg)" type="number"><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
+          <div class="card"><strong>Latest</strong><div class="stat"><span class="muted">Weight:</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat:</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle:</span><span id="bodyM">--</span></div></div>
+        </div>
+      </div>
 
-      function simulateUpload(file, cb){
-        let progress = 0
-        progBar.style.width = '0%'
-        uploadStatus.textContent = 'Uploading...'
-        const iv = setInterval(()=>{
-          progress += Math.random()*20
-          if(progress>=100) progress=100
-          progBar.style.width = progress+'%'
-          if(progress>=100){ clearInterval(iv); setTimeout(()=>{cb()},300) }
-        },300)
-      }
+      <footer>© 2026 NutriQuest Sprint 1</footer>
+    </main>
+  </div>
 
-      uploadArea.addEventListener('click',()=>fileInput.click())
-      uploadArea.addEventListener('dragover',e=>{e.preventDefault();uploadArea.style.borderColor='rgba(255,255,255,0.18)'} )
-      uploadArea.addEventListener('dragleave',e=>{uploadArea.style.borderColor='rgba(255,255,255,0.04)'} )
+  <script>
+    // App State
+    const app = {
+      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"","age":0,"height":0,"weight":0}'),
+      bodyMetrics: JSON.parse(localStorage.getItem('nq_metrics') || '[]'),
+      dailyCompleted: [],
+      weeklyProgress: {}
+    }
 
-      uploadArea.addEventListener('drop',e=>{
-        e.preventDefault(); uploadArea.style.borderColor='rgba(255,255,255,0.04)'
-        const f = e.dataTransfer.files[0]
-        if(f) handleFile(f)
+    const meals = [
+      {name:'Grilled Chicken',cal:165,p:31,c:0,f:3.6,icon:'🍗'},
+      {name:'Quinoa Salad',cal:222,p:8,c:39,f:4,icon:'🥗'},
+      {name:'Salmon',cal:280,p:25,c:10,f:15,icon:'🐟'},
+      {name:'Greek Salad',cal:150,p:5,c:12,f:9,icon:'🥒'},
+      {name:'Brown Rice',cal:206,p:8,c:43,f:2,icon:'🍚'},
+      {name:'Egg Whites',cal:102,p:22,c:1,f:1.1,icon:'🥚'},
+      {name:'Sweet Potato',cal:190,p:20,c:24,f:2,icon:'🍠'},
+      {name:'Stir-fry',cal:260,p:28,c:18,f:9,icon:'🍳'},
+      {name:'Turkey Balls',cal:200,p:26,c:5,f:9,icon:'🥩'},
+      {name:'Lentil Soup',cal:130,p:9,c:20,f:2,icon:'🍲'},
+      {name:'Grilled Fish',cal:206,p:22,c:0,f:12,icon:'🐠'},
+      {name:'Chickpea Curry',cal:320,p:15,c:40,f:10,icon:'🍛'},
+      {name:'Tofu Bowl',cal:144,p:17,c:3,f:8,icon:'🟫'},
+      {name:'Avocado Toast',cal:280,p:10,c:27,f:15,icon:'🥑'},
+      {name:'Protein Shake',cal:200,p:30,c:20,f:2,icon:'🥤'}
+    ]
+
+    const dailyChalls = [
+      {id:'d1',name:'Log Meals',desc:'Track all meals',xp:50,done:false},
+      {id:'d2',name:'Water Goal',desc:'8 glasses',xp:30,done:false},
+      {id:'d3',name:'Workout',desc:'30 min exercise',xp:100,done:false},
+      {id:'d4',name:'Calorie',desc:'Within range',xp:60,done:false},
+      {id:'d5',name:'Protein',desc:'Hit target',xp:40,done:false}
+    ]
+
+    const weeklyChalls = [
+      {id:'w1',name:'Gym 5x',desc:'5 workouts',xp:250,prog:0,max:5},
+      {id:'w2',name:'Meal Prep',desc:'7 meals',xp:200,prog:0,max:7},
+      {id:'w3',name:'Hydration',desc:'56 glasses',xp:150,prog:0,max:56},
+      {id:'w4',name:'Log 6 Days',desc:'6 day logs',xp:180,prog:0,max:6}
+    ]
+
+    const achievements = [
+      {id:'a1',name:'First Step',desc:'Log 1 metric',icon:'🚀',unlocked:false},
+      {id:'a2',name:'Streak',desc:'7 day streak',icon:'🔥',unlocked:false},
+      {id:'a3',name:'Level 5',desc:'Reach Level 5',icon:'⭐',unlocked:false},
+      {id:'a4',name:'50 Meals',desc:'Log 50 meals',icon:'🍽️',unlocked:false},
+      {id:'a5',name:'Champion',desc:'10 challenges',icon:'🏆',unlocked:false}
+    ]
+
+    function qs(id) { return document.getElementById(id) }
+    function save() { localStorage.setItem('nq_user', JSON.stringify(app.user)) }
+
+    // Nav
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault()
+        const page = link.dataset.page
+        document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'))
+        link.classList.add('active')
+        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'))
+        qs(page).classList.remove('hidden')
+        render(page)
       })
+    })
 
-      qs('uploadBtn').addEventListener('click',()=>fileInput.click())
-      fileInput.addEventListener('change',e=>{ const f = e.target.files[0]; if(f) handleFile(f) })
+    function render(page) {
+      if(page === 'dashboard') renderDash()
+      if(page === 'meals') renderMeals()
+      if(page === 'challenges') renderChallenges()
+      if(page === 'achievements') renderAchieve()
+      if(page === 'profile') renderProfile()
+      if(page === 'leaderboard') renderLeader()
+      if(page === 'body') renderBody()
+    }
 
-      function handleFile(file){
-        if(file.type !== 'application/pdf'){ alert('Sadece PDF destekleniyor.'); return }
-        simulateUpload(file, ()=>{
-          const reader = new FileReader()
-          reader.onload = ()=>{
-            const dataUrl = reader.result
-            const id = Date.now().toString(36)
-            const r = {id,name:file.name,date:Date.now(),dataUrl,values:{}}
-            reports.push(r)
-            saveReports(); renderHistory(); uploadStatus.textContent = 'Uploaded: '+file.name
-            // Prompt manual entry for parsed values
-            setTimeout(()=>{ promptManualForReport(r) },200)
-          }
-          reader.readAsDataURL(file)
-        })
+    // Streak Check
+    function checkStreak() {
+      const today = new Date().toDateString()
+      if(app.user.lastLogin !== today) {
+        app.user.streak++
+        app.user.lastLogin = today
+        save()
       }
+      qs('streakFire').innerHTML = `🔥 ${app.user.streak}`
+    }
 
-      function promptManualForReport(report){
-        const weight = prompt('Son ölçülen kilo (kg) — raporda görünen değeri girin','')
-        const fat = prompt('Vücut yağ oranı (%) — raporda görünen değeri girin','')
-        const muscle = prompt('Kas kütlesi (kg)','')
-        const water = prompt('Su oranı (%)','')
-        report.values = {weight: parseFloat(weight)||null, fat:parseFloat(fat)||null, muscle:parseFloat(muscle)||null, water:parseFloat(water)||null}
-        saveReports(); renderHistory(); renderSnapshot(); updateCharts()
+    function addXP(amt) {
+      app.user.xp += amt
+      app.user.level = Math.floor(app.user.xp / 500) + 1
+      save()
+      updateXP()
+    }
+
+    function updateXP() {
+      const xpInLevel = app.user.xp % 500
+      qs('levelBadge').innerHTML = `Level ${app.user.level}`
+      qs('dashXP').innerHTML = `${app.user.xp} XP`
+      qs('dashXPBar').style.width = ((xpInLevel / 500) * 100) + '%'
+      qs('dashXPText').innerHTML = `${xpInLevel}/500 to next`
+    }
+
+    function renderDash() {
+      const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
+      if(latest) {
+        const score = Math.max(0, Math.min(100, 100 - (latest.fat * 0.9)))
+        qs('dashScore').innerHTML = Math.round(score)
+        qs('dashGrade').innerHTML = score >= 80 ? 'A' : score >= 70 ? 'B' : 'C'
+        qs('dashWeight').innerHTML = latest.weight + ' kg'
       }
-
-      // Manual measurement
-      qs('addMeasurement').addEventListener('click',()=>{
-        const w = parseFloat(qs('mWeight').value)
-        const f = parseFloat(qs('mFat').value)
-        const m = parseFloat(qs('mMuscle').value)
-        const wa = parseFloat(qs('mWater').value)
-        if(!w || !f){ alert('En az kilo ve yağ bilgisi girin.'); return }
-        const id = Date.now().toString(36)
-        const r = {id,name:'manual-'+id,date:Date.now(),dataUrl:null,values:{weight:w,fat:f,muscle:m||null,water:wa||null}}
-        reports.push(r); saveReports(); renderHistory(); renderSnapshot(); updateCharts()
-        qs('mWeight').value='';qs('mFat').value='';qs('mMuscle').value='';qs('mWater').value=''
+      let html = ''
+      dailyChalls.slice(0, 3).forEach(c => {
+        html += `<div class="challenge-item"><span>${c.name}: ${c.desc}</span><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
       })
+      qs('todayChalls').innerHTML = html
+    }
 
-      qs('clearData').addEventListener('click',()=>{ if(confirm('Tüm verileri silmek istediğinizden emin misiniz?')){ reports=[]; localStorage.removeItem(KEY_REPORTS); renderHistory(); renderSnapshot(); updateCharts(); uploadStatus.textContent='No uploads yet' } })
-
-      // Snapshot & Body Score
-      function lastReports(){ return reports.filter(r=>r.values && r.values.weight).sort((a,b)=>a.date-b.date) }
-
-      function renderSnapshot(){
-        const arr = lastReports()
-        const last = arr[arr.length-1]
-        const prev = arr[arr.length-2]
-        if(!last){ qs('cardWeight').textContent='--'; qs('scoreCircle').textContent='--'; qs('cardFat').textContent='--'; return }
-        setAnimatedValue('cardWeight', last.values.weight, prev && prev.values.weight)
-        setAnimatedValue('cardFat', last.values.fat, prev && prev.values.fat)
-        setAnimatedValue('cardMuscle', last.values.muscle, prev && prev.values.muscle)
-        setAnimatedValue('cardWater', last.values.water, prev && prev.values.water)
-        const score = computeBodyScore(last.values)
-        qs('scoreCircle').textContent = Math.round(score)
-        qs('scoreGrade').textContent = gradeFromScore(score)
-      }
-
-      function setAnimatedValue(id, value, prev){
-        const el = qs(id); const deltaEl = qs('delta'+id.replace('card',''))
-        if(value==null){ el.textContent='--'; deltaEl.textContent=''; return }
-        const start = prev||value
-        const duration = 800
-        const startTime = performance.now()
-        function tick(now){
-          const p = Math.min(1,(now-startTime)/duration)
-          const cur = start + (value-start)*p
-          el.textContent = (Math.round(cur*100)/100)
-          if(p<1) requestAnimationFrame(tick)
-        }
-        requestAnimationFrame(tick)
-        if(prev!=null){ const diff = value - prev; deltaEl.innerHTML = (diff>0?'<span style="color:#6ee7b7">▲ +'+Math.abs(diff).toFixed(2)+'</span>':'<span style="color:#ff6b6b">▼ '+Math.abs(diff).toFixed(2)+'</span>') }
-      }
-
-      function computeBodyScore(values){
-        // Simple heuristic for prototype
-        const w = values.weight || 0
-        const fat = values.fat || 0
-        const muscle = values.muscle || 0
-        const water = values.water || 0
-        let score = 100
-        score -= fat * 0.9
-        score += Math.min(10, (muscle / Math.max(1,w)) * 50)
-        score += Math.min(6, (water-50)*0.2)
-        return Math.max(0, Math.min(100, score))
-      }
-
-      function gradeFromScore(s){ if(s>=95) return 'A+'; if(s>=90) return 'A'; if(s>=80) return 'B+'; if(s>=70) return 'B'; if(s>=60) return 'C'; return 'D' }
-
-      // Goal Builder & Nutrition Engine
-      qs('calcGoals').addEventListener('click',()=>{
-        const age = parseFloat(qs('gAge').value)||30
-        const height = parseFloat(qs('gHeight').value)||170
-        const weight = parseFloat(qs('gWeight').value)||75
-        const activity = parseFloat(qs('gActivity').value)||1.55
-        const goal = qs('goalSelect').value
-        const bmr = mifflinBmr(weight,height,age)
-        const tdee = Math.round(bmr * activity)
-        // basic macro percentages
-        let protein = 1.6, carbsPercent=0.45, fatPercent=0.25
-        if(goal==='fat_loss'){ protein=1.8; carbsPercent=0.35; fatPercent=0.30 }
-        if(goal==='muscle_gain'){ protein=2.0; carbsPercent=0.5; fatPercent=0.2 }
-        const calories = tdee
-        const proteinGrams = Math.round(protein * weight)
-        const proteinCals = proteinGrams*4
-        const fatGrams = Math.round((calories*fatPercent)/9)
-        const carbsGrams = Math.round((calories - proteinCals - fatGrams*9)/4)
-        const waterTarget = Math.round(weight * 35) // ml
-        qs('goalResult').innerHTML = `Calories: <strong>${calories} kcal</strong><br>Protein: <strong>${proteinGrams} g</strong> · Carbs: <strong>${carbsGrams} g</strong> · Fat: <strong>${fatGrams} g</strong><br>Water target: <strong>${waterTarget} ml</strong>`
-        qs('calories').textContent = calories + ' kcal'
-        qs('macros').textContent = `${proteinGrams}g protein · ${carbsGrams}g carbs · ${fatGrams}g fat · Water ${waterTarget}ml`
-
-        // Prediction target using sample target weight (5% change heuristic)
-        const targetWeight = goal==='fat_loss' ? Math.round(weight*0.95*10)/10 : (goal==='muscle_gain'? Math.round((weight*1.03)*10)/10:weight)
-        const weeklyChange = estimateWeeklyChange(calories - tdee)
-        let weeks = Math.abs((targetWeight - weight) / Math.abs(weeklyChange || 0.1))
-        if(!isFinite(weeks)||weeks>520) weeks = 0
-        const date = weeks>0 ? new Date(Date.now() + weeks*7*24*60*60*1000).toLocaleDateString() : '—'
-        qs('predDate').textContent = date
-        qs('predWeekly').textContent = (weeklyChange>0? '+' : '') + weeklyChange.toFixed(2) + ' kg/week'
+    function renderMeals() {
+      let html = ''
+      meals.forEach(m => {
+        html += `<div class="meal-card"><div style="display:flex;justify-content:space-between"><div><div style="font-size:28px">${m.icon}</div><strong>${m.name}</strong><div class="muted">${m.cal} cal</div></div><div style="font-size:12px;text-align:right"><div>P: ${m.p}g</div><div>C: ${m.c}g</div><div>F: ${m.f}g</div></div></div></div>`
       })
+      qs('mealList').innerHTML = html
+    }
 
-      function mifflinBmr(weight, height, age){ // male default prototype
-        // Using male equation; in production include sex
-        return Math.round(10*weight + 6.25*height - 5*age + 5)
+    function chooseMealPlan() {
+      const p = prompt('Choose: Fat Loss, Muscle Gain, or General Health', 'Fat Loss')
+      if(p) {
+        app.user.goal = p
+        save()
+        alert('Plan set: ' + p)
+        renderProfile()
       }
+    }
 
-      function estimateWeeklyChange(dailyCalDiff){
-        // 7700 kcal ~ 1kg fat
-        return (dailyCalDiff*7)/7700
+    function renderChallenges() {
+      let dailyHTML = ''
+      dailyChalls.forEach(c => {
+        dailyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc}</div></div><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
+      })
+      qs('dailyChallenges').innerHTML = dailyHTML
+
+      let weeklyHTML = ''
+      weeklyChalls.forEach(c => {
+        weeklyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc} [${c.prog}/${c.max}]</div></div><button class="btn secondary" onclick="addWeekly('${c.id}')">+${c.xp}</button></div>`
+      })
+      qs('weeklyChallenges').innerHTML = weeklyHTML
+    }
+
+    function completeDaily(id) {
+      const c = dailyChalls.find(x => x.id === id)
+      if(c && !c.done) {
+        c.done = true
+        addXP(c.xp)
+        alert(`+${c.xp} XP!`)
+        renderChallenges()
+        renderDash()
       }
+    }
 
-      // Charts
-      let chartW, chartF, chartM, chartWa, chartComp, dashChart
-      function updateCharts(){
-        const arr = lastReports()
-        const labels = arr.map(r=>new Date(r.date).toLocaleDateString())
-        const weights = arr.map(r=>r.values.weight)
-        const fats = arr.map(r=>r.values.fat)
-        const muscles = arr.map(r=>r.values.muscle)
-        const waters = arr.map(r=>r.values.water)
-
-        if(!chartW){
-          chartW = new Chart(qs('chartWeight').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Weight (kg)', data:weights, borderColor:'#6ee7b7', backgroundColor:'rgba(110,231,183,0.08)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
-          chartF = new Chart(qs('chartFat').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Fat %', data:fats, borderColor:'#38bdf8', backgroundColor:'rgba(56,189,248,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
-          chartM = new Chart(qs('chartMuscle').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Muscle (kg)', data:muscles, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
-          chartWa = new Chart(qs('chartWater').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Water %', data:waters, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
-          chartComp = new Chart(qs('chartComparison').getContext('2d'),{type:'bar',data:{labels:['Weight','Fat %','Muscle','Water %'], datasets:[]}, options:{responsive:true, plugins:{legend:{position:'top'}}}})
-          dashChart = new Chart(qs('dashChartWeight').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Weight (kg)', data:weights, borderColor:'#6ee7b7', backgroundColor:'rgba(110,231,183,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+    function addWeekly(id) {
+      const c = weeklyChalls.find(x => x.id === id)
+      if(c && c.prog < c.max) {
+        c.prog++
+        if(c.prog >= c.max) {
+          addXP(c.xp)
+          alert(`Completed! +${c.xp} XP`)
         } else {
-          chartW.data.labels = labels; chartW.data.datasets[0].data = weights; chartW.update()
-          chartF.data.labels = labels; chartF.data.datasets[0].data = fats; chartF.update()
-          chartM.data.labels = labels; chartM.data.datasets[0].data = muscles; chartM.update()
-          chartWa.data.labels = labels; chartWa.data.datasets[0].data = waters; chartWa.update()
-          dashChart.data.labels = labels; dashChart.data.datasets[0].data = weights; dashChart.update()
-          // comparison: first vs last
-          if(arr.length>=1){
-            const first = arr[0].values || {}
-            const last = arr[arr.length-1].values || {}
-            chartComp.data.datasets = [
-              {label:'First', data:[first.weight||0, first.fat||0, first.muscle||0, first.water||0], backgroundColor:'rgba(99,102,241,0.6)'},
-              {label:'Latest', data:[last.weight||0, last.fat||0, last.muscle||0, last.water||0], backgroundColor:'rgba(34,197,94,0.6)'}
-            ]
-            chartComp.update()
-          }
+          alert(`${c.prog}/${c.max}`)
         }
+        renderChallenges()
       }
+    }
 
-      // View switching and Dashboard render
-      function showView(name){
-        qs('dashboardView').style.display = name==='dashboard' ? '' : 'none'
-        qs('bodyView').style.display = name==='body' ? '' : 'none'
-        // nav active
-        document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'))
-        if(name==='dashboard') qs('nav-dashboard').classList.add('active')
-        if(name==='body') qs('nav-body').classList.add('active')
-        if(name==='dashboard') renderDashboard()
-      }
-
-      qs('nav-dashboard').addEventListener('click',e=>{ e.preventDefault(); showView('dashboard') })
-      qs('nav-body').addEventListener('click',e=>{ e.preventDefault(); showView('body') })
-
-      function renderDashboard(){
-        const arr = lastReports()
-        const last = arr[arr.length-1]
-        if(!last){ qs('dashScore').textContent='--'; qs('dashGrade').textContent='--'; qs('dashWeight').textContent='-- kg'; qs('dashWaterText').textContent='--'; return }
-        const score = computeBodyScore(last.values)
-        qs('dashScore').textContent = Math.round(score)
-        qs('dashGrade').textContent = gradeFromScore(score)
-        qs('dashWeight').textContent = (last.values.weight||'--') + ' kg'
-        const waterML = Math.round((last.values.water||50) * (last.values.weight||70) * 10 / 100) // heuristic ml
-        const pct = Math.min(100, Math.round((last.values.water||50)))
-        qs('dashWaterBar').style.width = pct+'%'
-        qs('dashWaterText').textContent = waterML + ' ml'
-        // update charts
-        updateCharts()
-      }
-
-      // Initial render
-      renderHistory(); renderSnapshot(); updateCharts()
-
-      // Small UX: clicking view shows report preview
-      historyEl.addEventListener('click',e=>{
-        const btn = e.target.closest('button')
-        if(!btn) return
-        const id = btn.dataset.id
-        const r = reports.find(x=>x.id===id)
-        if(!r) return
-        if(r.dataUrl){
-          const w = window.open('')
-          w.document.write(`<iframe src="${r.dataUrl}" style="width:100%;height:100vh;border:none"></iframe>`)
-        } else {
-          alert('No PDF for this item. Values: '+JSON.stringify(r.values))
-        }
+    function renderAchieve() {
+      let html = ''
+      achievements.forEach(a => {
+        html += `<div class="achievement-item" style="opacity:${a.unlocked?1:0.5}"><div class="achievement-icon">${a.icon}</div><div><strong>${a.name}</strong><div class="muted small">${a.desc}</div></div><span style="background:rgba(110,231,183,0.2);color:var(--accent);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'✓':'Locked'}</span></div>`
       })
-    </script>
-  </body>
+      qs('achievementsList').innerHTML = html
+    }
+
+    function renderProfile() {
+      qs('profGoal').innerHTML = app.user.goal || 'Not set'
+      qs('profStreak').innerHTML = `${app.user.streak} days 🔥`
+      qs('profLevel').innerHTML = `Level ${app.user.level}`
+      qs('profXP').innerHTML = `${app.user.xp} XP`
+      qs('profAge').value = app.user.age || ''
+      qs('profHeight').value = app.user.height || ''
+      qs('profWeight').value = app.user.weight || ''
+    }
+
+    function saveProfile() {
+      app.user.age = parseInt(qs('profAge').value) || 0
+      app.user.height = parseInt(qs('profHeight').value) || 0
+      app.user.weight = parseInt(qs('profWeight').value) || 0
+      save()
+      alert('Saved!')
+    }
+
+    function renderLeader() {
+      const leaders = [
+        {name:'You',lv:app.user.level,xp:app.user.xp,st:app.user.streak},
+        {name:'Alex',lv:5,xp:2500,st:12},
+        {name:'Jordan',lv:4,xp:1800,st:8},
+        {name:'Sam',lv:3,xp:1200,st:5}
+      ]
+      let html = ''
+      leaders.forEach((l, i) => {
+        html += `<div style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between"><div><strong>#${i+1} ${l.name}</strong><div class="muted small">Lvl ${l.lv} • ${l.xp} XP • 🔥 ${l.st}</div></div></div>`
+      })
+      qs('leaderboardList').innerHTML = html
+    }
+
+    function renderBody() {
+      if(app.bodyMetrics.length > 0) {
+        const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
+        qs('bodyW').innerHTML = latest.weight + ' kg'
+        qs('bodyF').innerHTML = latest.fat + '%'
+        qs('bodyM').innerHTML = latest.muscle ? latest.muscle + ' kg' : '--'
+      }
+    }
+
+    function addBodyMetric() {
+      const w = parseFloat(qs('bodyWeight').value)
+      const f = parseFloat(qs('bodyFat').value)
+      const m = parseFloat(qs('bodyMuscle').value)
+      if(w && f) {
+        app.bodyMetrics.push({date:new Date().toLocaleDateString(),weight:w,fat:f,muscle:m||null})
+        localStorage.setItem('nq_metrics', JSON.stringify(app.bodyMetrics))
+        qs('bodyWeight').value = ''
+        qs('bodyFat').value = ''
+        qs('bodyMuscle').value = ''
+        addXP(25)
+        alert('Saved!')
+        renderBody()
+        renderDash()
+      }
+    }
+
+    // Init
+    checkStreak()
+    updateXP()
+    renderDash()
+    renderBody()
+    renderProfile()
+  </script>
+</body>
 </html>
