@@ -3,43 +3,59 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NutriQuest v0.2 — Gamified Health App</title>
+  <title>NutriQuest v0.3 — Gamified Health App</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {--accent:#6ee7b7;--muted:#9aa4b2;--danger:#ff6b6b;--warning:#f59e0b}
+    :root {--accent:#6ee7b7;--muted:#9aa4b2;--danger:#ff6b6b;--warning:#f59e0b;--bg:#071018;--panel:rgba(255,255,255,0.06)}
     * {margin:0;padding:0;box-sizing:border-box}
     html, body {height:100%;font-family:Inter,system-ui,-apple-system,sans-serif}
     body {background:linear-gradient(180deg,#071018 0%, #071922 100%);color:#e6eef6;overflow-x:hidden}
     .app {display:flex;height:100vh}
-    .sidebar {width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:24px;border-right:1px solid rgba(255,255,255,0.03);overflow-y:auto}
+    .sidebar {width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.04),transparent);padding:24px;border-right:1px solid rgba(255,255,255,0.04);overflow-y:auto}
     .logo {font-weight:800;font-size:18px;margin-bottom:20px;background:linear-gradient(90deg,var(--accent),#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
     .nav {display:flex;flex-direction:column;gap:6px}
     .nav a {padding:12px;border-radius:10px;color:var(--muted);text-decoration:none;cursor:pointer;transition:all 0.2s;border-left:3px solid transparent}
     .nav a:hover {background:rgba(255,255,255,0.06);color:#e6eef6}
     .nav a.active {background:rgba(110,231,183,0.1);color:var(--accent);border-left-color:var(--accent)}
     .content {flex:1;padding:28px;overflow-y:auto}
-    .header {display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .header {display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:16px}
     .title {font-size:28px;font-weight:800}
     .badge {background:linear-gradient(135deg,#6366f1,#8b5cf6);padding:8px 16px;border-radius:8px;font-weight:700;font-size:12px;display:inline-block}
-    .grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
-    .card {background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:20px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
-    .btn {background:var(--accent);color:#052018;padding:12px 20px;border-radius:8px;font-weight:600;border:none;cursor:pointer;transition:all 0.2s}
-    .btn:hover {opacity:0.9;transform:translateY(-2px)}
-    .btn.secondary {background:rgba(255,255,255,0.1);color:#e6eef6}
-    input, select {background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.1);padding:10px;border-radius:8px;color:inherit;font-size:14px;width:100%}
+    .grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .card {background:linear-gradient(180deg,rgba(255,255,255,0.04),transparent);padding:20px;border-radius:16px;border:1px solid rgba(255,255,255,0.05);box-shadow:0 18px 50px rgba(0,0,0,0.18)}
+    .btn {background:var(--accent);color:#052018;padding:12px 20px;border-radius:10px;font-weight:700;border:none;cursor:pointer;transition:all 0.2s}
+    .btn:hover {opacity:0.95;transform:translateY(-2px)}
+    .btn.secondary {background:rgba(255,255,255,0.08);color:#e6eef6}
+    input, select {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:10px;color:inherit;font-size:14px;width:100%}
     .muted {color:var(--muted);font-size:13px}
     .small {font-size:13px}
     .page {animation:fadeIn 0.2s}
     @keyframes fadeIn {from {opacity:0} to {opacity:1}}
     .hidden {display:none!important}
-    .xp-bar {height:10px;background:rgba(255,255,255,0.05);border-radius:999px;overflow:hidden;margin-top:8px}
+    .xp-bar {height:10px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;margin-top:8px}
     .xp-bar > div {height:100%;background:linear-gradient(90deg,var(--accent),#34d399);transition:width 0.4s}
-    .stat {display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:8px}
-    .challenge-item {padding:14px;background:rgba(255,255,255,0.02);border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--accent)}
-    .meal-card {padding:16px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.03)}
-    .achievement-item {display:flex;align-items:center;gap:16px;padding:14px;background:rgba(255,255,255,0.01);border-radius:8px;margin-bottom:10px}
+    .stat {display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;margin-bottom:8px}
+    .challenge-item {padding:14px;background:rgba(255,255,255,0.02);border-radius:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border-left:3px solid var(--accent)}
+    .meal-card {padding:16px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.04)}
+    .achievement-item {display:flex;align-items:center;gap:16px;padding:14px;background:rgba(255,255,255,0.02);border-radius:12px;margin-bottom:10px}
     .achievement-icon {font-size:32px}
+    .hero-card {display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-bottom:16px}
+    .hero-main {background:linear-gradient(135deg,rgba(110,231,183,0.18),rgba(56,189,248,0.08));padding:22px;border-radius:20px;border:1px solid rgba(110,231,183,0.18)}
+    .pill {display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.08);font-size:12px;text-transform:uppercase;letter-spacing:.15em;color:#d9fff0}
+    .metric-title {font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--muted)}
+    .metric-value {font-size:24px;font-weight:800;margin-top:8px}
+    .progress-track {height:10px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden}
+    .progress-fill {height:100%;background:linear-gradient(90deg,var(--accent),#34d399);transition:width 0.4s}
+    .plan-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .plan-card {padding:18px;border-radius:16px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;gap:10px;transition:all .2s}
+    .plan-card.active {border-color:rgba(110,231,183,0.45);transform:translateY(-3px);background:rgba(110,231,183,0.08)}
+    .plan-meta {display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
+    .profile-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .table {width:100%;border-collapse:collapse;overflow:hidden;border-radius:12px}
+    .table th, .table td {padding:12px;border-bottom:1px solid rgba(255,255,255,0.06);text-align:left}
+    .table th {color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.14em}
+    .circle {width:112px;height:112px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:20px;background:radial-gradient(circle,rgba(255,255,255,0.12),rgba(255,255,255,0.04));border:10px solid rgba(110,231,183,0.2)}
+    .tiny {font-size:12px;color:var(--muted)}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
 </head>
@@ -53,43 +69,71 @@
         <a class="nav-link" data-page="plan">📋 Meal Plan</a>
         <a class="nav-link" data-page="challenges">⚡ Challenges</a>
         <a class="nav-link" data-page="achievements">🏆 Achievements</a>
-        <a class="nav-link" data-page="leaderboard">🎯 Leaderboard</a>
+        <a class="nav-link" data-page="tracking">📅 Calorie Tracking</a>
         <a class="nav-link" data-page="profile">👤 Profile</a>
         <a class="nav-link" data-page="body">📈 Body Analysis</a>
       </nav>
-      <footer style="margin-top:auto">v0.2 Gamified</footer>
+      <footer style="margin-top:auto">v0.3 Premium</footer>
     </aside>
     <main class="content">
       <!-- Dashboard -->
       <div id="dashboard" class="page">
         <div class="header">
-          <div><div class="title">Dashboard</div><div class="muted">Your fitness journey</div></div>
+          <div><div class="title">Dashboard</div><div class="muted">Your fitness journey, polished and focused</div></div>
           <div style="text-align:right"><span class="badge" id="levelBadge">Level 1</span><div style="margin-top:8px;font-size:28px;font-weight:800" id="streakFire">🔥 0</div></div>
         </div>
-        <div class="grid">
-          <div class="card"><div class="muted small">XP & Level</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashXP">0 XP</div><div class="xp-bar"><div id="dashXPBar" style="width:0%"></div></div><div class="muted small" style="margin-top:8px" id="dashXPText">0/500 to next</div></div>
-          <div class="card"><div class="muted small">Body Score</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashScore">--</div><div class="muted small" style="margin-top:8px" id="dashGrade">No data yet</div></div>
-          <div class="card"><div class="muted small">Latest Weight</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashWeight">-- kg</div><div class="muted small" style="margin-top:8px">Track in Body Analysis</div></div>
+        <div class="hero-card">
+          <div class="hero-main">
+            <div class="pill">Today’s focus</div>
+            <div style="font-size:26px;font-weight:800;margin-top:10px">Stay consistent — one smart meal can change the whole day.</div>
+            <div class="muted" style="margin-top:8px;max-width:620px">Your dashboard now highlights progress, nutrition balance, and the next best action in one clean view.</div>
+            <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+              <button class="btn" onclick="document.querySelector('[data-page=plan]').click()">View meal plan</button>
+              <button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Track calories</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Calories today</div>
+            <div class="metric-value" id="dashCalories">0 / 0 kcal</div>
+            <div class="progress-track" style="margin-top:10px"><div id="dashCalBar" class="progress-fill" style="width:0%"></div></div>
+            <div class="muted small" id="dashCalText" style="margin-top:8px">Start logging meals</div>
+            <div class="stat" style="margin-top:14px"><span class="muted">Protein</span><span id="dashProtein">0g</span></div>
+            <div class="stat"><span class="muted">Carbs</span><span id="dashCarbs">0g</span></div>
+            <div class="stat"><span class="muted">Fat</span><span id="dashFat">0g</span></div>
+          </div>
         </div>
-        <div class="card" style="margin-top:16px"><strong>Today's Challenges</strong><div id="todayChalls" style="margin-top:12px"></div></div>
+        <div class="grid">
+          <div class="card"><div class="metric-title">XP & level</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashXP">0 XP</div><div class="xp-bar"><div id="dashXPBar" style="width:0%"></div></div><div class="muted small" style="margin-top:8px" id="dashXPText">0/500 to next</div></div>
+          <div class="card"><div class="metric-title">Body score</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashScore">--</div><div class="muted small" style="margin-top:8px" id="dashGrade">No data yet</div></div>
+          <div class="card"><div class="metric-title">Latest weight</div><div style="font-size:24px;font-weight:800;margin-top:10px" id="dashWeight">-- kg</div><div class="muted small" style="margin-top:8px">Tracked in Body Analysis</div></div>
+        </div>
+        <div class="grid" style="margin-top:16px">
+          <div class="card"><strong>Today's challenges</strong><div id="todayChalls" style="margin-top:12px"></div></div>
+          <div class="card"><strong>Nutrition snapshot</strong><div class="muted small" style="margin-top:8px">Your goals are now reflected in the plan and calorie tracking experience.</div><div class="stat" style="margin-top:12px"><span class="muted">Current goal</span><span id="dashGoal">Lose Weight</span></div><div class="stat"><span class="muted">Recovery</span><span>On track</span></div></div>
+        </div>
       </div>
 
       <!-- Meal Library -->
       <div id="meals" class="page hidden">
-        <div class="header"><div><div class="title">Meal Library</div><div class="muted">15 healthy recipes</div></div></div>
+        <div class="header"><div><div class="title">Meal Library</div><div class="muted">15 healthy recipes, curated for real-life nutrition</div></div></div>
         <div class="grid" id="mealList"></div>
       </div>
 
       <!-- Meal Plan -->
       <div id="plan" class="page hidden">
-        <div class="header"><div><div class="title">Meal Plan</div><div class="muted">Weekly nutrition guide</div></div><button class="btn" onclick="chooseMealPlan()">Choose Plan</button></div>
-        <div id="planContent" style="margin-top:20px"></div>
+        <div class="header"><div><div class="title">Meal Plan</div><div class="muted">Choose a plan that matches your current objective</div></div><button class="btn" onclick="chooseMealPlan()">Quick Select</button></div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="pill">Recommended by goal</div>
+          <div style="font-size:22px;font-weight:800;margin-top:10px" id="planSummary">Focused plan</div>
+          <div class="muted" style="margin-top:6px">A leaner, cleaner experience built around your desired nutrition rhythm.</div>
+        </div>
+        <div class="plan-grid" id="planCards"></div>
       </div>
 
       <!-- Challenges -->
       <div id="challenges" class="page hidden">
-        <div class="header"><div><div class="title">Challenges</div><div class="muted">Complete & earn XP</div></div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="header"><div><div class="title">Challenges</div><div class="muted">Complete tasks and earn XP</div></div></div>
+        <div class="grid">
           <div class="card"><strong>Daily ⚡</strong><div id="dailyChallenges" style="margin-top:12px"></div></div>
           <div class="card"><strong>Weekly 📈</strong><div id="weeklyChallenges" style="margin-top:12px"></div></div>
         </div>
@@ -97,34 +141,96 @@
 
       <!-- Achievements -->
       <div id="achievements" class="page hidden">
-        <div class="header"><div><div class="title">Achievements</div><div class="muted">Unlock & collect badges</div></div></div>
+        <div class="header"><div><div class="title">Achievements</div><div class="muted">Unlock badges as your routine grows</div></div></div>
         <div id="achievementsList"></div>
       </div>
 
-      <!-- Leaderboard -->
-      <div id="leaderboard" class="page hidden">
-        <div class="header"><div><div class="title">Leaderboard</div><div class="muted">Top performers</div></div></div>
-        <div class="card"><div id="leaderboardList"></div></div>
+      <!-- Calorie Tracking -->
+      <div id="tracking" class="page hidden">
+        <div class="header"><div><div class="title">Calorie Tracking</div><div class="muted">Keep your intake visible and intentional</div></div></div>
+        <div class="grid" style="grid-template-columns:1.1fr .9fr">
+          <div class="card">
+            <div class="metric-title">Daily calorie target</div>
+            <div style="display:flex;align-items:center;gap:20px;margin-top:14px;flex-wrap:wrap">
+              <div class="circle" id="trackingCircle">0%</div>
+              <div>
+                <div style="font-size:24px;font-weight:800" id="trackingCalories">0 / 2200 kcal</div>
+                <div class="muted" style="margin-top:6px" id="trackingMacro">Protein 0g • Carbs 0g • Fat 0g</div>
+              </div>
+            </div>
+            <div class="progress-track" style="margin-top:16px"><div id="trackingBar" class="progress-fill" style="width:0%"></div></div>
+            <div class="muted small" style="margin-top:8px">Add meals to get a more accurate daily view.</div>
+          </div>
+          <div class="card">
+            <strong>Quick log</strong>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <input id="trackingMeal" placeholder="Meal name" />
+              <input id="trackingCals" placeholder="Calories" type="number" />
+              <button class="btn" onclick="logMeal()">Add meal</button>
+            </div>
+            <div id="trackingLog" style="margin-top:14px"></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <strong>Weekly rhythm</strong>
+          <div class="muted small" style="margin-top:8px">Balanced progression keeps your nutrition plan sustainable.</div>
+          <div class="table" style="margin-top:12px">
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr><th>Day</th><th>Focus</th><th>Goal</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Mon</td><td>High protein</td><td>Stay on target</td></tr>
+                <tr><td>Tue</td><td>Hydration + fiber</td><td>Energy reset</td></tr>
+                <tr><td>Wed</td><td>Balanced meals</td><td>Steady pace</td></tr>
+                <tr><td>Thu</td><td>Recovery focus</td><td>Light and clean</td></tr>
+                <tr><td>Fri</td><td>Strength support</td><td>Keep momentum</td></tr>
+                <tr><td>Sat</td><td>Flexible meal plan</td><td>Enjoy the week</td></tr>
+                <tr><td>Sun</td><td>Meal prep</td><td>Set up next week</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Profile -->
       <div id="profile" class="page hidden">
-        <div class="header"><div><div class="title">Profile</div><div class="muted">Your stats</div></div></div>
-        <div class="grid">
-          <div class="card"><div class="muted small">Goal</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profGoal">Not set</div></div>
-          <div class="card"><div class="muted small">Streak</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profStreak">0 days 🔥</div></div>
-          <div class="card"><div class="muted small">Level</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profLevel">Level 1</div></div>
-          <div class="card"><div class="muted small">Total XP</div><div style="font-weight:700;margin-top:10px;font-size:18px" id="profXP">0 XP</div></div>
+        <div class="header"><div><div class="title">Profile</div><div class="muted">A refined snapshot of your personal stats</div></div></div>
+        <div class="profile-grid">
+          <div class="card">
+            <strong>Health Profile</strong>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+              <input id="profAge" placeholder="Age" type="number" />
+              <input id="profHeight" placeholder="Height (cm)" type="number" />
+              <input id="profWeight" placeholder="Weight (kg)" type="number" />
+              <button class="btn" onclick="saveProfile()">Save</button>
+            </div>
+          </div>
+          <div class="card">
+            <strong>Current snapshot</strong>
+            <div class="stat" style="margin-top:12px"><span class="muted">Goal</span><span id="profGoal">Not set</span></div>
+            <div class="stat"><span class="muted">Streak</span><span id="profStreak">0 days 🔥</span></div>
+            <div class="stat"><span class="muted">Level</span><span id="profLevel">Level 1</span></div>
+            <div class="stat"><span class="muted">Total XP</span><span id="profXP">0 XP</span></div>
+          </div>
         </div>
-        <div class="card" style="margin-top:16px"><strong>Health Profile</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="profAge" placeholder="Age" type="number"><input id="profHeight" placeholder="Height (cm)" type="number"><input id="profWeight" placeholder="Weight (kg)" type="number"><button class="btn" onclick="saveProfile()">Save</button></div></div>
       </div>
 
       <!-- Body Analysis -->
       <div id="body" class="page hidden">
-        <div class="header"><div><div class="title">Body Analysis</div><div class="muted">Track metrics</div></div></div>
-        <div class="grid" style="grid-template-columns:1fr 1fr">
-          <div class="card"><strong>Add Measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number"><input id="bodyFat" placeholder="Fat %" type="number"><input id="bodyMuscle" placeholder="Muscle (kg)" type="number"><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
-          <div class="card"><strong>Latest</strong><div class="stat"><span class="muted">Weight:</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat:</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle:</span><span id="bodyM">--</span></div></div>
+        <div class="header"><div><div class="title">Body Analysis</div><div class="muted">Track changes with elegance</div></div></div>
+        <div class="grid" style="grid-template-columns:1.1fr .9fr">
+          <div class="card"><strong>Add measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number" /><input id="bodyFat" placeholder="Fat %" type="number" /><input id="bodyMuscle" placeholder="Muscle (kg)" type="number" /><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
+          <div class="card"><strong>Latest summary</strong><div class="stat" style="margin-top:12px"><span class="muted">Weight</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle</span><span id="bodyM">--</span></div></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <strong>Progress timeline</strong>
+          <div style="overflow:auto;margin-top:10px">
+            <table class="table">
+              <thead><tr><th>Date</th><th>Weight</th><th>Fat</th><th>Muscle</th></tr></thead>
+              <tbody id="bodyHistory"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -133,10 +239,10 @@
   </div>
 
   <script>
-    // App State
     const app = {
-      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"","age":0,"height":0,"weight":0}'),
+      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"lose-weight","age":0,"height":0,"weight":0}'),
       bodyMetrics: JSON.parse(localStorage.getItem('nq_metrics') || '[]'),
+      dailyLog: JSON.parse(localStorage.getItem('nq_tracking') || '[]'),
       dailyCompleted: [],
       weeklyProgress: {}
     }
@@ -182,10 +288,25 @@
       {id:'a5',name:'Champion',desc:'10 challenges',icon:'🏆',unlocked:false}
     ]
 
+    const mealPlans = [
+      {id:'lose-weight',title:'Lose Weight',subtitle:'Light and lean',accent:'Fat burn',calories:1800,protein:140,carbs:160,fat:55,meals:['High-protein breakfast','Light lunch','Vegetable dinner'],tips:['Hydrate often','Prioritize fiber']},
+      {id:'maintain-weight',title:'Maintain Weight',subtitle:'Balanced daily rhythm',accent:'Steady energy',calories:2200,protein:150,carbs:220,fat:70,meals:['Balanced breakfast','Protein lunch','Smart dinner'],tips:['Keep portions consistent','Move daily']},
+      {id:'gain-weight',title:'Gain Weight',subtitle:'More fuel, gentle pace',accent:'Healthy mass',calories:2600,protein:165,carbs:260,fat:85,meals:['Calorie-dense breakfast','Hearty lunch','Comfort dinner'],tips:['Eat every 3-4 hours','Sleep well']},
+      {id:'gain-muscle',title:'Gain Muscle',subtitle:'Performance focused',accent:'Muscle gain',calories:2500,protein:190,carbs:240,fat:75,meals:['Protein-rich breakfast','Post-workout meal','Recovery dinner'],tips:['Lift consistently','Recover well']},
+      {id:'stay-fit',title:'Stay Fit',subtitle:'Clean and sustainable',accent:'Daily balance',calories:2100,protein:155,carbs:200,fat:65,meals:['Fresh breakfast','Balanced lunch','Light dinner'],tips:['Keep protein steady','Avoid overcomplication']}
+    ]
+
+    const goalLabels = {
+      'lose-weight':'Lose Weight',
+      'maintain-weight':'Maintain Weight',
+      'gain-weight':'Gain Weight',
+      'gain-muscle':'Gain Muscle',
+      'stay-fit':'Stay Fit'
+    }
+
     function qs(id) { return document.getElementById(id) }
     function save() { localStorage.setItem('nq_user', JSON.stringify(app.user)) }
 
-    // Nav
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault()
@@ -201,14 +322,14 @@
     function render(page) {
       if(page === 'dashboard') renderDash()
       if(page === 'meals') renderMeals()
+      if(page === 'plan') renderPlan()
       if(page === 'challenges') renderChallenges()
       if(page === 'achievements') renderAchieve()
       if(page === 'profile') renderProfile()
-      if(page === 'leaderboard') renderLeader()
+      if(page === 'tracking') renderTracking()
       if(page === 'body') renderBody()
     }
 
-    // Streak Check
     function checkStreak() {
       const today = new Date().toDateString()
       if(app.user.lastLogin !== today) {
@@ -230,18 +351,48 @@
       const xpInLevel = app.user.xp % 500
       qs('levelBadge').innerHTML = `Level ${app.user.level}`
       qs('dashXP').innerHTML = `${app.user.xp} XP`
-      qs('dashXPBar').style.width = ((xpInLevel / 500) * 100) + '%'
-      qs('dashXPText').innerHTML = `${xpInLevel}/500 to next`
+      if(qs('dashXPBar')) qs('dashXPBar').style.width = ((xpInLevel / 500) * 100) + '%'
+      if(qs('dashXPText')) qs('dashXPText').innerHTML = `${xpInLevel}/500 to next`
+    }
+
+    function getGoalLabel() {
+      return goalLabels[app.user.goal] || 'Lose Weight'
+    }
+
+    function getPlanDetail(goalId = app.user.goal) {
+      return mealPlans.find(plan => plan.id === goalId) || mealPlans[0]
+    }
+
+    function getTargetCalories() {
+      return getPlanDetail().calories
+    }
+
+    function getTodayCalories() {
+      const today = new Date().toDateString()
+      return app.dailyLog.filter(item => item.date === today).reduce((sum, item) => sum + item.cals, 0)
     }
 
     function renderDash() {
       const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
+      const target = getTargetCalories()
+      const todayTotal = getTodayCalories()
+      const percent = Math.min(100, Math.round((todayTotal / target) * 100))
+
       if(latest) {
         const score = Math.max(0, Math.min(100, 100 - (latest.fat * 0.9)))
         qs('dashScore').innerHTML = Math.round(score)
         qs('dashGrade').innerHTML = score >= 80 ? 'A' : score >= 70 ? 'B' : 'C'
         qs('dashWeight').innerHTML = latest.weight + ' kg'
       }
+
+      qs('dashCalories').innerHTML = `${todayTotal} / ${target} kcal`
+      qs('dashCalBar').style.width = percent + '%'
+      qs('dashCalText').innerHTML = percent >= 100 ? 'Goal reached' : `${target - todayTotal} kcal left`
+      qs('dashProtein').innerHTML = `${Math.round(todayTotal / 8)}g`
+      qs('dashCarbs').innerHTML = `${Math.round(todayTotal / 3)}g`
+      qs('dashFat').innerHTML = `${Math.round(todayTotal / 12)}g`
+      qs('dashGoal').innerHTML = getGoalLabel()
+
       let html = ''
       dailyChalls.slice(0, 3).forEach(c => {
         html += `<div class="challenge-item"><span>${c.name}: ${c.desc}</span><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
@@ -252,19 +403,46 @@
     function renderMeals() {
       let html = ''
       meals.forEach(m => {
-        html += `<div class="meal-card"><div style="display:flex;justify-content:space-between"><div><div style="font-size:28px">${m.icon}</div><strong>${m.name}</strong><div class="muted">${m.cal} cal</div></div><div style="font-size:12px;text-align:right"><div>P: ${m.p}g</div><div>C: ${m.c}g</div><div>F: ${m.f}g</div></div></div></div>`
+        html += `<div class="meal-card"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-size:28px">${m.icon}</div><strong>${m.name}</strong><div class="muted">${m.cal} cal</div></div><div style="font-size:12px;text-align:right"><div>P: ${m.p}g</div><div>C: ${m.c}g</div><div>F: ${m.f}g</div></div></div></div>`
       })
       qs('mealList').innerHTML = html
     }
 
+    function setPlan(id) {
+      app.user.goal = id
+      save()
+      renderPlan()
+      renderProfile()
+      renderDash()
+      renderTracking()
+    }
+
+    function renderPlan() {
+      const selected = getPlanDetail()
+      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal`
+      qs('planCards').innerHTML = mealPlans.map(plan => `
+        <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
+          <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.accent}</span></div>
+          <div style="font-size:14px;color:#d7fbea">${plan.subtitle}</div>
+          <div class="muted">${plan.calories} kcal • ${plan.protein}g protein</div>
+          <div><strong>Meals</strong><div class="tiny" style="margin-top:4px">${plan.meals.join(' • ')}</div></div>
+          <div><strong>Tips</strong><div class="tiny" style="margin-top:4px">${plan.tips.join(' • ')}</div></div>
+          <button class="btn secondary" onclick="setPlan('${plan.id}')">Choose</button>
+        </div>
+      `).join('')
+    }
+
     function chooseMealPlan() {
-      const p = prompt('Choose: Fat Loss, Muscle Gain, or General Health', 'Fat Loss')
-      if(p) {
-        app.user.goal = p
-        save()
-        alert('Plan set: ' + p)
-        renderProfile()
+      const p = prompt('Choose one: lose weight, maintain weight, gain weight, gain muscle, stay fit', getGoalLabel())
+      const matches = {
+        'lose weight':'lose-weight',
+        'maintain weight':'maintain-weight',
+        'gain weight':'gain-weight',
+        'gain muscle':'gain-muscle',
+        'stay fit':'stay-fit'
       }
+      const selected = matches[(p || '').toLowerCase()] || null
+      if(selected) setPlan(selected)
     }
 
     function renderChallenges() {
@@ -315,7 +493,7 @@
     }
 
     function renderProfile() {
-      qs('profGoal').innerHTML = app.user.goal || 'Not set'
+      qs('profGoal').innerHTML = getGoalLabel()
       qs('profStreak').innerHTML = `${app.user.streak} days 🔥`
       qs('profLevel').innerHTML = `Level ${app.user.level}`
       qs('profXP').innerHTML = `${app.user.xp} XP`
@@ -332,18 +510,39 @@
       alert('Saved!')
     }
 
-    function renderLeader() {
-      const leaders = [
-        {name:'You',lv:app.user.level,xp:app.user.xp,st:app.user.streak},
-        {name:'Alex',lv:5,xp:2500,st:12},
-        {name:'Jordan',lv:4,xp:1800,st:8},
-        {name:'Sam',lv:3,xp:1200,st:5}
-      ]
-      let html = ''
-      leaders.forEach((l, i) => {
-        html += `<div style="padding:12px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between"><div><strong>#${i+1} ${l.name}</strong><div class="muted small">Lvl ${l.lv} • ${l.xp} XP • 🔥 ${l.st}</div></div></div>`
-      })
-      qs('leaderboardList').innerHTML = html
+    function renderTracking() {
+      const today = new Date().toDateString()
+      const todayEntries = app.dailyLog.filter(item => item.date === today)
+      const total = todayEntries.reduce((sum, item) => sum + item.cals, 0)
+      const target = getTargetCalories()
+      const percent = Math.min(100, Math.round((total / target) * 100))
+      qs('trackingCircle').innerHTML = `${percent}%`
+      qs('trackingBar').style.width = percent + '%'
+      qs('trackingCalories').innerHTML = `${total} / ${target} kcal`
+      qs('trackingMacro').innerHTML = `Protein ${Math.round(total / 8)}g • Carbs ${Math.round(total / 3)}g • Fat ${Math.round(total / 12)}g`
+
+      if(todayEntries.length > 0) {
+        qs('trackingLog').innerHTML = todayEntries.map(item => `<div class="stat"><span>${item.name}</span><span>${item.cals} kcal</span></div>`).join('')
+      } else {
+        qs('trackingLog').innerHTML = '<div class="tiny">No meals logged yet.</div>'
+      }
+    }
+
+    function logMeal() {
+      const mealName = qs('trackingMeal').value.trim()
+      const cals = parseInt(qs('trackingCals').value, 10)
+      if(!mealName || !cals) {
+        alert('Please add a meal name and calories.')
+        return
+      }
+      const today = new Date().toDateString()
+      app.dailyLog.push({date:today,name:mealName,cals})
+      localStorage.setItem('nq_tracking', JSON.stringify(app.dailyLog))
+      qs('trackingMeal').value = ''
+      qs('trackingCals').value = ''
+      addXP(10)
+      renderTracking()
+      renderDash()
     }
 
     function renderBody() {
@@ -353,6 +552,10 @@
         qs('bodyF').innerHTML = latest.fat + '%'
         qs('bodyM').innerHTML = latest.muscle ? latest.muscle + ' kg' : '--'
       }
+
+      qs('bodyHistory').innerHTML = app.bodyMetrics.length > 0
+        ? app.bodyMetrics.slice().reverse().map(item => `<tr><td>${item.date}</td><td>${item.weight} kg</td><td>${item.fat}%</td><td>${item.muscle ? item.muscle + ' kg' : '—'}</td></tr>`).join('')
+        : '<tr><td colspan="4" class="tiny">No measurements yet.</td></tr>'
     }
 
     function addBodyMetric() {
@@ -372,12 +575,13 @@
       }
     }
 
-    // Init
     checkStreak()
     updateXP()
     renderDash()
+    renderPlan()
     renderBody()
     renderProfile()
+    renderTracking()
   </script>
 </body>
 </html>
