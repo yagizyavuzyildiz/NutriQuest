@@ -1,192 +1,475 @@
 <!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>NutriQuest — Healthy Habits, Levelled Up</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root{--bg:#070d1d;--sidebar:#0d1729;--panel:#101d32;--panel-2:#142442;--line:#233654;--text:#f3f6ff;--muted:#7891ba;--lime:#bbff2c;--orange:#ff6247;--purple:#9271ff;--blue:#61a9ff;--green:#47dd8b}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;font-size:15px}.app{min-height:100vh;display:grid;grid-template-columns:310px 1fr}.side{background:var(--sidebar);border-right:1px solid #1d2d48;padding:28px 18px 22px;display:flex;flex-direction:column;min-height:100vh}.brand{display:flex;align-items:center;gap:12px;padding:0 10px 28px;border-bottom:1px solid #1d2d48;font-family:"Barlow Condensed",sans-serif;font-size:29px;font-weight:800;letter-spacing:1px}.brand-icon{width:43px;height:43px;border-radius:14px;background:var(--lime);color:#0d1729;display:grid;place-items:center;font-family:Arial;font-size:26px}.nav{padding:22px 0}.nav button{border:0;background:transparent;width:100%;display:flex;gap:15px;align-items:center;color:var(--muted);border-radius:17px;padding:15px 18px;margin:4px 0;text-align:left;font:600 16px "DM Sans",sans-serif;cursor:pointer}.nav button:hover{background:#13243d;color:#dce7ff}.nav button.active{background:#1a3029;color:var(--lime);box-shadow:inset 0 0 0 1px #42672e}.nav .ico{width:22px;text-align:center;font-size:19px}.profile{margin-top:auto;background:#142442;border-radius:19px;padding:16px}.avatar{width:43px;height:43px;border-radius:50%;background:#263d5c;border:1px solid #5e8244;color:var(--lime);display:grid;place-items:center;font-weight:700}.profile-top{display:flex;gap:10px;align-items:center}.profile-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.profile-small{font-size:12px;color:var(--muted);margin-top:4px}.profile-xp{color:var(--lime);font-weight:700;margin-top:15px}.bar{height:9px;border-radius:10px;background:#26375c;overflow:hidden;margin-top:10px}.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--purple),var(--lime))}.main{padding:42px 5.5vw 58px;max-width:1600px;width:100%;margin:auto}.screen{display:none}.screen.active{display:block}.topline{color:var(--muted);font-size:13px;letter-spacing:1px;font-weight:700}.heading{font-family:"Barlow Condensed",sans-serif;font-size:64px;line-height:.9;letter-spacing:.5px;margin:13px 0 12px;text-transform:uppercase}.sub{color:var(--muted);font-size:17px;margin:0}.highlight{color:var(--lime);font-weight:700}.streak{color:var(--orange);font-weight:700;margin-left:15px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:17px;margin:38px 0 34px}.card{background:var(--panel);border:1px solid var(--line);border-radius:21px}.metric{padding:22px;position:relative;min-height:132px}.metric-label{color:var(--muted);font-weight:600}.metric strong{display:block;font-family:"Barlow Condensed",sans-serif;font-size:38px;line-height:.9;margin:13px 0 5px}.metric small{color:var(--muted);font-size:13px}.metric-ico{position:absolute;right:20px;top:20px;width:43px;height:43px;display:grid;place-items:center;border-radius:50%;font-size:21px}.m1 .metric-ico{background:#322436;color:var(--orange)}.m2 .metric-ico{background:#1d3627;color:var(--lime)}.m3 .metric-ico{background:#25204b;color:var(--purple)}.m4 .metric-ico{background:#3b301b;color:#ffc92d}.dash-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.7fr);gap:20px}.challenge-card{padding:29px}.card-head{display:flex;align-items:start;justify-content:space-between}.card-title{font-family:"Barlow Condensed",sans-serif;font-size:30px;letter-spacing:.5px;margin:0;text-transform:uppercase}.card-note{color:var(--muted);margin-top:5px}.pill{border:1px solid #486b30;border-radius:999px;padding:8px 13px;color:var(--lime);font-weight:700;font-size:13px}.challenge{width:100%;display:grid;grid-template-columns:45px 1fr auto;gap:15px;align-items:center;background:#13223d;border:1px solid #263a5e;border-radius:18px;padding:16px 17px;margin-top:14px;cursor:pointer;color:var(--text);text-align:left}.challenge:hover{border-color:#4d6f3b}.challenge.done{background:#142526;border-color:#416333}.challenge.done .challenge-text{text-decoration:line-through;color:var(--muted)}.challenge-icon{width:43px;height:43px;border-radius:14px;background:#1d3156;display:grid;place-items:center;font-size:20px}.challenge.done .challenge-icon{background:#36522d;color:var(--lime)}.challenge-text{font-weight:600;font-size:16px}.challenge-meta{display:block;color:var(--muted);font-size:12px;margin-top:4px}.reward{border:1px solid #527c34;border-radius:999px;padding:8px 12px;color:var(--lime);font-size:13px;font-weight:700}.done .reward{background:var(--lime);color:#10211b;border:0}.side-stack{display:grid;gap:20px}.motivation{background:var(--lime);color:#071520;border:0;padding:27px;min-height:184px;position:relative;overflow:hidden}.motivation:after{content:"";position:absolute;width:135px;height:135px;right:-38px;top:-35px;border-radius:50%;background:#96c72d}.motivation h3{font-size:13px;margin:0 0 19px;position:relative;z-index:1}.motivation q{font-size:20px;font-weight:700;line-height:1.45;position:relative;z-index:1}.level{padding:22px}.level-row{display:flex;justify-content:space-between;align-items:center}.level h3,.weekly h3{font-family:"Barlow Condensed",sans-serif;font-size:26px;text-transform:uppercase;margin:0}.level-badge{width:43px;height:43px;border-radius:50%;display:grid;place-items:center;background:#29214d;color:var(--purple);font-size:20px}.xp-row{display:flex;justify-content:space-between;margin-top:11px;color:var(--muted);font-size:13px}.xp-row b{color:var(--lime)}.weekly{padding:22px}.weekly-item{margin-top:19px}.weekly-line{display:flex;justify-content:space-between;gap:9px;color:var(--muted);font-size:13px}.weekly-line b{color:var(--orange)}.weekly .bar{height:8px}.weekly .bar i{background:var(--orange)}.weekly-item:nth-child(3) .bar i{background:var(--lime)}.weekly-item:nth-child(4) .bar i{background:var(--purple)}
-    .section-top{display:flex;justify-content:space-between;align-items:end;margin-bottom:28px}.search{margin:28px 0 18px;width:100%;padding:17px 20px;border-radius:17px;border:1px solid var(--line);background:var(--panel);color:var(--text);font:inherit}.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}.filter{border:1px solid #2b4166;border-radius:999px;background:#172847;color:var(--muted);padding:10px 17px;font:600 14px "DM Sans";cursor:pointer}.filter.active{background:var(--lime);color:#0c1b27;border-color:var(--lime)}.recipe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.recipe{overflow:hidden}.food{height:156px;display:grid;place-items:center;font-size:72px;background:linear-gradient(135deg,#ed93a5,#7f3f59)}.recipe:nth-child(2) .food{background:linear-gradient(135deg,#8f7755,#e4c990)}.recipe:nth-child(3) .food{background:linear-gradient(135deg,#35515d,#cfdfdd)}.recipe:nth-child(4) .food{background:linear-gradient(135deg,#875d3d,#edca8a)}.recipe:nth-child(5) .food{background:linear-gradient(135deg,#315c51,#b8d981)}.recipe:nth-child(6) .food{background:linear-gradient(135deg,#795b6a,#f0a8b1)}.recipe-content{padding:17px}.recipe-name{font-size:17px;font-weight:700;margin-bottom:5px}.recipe-type{color:var(--green);font-size:13px;font-weight:600}.macros{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.macro{background:#182b4d;border-radius:12px;text-align:center;padding:9px 3px;color:var(--muted);font-size:11px}.macro b{font-size:14px;color:var(--orange);display:block}.macro:nth-child(2) b{color:#ffc62e}.macro:nth-child(3) b{color:var(--blue)}
-    .challenge-page{max-width:980px}.challenge-page .challenge{margin-top:15px;padding:20px}.challenge-page .challenge-text{font-size:18px}.week-head{font-family:"Barlow Condensed";text-transform:uppercase;font-size:32px;margin:48px 0 5px}.progress-num{font-family:"Barlow Condensed";font-size:28px;color:var(--orange)}.leaderboard{max-width:980px}.podium{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:18px;align-items:end;margin:55px 0}.pod{display:flex;flex-direction:column;align-items:center;text-align:center}.pod-avatar{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:#17294a;border:3px solid #bec3d0;font-weight:700;font-size:21px}.pod:first-child .pod-avatar{border-color:#c5c7cb}.pod:nth-child(2) .pod-avatar{border-color:#ffcf19}.pod:nth-child(3) .pod-avatar{border-color:#d77d2b}.pod-name{font-weight:700;margin:11px 0}.pod-block{width:100%;border:1px solid #33415e;background:#161e30;padding:35px 0;font-family:"Barlow Condensed";font-size:38px}.pod:nth-child(2) .pod-block{padding:57px 0;background:#1b211e;color:#ffd91c;border-color:#64562a}.pod:nth-child(3) .pod-block{color:#d78738;border-color:#53382b}.rank-row{display:grid;grid-template-columns:50px 52px 1fr auto;gap:14px;align-items:center;padding:15px 22px;margin-top:11px}.rank-row.me{border-color:#588238;background:#172b27}.rank-avatar{width:42px;height:42px;border-radius:50%;background:#192c4e;display:grid;place-items:center;font-weight:700;font-size:13px}.rank-name{font-weight:700}.rank-name small{display:block;color:var(--muted);font-weight:400;margin-top:3px}.rank-points{text-align:right;font-family:"Barlow Condensed";font-size:24px}.rank-points small{color:var(--orange);display:block;font-family:"DM Sans";font-size:12px}.achievement-progress{padding:22px;margin:27px 0 30px}.achievement-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.achievement{padding:24px 15px;text-align:center;min-height:230px}.achievement.locked{opacity:.42}.badge-icon{font-size:46px;margin:5px 0 18px}.achievement h3{font-size:16px;margin:0}.achievement p{font-size:13px;color:var(--muted);line-height:1.45;min-height:38px}.unlocked{background:#133d34;color:var(--green);border-radius:10px;padding:6px;font-size:12px;font-weight:700}.locked-label{color:var(--muted);font-size:12px}
-    .onboarding{min-height:100vh;display:grid;place-items:center;padding:34px 18px;background:radial-gradient(circle at 88% 17%,#19283b 0 1px,transparent 2px) 0 0/22px 22px,var(--bg)}.onboarding-shell{width:min(610px,100%)}.onboarding-brand{justify-content:center;border:0;padding:0 0 22px}.step-dots{display:flex;gap:7px;justify-content:center;margin:0 0 30px}.step-dots span{height:7px;width:32px;background:#25314a;border-radius:8px}.step-dots span.active{background:var(--lime)}.onboard-card{padding:34px;border-radius:23px;background:var(--panel);border:1px solid var(--line)}.onboard-step{display:none}.onboard-step.active{display:block}.onboard-title{font-family:"Barlow Condensed";font-size:42px;line-height:.95;text-transform:uppercase;margin:0 0 10px}.onboard-copy{color:var(--muted);font-size:16px;margin:0 0 26px}.input-label{display:block;color:#b9c8e2;font-size:13px;font-weight:700;margin:18px 0 8px}.onboard-input,.onboard-select{width:100%;background:#172849;border:1px solid #2c4168;border-radius:14px;padding:16px;color:var(--text);font:inherit}.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.choice,.chip{background:#14233f;color:var(--muted);border:1px solid #2a3d60;border-radius:14px;padding:16px;font:600 16px "DM Sans";text-align:left;cursor:pointer}.choice.selected,.chip.selected{border-color:var(--lime);background:#1a3029;color:var(--lime);box-shadow:inset 0 0 0 1px var(--lime)}.choice-list{display:grid;gap:11px}.choice-list .choice{display:flex;justify-content:space-between;align-items:center;padding:17px}.choice-list .choice:after{content:"○";font-size:26px;color:#9ba8c1}.choice-list .choice.selected:after{content:"✓";color:var(--lime)}.chip-list{display:flex;flex-wrap:wrap;gap:10px}.chip{border-radius:999px;padding:10px 13px;font-size:14px}.onboard-actions{display:flex;gap:12px;margin-top:30px}.ob-next,.ob-back{border:0;border-radius:12px;padding:14px 19px;font:700 15px "DM Sans";cursor:pointer}.ob-next{background:var(--lime);color:#102019;margin-left:auto;min-width:140px}.ob-back{background:#1d3153;color:#a9c0e7}.body-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.finish-note{background:#172b28;border:1px solid #416334;color:#b9dbb1;border-radius:13px;padding:13px 15px;font-size:13px;margin-top:17px}.app{display:none}.app.ready{display:grid}
-    @media(max-width:1000px){.app{grid-template-columns:235px 1fr}.main{padding:34px 30px}.metrics{grid-template-columns:repeat(2,1fr)}.dash-grid{grid-template-columns:1fr}.recipe-grid{grid-template-columns:repeat(2,1fr)}.achievement-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:680px){.app.ready{display:block}.side{min-height:0;padding:16px 14px;position:sticky;top:0;z-index:2}.brand{padding:0 5px 12px;border:0}.nav{display:flex;overflow:auto;padding:0}.nav button{min-width:max-content;padding:10px 12px;font-size:13px}.nav .ico{font-size:16px}.profile{display:none}.main{padding:31px 16px 45px}.heading{font-size:50px}.metrics{gap:10px;margin:26px 0}.metric{min-height:107px;padding:15px}.metric strong{font-size:31px}.metric-ico{display:none}.challenge-card{padding:18px}.challenge{grid-template-columns:38px 1fr auto;padding:13px}.challenge-icon{width:38px;height:38px}.challenge-text{font-size:13px}.reward{font-size:11px;padding:7px}.recipe-grid{grid-template-columns:1fr}.achievement-grid{gap:10px}.achievement{min-height:205px;padding:14px 8px}.podium{gap:8px}.pod-block{font-size:30px}.pod:nth-child(2) .pod-block{padding:42px 0}.pod-avatar{width:55px;height:55px}.rank-row{grid-template-columns:28px 42px 1fr auto;padding:12px}.rank-points{font-size:19px}.onboard-card{padding:25px 18px}.onboard-title{font-size:34px}.choice-grid{grid-template-columns:1fr}.body-grid{grid-template-columns:1fr}.onboarding{padding:18px}.step-dots{margin-bottom:20px}.onboarding-brand{font-size:25px}}
-    #onboarding{display:none}#onboarding.visible{display:grid}.auth{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 12% 75%,#172740 0 1px,transparent 2px) 0 0/20px 20px,var(--bg)}.auth-shell{width:min(460px,100%)}.auth-card{padding:31px;background:var(--panel);border:1px solid var(--line);border-radius:23px}.auth-tabs{display:grid;grid-template-columns:1fr 1fr;margin-bottom:24px;background:#152440;border-radius:13px;padding:4px}.auth-tabs button{border:0;border-radius:10px;padding:11px;background:transparent;color:var(--muted);font:700 14px "DM Sans";cursor:pointer}.auth-tabs button.active{background:#25395d;color:var(--text)}.auth-panel{display:none}.auth-panel.active{display:block}.auth-title{font-family:"Barlow Condensed";font-size:40px;text-transform:uppercase;line-height:.95;margin:0 0 8px}.auth-error{min-height:19px;color:#ff907d;font-size:13px;margin-top:11px}.auth-note{font-size:12px;color:var(--muted);line-height:1.5;margin:18px 0 0}.auth-submit{width:100%;margin-top:22px;border:0;border-radius:13px;background:var(--lime);color:#102019;padding:15px;font:700 15px "DM Sans";cursor:pointer}.nutrition-summary{display:grid;grid-template-columns:1.35fr repeat(3,1fr);gap:14px;padding:18px;margin:0 0 20px}.nutrition-intro{padding:3px 8px}.nutrition-intro h2{font-family:"Barlow Condensed";font-size:27px;text-transform:uppercase;margin:0 0 5px}.nutrition-intro p{font-size:12px;color:var(--muted);margin:0}.nutrition-stat{background:#152644;border-radius:14px;padding:13px}.nutrition-stat b{display:block;color:var(--lime);font-family:"Barlow Condensed";font-size:27px;line-height:1}.nutrition-stat span{color:var(--muted);font-size:12px}.calc-note{font-size:11px;color:var(--muted);margin-top:9px}@media(max-width:760px){.nutrition-summary{grid-template-columns:1fr 1fr}.nutrition-intro{grid-column:span 2}.auth-card{padding:24px 18px}}
-    .profile-page{max-width:1000px}.profile-hero{display:flex;align-items:center;gap:18px;margin:28px 0}.profile-avatar-big{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:#1c3157;border:2px solid #557b3e;color:var(--lime);font:700 24px "DM Sans"}.profile-hero h2{font-size:25px;margin:0 0 4px}.profile-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:19px;margin-top:22px}.profile-card{padding:25px}.profile-card h2{font-family:"Barlow Condensed";font-size:28px;text-transform:uppercase;margin:0 0 19px}.profile-row{display:flex;justify-content:space-between;gap:18px;border-top:1px solid var(--line);padding:14px 0;color:var(--muted)}.profile-row b{color:var(--text);font-weight:600;text-align:right}.profile-actions{display:flex;gap:12px;margin-top:20px}.profile-action{border:1px solid #2e456b;background:#182947;border-radius:12px;color:var(--text);padding:13px 16px;font:700 14px "DM Sans";cursor:pointer}.profile-action.logout{border-color:#663c43;background:#2a1c29;color:#ffac9c}@media(max-width:760px){.profile-grid{grid-template-columns:1fr}.profile-hero{margin:18px 0}.profile-card{padding:20px}}
-  </style>
-</head>
-<body><section class="onboarding" id="onboarding"><div class="onboarding-shell"><div class="brand onboarding-brand"><span class="brand-icon">ϟ</span>NUTRIQUEST</div><div class="step-dots" aria-label="Onboarding progress"><span class="active"></span><span></span><span></span><span></span><span></span></div><div class="onboard-card"><div class="onboard-step active"><h1 class="onboard-title">What’s your name?</h1><p class="onboard-copy">We’ll personalize every recommendation for you.</p><label class="input-label" for="userName">Your name</label><input class="onboard-input" id="userName" placeholder="Enter your name" value="Yagiz"><h2 class="input-label" style="margin-top:26px">Primary goal</h2><div class="choice-grid" data-choice="goal"><button class="choice selected">Fat Loss</button><button class="choice">Muscle Gain</button><button class="choice">Maintenance</button><button class="choice">Bulk</button><button class="choice">Endurance</button></div></div><div class="onboard-step"><h1 class="onboard-title">Your healthy habits</h1><p class="onboard-copy">Choose up to three habits that matter most to you.</p><div class="chip-list" data-max="3"><button class="chip">Plan more meals</button><button class="chip">Eat mindfully</button><button class="chip selected">Eat more protein</button><button class="chip">Track macros</button><button class="chip">Meal prep & cook</button><button class="chip selected">Track calories</button><button class="chip">Prioritize sleep</button><button class="chip">Move more</button><button class="chip">Eat a balanced diet</button><button class="chip">Drink more water</button><button class="chip">Eat more vegetables</button></div></div><div class="onboard-step"><h1 class="onboard-title">Meal planning style</h1><p class="onboard-copy">How often do you plan your meals in advance?</p><div class="choice-list" data-choice="planning"><button class="choice">Never</button><button class="choice">Rarely</button><button class="choice selected">Occasionally</button><button class="choice">Frequently</button><button class="choice">Always</button></div><h2 class="input-label" style="margin-top:26px">Would you like weekly meal plans?</h2><div class="choice-grid" data-choice="mealPlans"><button class="choice">Yes, definitely</button><button class="choice selected">Open to trying</button><button class="choice">No thanks</button></div></div><div class="onboard-step"><h1 class="onboard-title">Your activity level</h1><p class="onboard-copy">Not including workouts — we count that separately.</p><div class="choice-list" data-choice="activity"><button class="choice">Not very active<small>Mostly seated during the day</small></button><button class="choice selected">Lightly active<small>Often on your feet during the day</small></button><button class="choice">Active<small>Regular movement or physical work</small></button><button class="choice">Very active<small>Physically demanding daily routine</small></button></div></div><div class="onboard-step"><h1 class="onboard-title">Just a few more details</h1><p class="onboard-copy">This helps us estimate your daily nutrition needs.</p><div class="choice-grid" data-choice="sex"><button class="choice selected">Male</button><button class="choice">Female</button></div><div class="body-grid"><label class="input-label">Age<input class="onboard-input" type="number" placeholder="e.g. 28"></label><label class="input-label">Country<select class="onboard-select"><option>Türkiye</option><option>United Kingdom</option><option>United States</option></select></label><label class="input-label">Height (cm)<input class="onboard-input" type="number" placeholder="e.g. 178"></label><label class="input-label">Weight (kg)<input class="onboard-input" type="number" placeholder="e.g. 74"></label></div><div class="finish-note">Your plan will be built around your selected goals and preferences.</div></div><div class="onboard-actions"><button class="ob-back" id="obBack" type="button">← Back</button><button class="ob-next" id="obNext" type="button">Continue →</button></div></div></div></section><div class="app" id="app"><aside class="side"><div class="brand"><span class="brand-icon">ϟ</span>NUTRIQUEST</div><nav class="nav" aria-label="Primary navigation"><button class="active" data-screen="dashboard"><span class="ico">⌂</span>Dashboard</button><button data-screen="library"><span class="ico">▤</span>Meal Library</button><button data-screen="plan"><span class="ico">▣</span>Meal Plan</button><button data-screen="challenges"><span class="ico">◎</span>Challenges</button><button data-screen="leaderboard"><span class="ico">♕</span>Leaderboard</button><button data-screen="achievements"><span class="ico">♙</span>Achievements</button></nav><div class="profile"><div class="profile-top"><div class="avatar" id="userInitials">YA</div><div><div class="profile-name" id="profileName">Yagiz Yavuz</div><div class="profile-small">Level 7 &nbsp; 🔥 12</div></div></div><div class="profile-xp">2,840 XP <span style="float:right;color:var(--muted);font-weight:500">660 to Lv.8</span></div><div class="bar"><i style="width:72%"></i></div></div></aside><main class="main">
-  <section class="screen active" id="dashboard"><div class="topline">SATURDAY · JULY 12</div><h1 class="heading" id="dashboardGreeting">HEY, YAGIZ 👋</h1><p class="sub">Goal: <span class="highlight" id="dashboardGoal">Fat Loss</span><span class="streak">🔥 12-day streak</span></p><div class="metrics"><div class="card metric m1"><span class="metric-label">Day Streak</span><strong>12</strong><small>days</small><span class="metric-ico">🔥</span></div><div class="card metric m2"><span class="metric-label">Total XP</span><strong>2,840</strong><small>points</small><span class="metric-ico">ϟ</span></div><div class="card metric m3"><span class="metric-label">Badges</span><strong>4/8</strong><small>earned</small><span class="metric-ico">♙</span></div><div class="card metric m4"><span class="metric-label">Rank</span><strong>#7</strong><small>global</small><span class="metric-ico">♕</span></div></div><div class="dash-grid"><section class="card challenge-card"><div class="card-head"><div><h2 class="card-title">Daily challenges</h2><div class="card-note">Resets in 6h 42m</div></div><span class="pill" id="doneCount">1/4 Done</span></div><button class="challenge" data-challenge><span class="challenge-icon">♨</span><span class="challenge-text">Try one new healthy recipe today<small class="challenge-meta">Daily challenge · +50 XP</small></span><span class="reward">+50 XP</span></button><button class="challenge" data-challenge><span class="challenge-icon">♨</span><span class="challenge-text">Drink 8 glasses of water<small class="challenge-meta">Daily challenge · +30 XP</small></span><span class="reward">+30 XP</span></button><button class="challenge done" data-challenge><span class="challenge-icon">◎</span><span class="challenge-text">Complete your daily protein goal<small class="challenge-meta">Daily challenge · +40 XP</small></span><span class="reward">✓</span></button><button class="challenge" data-challenge><span class="challenge-icon">⌁</span><span class="challenge-text">Prepare a healthy breakfast<small class="challenge-meta">Daily challenge · +35 XP</small></span><span class="reward">+35 XP</span></button></section><aside class="side-stack"><section class="card motivation"><h3>DAILY MOTIVATION</h3><q>Every healthy meal is a step toward the best version of you.</q></section><section class="card level"><div class="level-row"><div><h3>Level 7</h3><span class="card-note">XP Progress</span></div><span class="level-badge">☆</span></div><div class="xp-row"><b>2,840 XP</b><span>660 to Lv.8</span></div><div class="bar"><i style="width:72%"></i></div></section><section class="card weekly"><h3>Weekly goals</h3><div class="weekly-item"><div class="weekly-line"><span>Try 3 new recipes</span><b>+150</b></div><div class="bar"><i style="width:33%"></i></div></div><div class="weekly-item"><div class="weekly-line"><span>Hit protein goal 5 days</span><b>+200</b></div><div class="bar"><i style="width:60%"></i></div></div></section></aside></div></section>
-  <section class="screen" id="library"><div class="section-top"><div><h1 class="heading">MEAL LIBRARY</h1><p class="sub">10 recipes · curated for your <span class="highlight">Fat Loss</span> goal</p></div></div><input class="search" id="search" placeholder="⌕  Search meals..." aria-label="Search meals"><div class="filters" id="filters"><button class="filter active">All</button><button class="filter">Breakfast</button><button class="filter">Lunch</button><button class="filter">Dinner</button><button class="filter">Snack</button><button class="filter">High-Protein</button><button class="filter">Vegan</button></div><div class="recipe-grid" id="recipes"></div></section>
-  <section class="screen" id="plan"><h1 class="heading">MEAL PLAN</h1><p class="sub">Build a day that works for you.</p><div class="card challenge-card" style="margin-top:30px"><h2 class="card-title">Today’s menu</h2><button class="challenge"><span class="challenge-icon">🥣</span><span class="challenge-text">Breakfast · Greek yogurt power bowl<small class="challenge-meta">420 kcal · 28g protein</small></span><span class="reward">Edit</span></button><button class="challenge"><span class="challenge-icon">🥗</span><span class="challenge-text">Lunch · Quinoa Buddha bowl<small class="challenge-meta">540 kcal · 24g protein</small></span><span class="reward">Edit</span></button><button class="challenge"><span class="challenge-icon">🐟</span><span class="challenge-text">Dinner · Grilled chicken & roasted veg<small class="challenge-meta">480 kcal · 42g protein</small></span><span class="reward">Edit</span></button></div></section>
-  <section class="screen challenge-page" id="challenges"><h1 class="heading">CHALLENGES</h1><p class="sub">Complete challenges to earn XP and level up.</p><div class="week-head">Daily <span class="card-note" style="float:right;font-family:DM Sans;font-size:13px;text-transform:none">Resets in 6h 42m</span></div><div id="allChallenges"></div><div class="week-head">Weekly <span class="card-note" style="float:right;font-family:DM Sans;font-size:13px;text-transform:none">5 days left</span></div><button class="challenge"><span class="challenge-icon">▤</span><span class="challenge-text">Try 3 new recipes this week<small class="challenge-meta">Weekly challenge · +150 XP</small><span class="bar" style="display:block;width:100%;margin-top:12px"><i style="width:33%;background:var(--orange)"></i></span></span><span class="progress-num">1/3</span></button><button class="challenge"><span class="challenge-icon">ϟ</span><span class="challenge-text">Hit protein goal 5 days<small class="challenge-meta">Weekly challenge · +200 XP</small><span class="bar" style="display:block;width:100%;margin-top:12px"><i style="width:60%"></i></span></span><span class="progress-num">3/5</span></button></section>
-  <section class="screen leaderboard" id="leaderboard"><h1 class="heading">LEADERBOARD</h1><p class="sub">Week of July 7–13, 2026</p><div class="podium"><div class="pod"><div class="pod-avatar">MC</div><div class="pod-name">Marcus Cole</div><div class="pod-block">#2</div></div><div class="pod"><div class="pod-avatar">SK</div><div class="pod-name">Sarah Kim</div><div class="pod-block">#1</div></div><div class="pod"><div class="pod-avatar">PS</div><div class="pod-name">Priya Sharma</div><div class="pod-block">#3</div></div></div><div id="ranking"></div></section>
-  <section class="screen" id="achievements"><h1 class="heading">ACHIEVEMENTS</h1><p class="sub">4 of 8 badges unlocked</p><div class="card achievement-progress"><div class="xp-row"><span>Collection Progress</span><b>50%</b></div><div class="bar"><i style="width:50%"></i></div></div><div class="achievement-grid" id="badges"></div></section>
-</main></div><section class="auth" id="auth"><div class="auth-shell"><div class="brand onboarding-brand"><span class="brand-icon">ϟ</span>NUTRIQUEST</div><div class="auth-card"><div class="auth-tabs"><button class="active" data-auth-tab="register" type="button">Create account</button><button data-auth-tab="login" type="button">Sign in</button></div><div class="auth-panel active" id="register"><h1 class="auth-title">Start your quest</h1><p class="onboard-copy">Create an account to save your progress, streaks, and personal plan.</p><label class="input-label">Username<input class="onboard-input" id="registerUser" placeholder="Choose a username"></label><label class="input-label">Password<input class="onboard-input" id="registerPass" type="password" placeholder="At least 4 characters"></label><button class="auth-submit" id="registerButton" type="button">Create account →</button></div><div class="auth-panel" id="login"><h1 class="auth-title">Welcome back</h1><p class="onboard-copy">Pick up exactly where you left off.</p><label class="input-label">Username<input class="onboard-input" id="loginUser" placeholder="Your username"></label><label class="input-label">Password<input class="onboard-input" id="loginPass" type="password" placeholder="Your password"></label><button class="auth-submit" id="loginButton" type="button">Sign in →</button></div><div class="auth-error" id="authError" aria-live="polite"></div><p class="auth-note">This is a front-end prototype. Account data is kept only in this browser.</p></div></div></section><script>
-const screens=document.querySelectorAll('.screen'),nav=document.querySelectorAll('.nav button');nav.forEach(b=>b.addEventListener('click',()=>{nav.forEach(x=>x.classList.remove('active'));b.classList.add('active');screens.forEach(s=>s.classList.toggle('active',s.id===b.dataset.screen));window.scrollTo({top:0,behavior:'smooth'})}));
-const challenges=[['♨','Try one new healthy recipe today','+50 XP'],['♨','Drink 8 glasses of water','+30 XP'],['◎','Complete your daily protein goal','✓',true],['⌁','Prepare a healthy breakfast','+35 XP']];function challengeHTML(x){return `<button class="challenge ${x[3]?'done':''}" data-challenge><span class="challenge-icon">${x[0]}</span><span class="challenge-text">${x[1]}<small class="challenge-meta">Daily challenge · ${x[2]==='✓'?'+40 XP':x[2]}</small></span><span class="reward">${x[2]}</span></button>`}document.querySelector('#allChallenges').innerHTML=challenges.map(challengeHTML).join('');
-function updateCount(){let n=document.querySelectorAll('#dashboard [data-challenge].done').length;document.querySelector('#doneCount').textContent=Math.min(n,4)+'/4 Done'}document.addEventListener('click',e=>{let b=e.target.closest('[data-challenge]');if(!b)return;b.classList.toggle('done');b.querySelector('.reward').textContent=b.classList.contains('done')?'✓':b.querySelector('.challenge-meta').textContent.match(/\+\d+ XP/)[0];updateCount()});
-const meals=[['🥣','Berry Acai Smoothie Bowl','Easy · Breakfast','12g','58g','10g'],['🍓','Greek Yogurt Power Bowl','Easy · Breakfast','28g','42g','12g'],['🥣','Overnight Oats & Chia','Easy · Breakfast','14g','52g','9g'],['🥙','Quinoa Buddha Bowl','Medium · Lunch','19g','64g','18g'],['🐟','Grilled Chicken & Roasted Veg','Easy · Dinner','42g','28g','16g'],['🍨','Seasonal Fruit Salad','Easy · Snack','5g','38g','3g']];document.querySelector('#recipes').innerHTML=meals.map(m=>`<article class="card recipe" data-name="${m[1].toLowerCase()}"><div class="food">${m[0]}</div><div class="recipe-content"><div class="recipe-name">${m[1]}</div><div class="recipe-type">${m[2]}</div><div class="macros"><div class="macro"><b>${m[3]}</b>Protein</div><div class="macro"><b>${m[4]}</b>Carbs</div><div class="macro"><b>${m[5]}</b>Fat</div></div></div></article>`).join('');document.querySelector('#search').addEventListener('input',e=>document.querySelectorAll('.recipe').forEach(x=>x.style.display=x.dataset.name.includes(e.target.value.toLowerCase())?'block':'none'));document.querySelectorAll('.filter').forEach(x=>x.addEventListener('click',()=>{document.querySelectorAll('.filter').forEach(y=>y.classList.remove('active'));x.classList.add('active')}));
-const ranks=[['🥇','SK','Sarah Kim','Level 15','8,420','45d'],['🥈','MC','Marcus Cole','Level 14','7,890','38d'],['🥉','PS','Priya Sharma','Level 13','7,340','31d'],['#4','JL','James Liu','Level 12','6,800','28d'],['#7','YA','Yagiz Yavuz','Level 7','2,840','12d']];document.querySelector('#ranking').innerHTML=ranks.map((r,i)=>`<div class="card rank-row ${i===4?'me':''}"><span>${r[0]}</span><span class="rank-avatar">${r[1]}</span><span class="rank-name">${r[2]}<small>${r[3]}</small></span><span class="rank-points">${r[4]}<small>🔥 ${r[5]}</small></span></div>`).join('');
-const badges=[['🌱','Healthy Starter','Complete your first meal log',1],['⚡','7-Day Streak','Log in 7 days in a row',1],['🍽️','Meal Explorer','Try 5 different recipes',1],['💪','Protein Master','Hit your protein goal 10 days',0],['💧','Hydration Hero','Log water for 7 consecutive days',1],['🔥','30-Day Consistency','Maintain a 30-day streak',0],['🎓','Nutrition Expert','Complete 50 nutrition goals',0],['👨‍🍳','Recipe Creator','Build your first custom meal plan',0]];document.querySelector('#badges').innerHTML=badges.map(b=>`<article class="card achievement ${b[3]?'':'locked'}"><div class="badge-icon">${b[0]}</div><h3>${b[1]}</h3><p>${b[2]}</p><div class="${b[3]?'unlocked':'locked-label'}">${b[3]?'Unlocked':'🔒 Locked'}</div></article>`).join('');
-const onboarding=document.querySelector('#onboarding'),app=document.querySelector('#app'),steps=[...document.querySelectorAll('.onboard-step')],dots=[...document.querySelectorAll('.step-dots span')],back=document.querySelector('#obBack'),next=document.querySelector('#obNext');let step=0;function showStep(){steps.forEach((s,i)=>s.classList.toggle('active',i===step));dots.forEach((d,i)=>d.classList.toggle('active',i<=step));back.style.visibility=step?'visible':'hidden';next.textContent=step===steps.length-1?'Create my plan →':'Continue →'}showStep();document.querySelectorAll('[data-choice] .choice').forEach(b=>b.addEventListener('click',()=>{b.parentElement.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')}));document.querySelectorAll('.chip-list .chip').forEach(b=>b.addEventListener('click',()=>{let list=b.parentElement;if(b.classList.contains('selected')){b.classList.remove('selected');return}if(list.querySelectorAll('.selected').length<Number(list.dataset.max))b.classList.add('selected')}));back.addEventListener('click',()=>{if(step){step--;showStep()}});next.addEventListener('click',()=>{if(step<steps.length-1){step++;showStep();return}let name=document.querySelector('#userName').value.trim()||'Friend',goal=document.querySelector('[data-choice="goal"] .selected').textContent;document.querySelector('#dashboardGreeting').textContent='HEY, '+name.toUpperCase()+' 👋';document.querySelector('#dashboardGoal').textContent=goal;document.querySelector('#profileName').textContent=name;document.querySelector('#userInitials').textContent=name.split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase();onboarding.style.display='none';app.classList.add('ready');window.scrollTo(0,0)});
-</script><script>
-(() => {
-  const KEY = 'nutriquest-local-account-v2', SESSION = 'nutriquest-session-v1';
-  const $ = (s, r = document) => r.querySelector(s);
-  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-  const auth = $('#auth'), onboarding = $('#onboarding'), app = $('#app');
-  const obSteps = $$('.onboard-step'), obDots = $$('.step-dots span');
-  const todayKey = () => new Date().toLocaleDateString('en-CA');
-  const dayIndex = () => Math.floor(new Date(todayKey() + 'T00:00').getTime() / 86400000);
-  const safeGet = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
-  const save = p => { try { localStorage.setItem(KEY, JSON.stringify(p)); } catch {} };
-  let profile = safeGet(), obStep = 0;
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NutriQuest — Body Analysis v0.2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      :root{--bg:#0b0f14;--card:#0f1720;--muted:#9aa4b2;--accent:#6ee7b7;--danger:#ff6b6b}
+      html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,-apple-system,"Helvetica Neue",Arial}
+      body{background:linear-gradient(180deg,#071018 0%, #071922 100%);color:#e6eef6}
+      .app{display:flex;min-height:100vh}
+      .sidebar{width:260px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:24px;box-sizing:border-box;border-right:1px solid rgba(255,255,255,0.03)}
+      .logo{font-weight:700;font-size:18px;margin-bottom:18px}
+      .nav{display:flex;flex-direction:column;gap:8px}
+      .nav a{padding:10px 12px;border-radius:10px;color:var(--muted);text-decoration:none;display:flex;justify-content:space-between;align-items:center}
+      .nav a.active{background:rgba(255,255,255,0.02);color:#e6eef6}
+      .content{flex:1;padding:28px;box-sizing:border-box}
+      .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+      .page-title{font-size:20px;font-weight:700}
+      .grid{display:grid;grid-template-columns:380px 1fr;gap:20px}
+      .card{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:18px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+      .upload-area{border:2px dashed rgba(255,255,255,0.04);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:22px;min-height:180px;border-radius:10px;gap:10px}
+      .btn{background:var(--accent);color:#052018;padding:8px 12px;border-radius:8px;font-weight:600;border:none;cursor:pointer}
+      .muted{color:var(--muted);font-size:13px}
+      .history-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+      .history-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:rgba(255,255,255,0.01)}
+      .big-cards{display:flex;gap:12px}
+      .info-card{flex:1;padding:18px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.01),transparent);text-align:center}
+      .value{font-size:28px;font-weight:700}
+      .delta{font-size:13px;margin-top:8px}
+      .body-score{display:flex;align-items:center;gap:16px}
+      .score-circle{width:96px;height:96px;border-radius:999px;background:linear-gradient(180deg,#071922,rgba(255,255,255,0.02));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800}
+      .charts{margin-top:18px}
+      .form-row{display:flex;gap:8px;align-items:center}
+      input,select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+      .small{font-size:13px}
+      .progress{height:10px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden}
+      .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#38bdf8);width:0%}
+      canvas{background:transparent}
+      footer{opacity:0.6;font-size:12px;margin-top:12px}
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar">
+        <div class="logo">NutriQuest</div>
+        <nav class="nav">
+          <a href="#" id="nav-dashboard">Dashboard</a>
+          <a href="#" id="nav-meals">Meal Library</a>
+          <a href="#" id="nav-plans">Meal Plan</a>
+          <a href="#" id="nav-challenges">Challenges</a>
+          <a href="#" id="nav-achievements">Achievements</a>
+          <a href="#" id="nav-leaderboard">Leaderboard</a>
+          <a href="#" id="nav-profile">Profile</a>
+          <a href="#" id="nav-body" class="active">Body Analysis</a>
+        </nav>
+      </aside>
+      <main class="content">
+        <div class="header">
+          <div class="page-title">Body Analysis</div>
+          <div class="muted">Premium insights · Dark mode · Animations</div>
+        </div>
 
-  const dailyQuotes = [
-    'Small choices become powerful routines.',
-    'A healthy meal is progress you can taste.',
-    'Consistency is your quiet superpower.',
-    'Fuel the life you want to live.',
-    'Today is another chance to keep your promise to yourself.',
-    'You do not need perfect. You need repeatable.'
-  ];
-  const challengePools = {
-    'Fat Loss': [['recipe','Try a filling high-protein recipe','+50 XP','♨'],['water','Drink 8 glasses of water','+30 XP','💧'],['protein','Reach your protein target','+40 XP','◎'],['walk','Take a 20-minute walk','+35 XP','⌁'],['log','Log your meals today','+25 XP','▤']],
-    'Muscle Gain': [['protein','Reach your protein target','+50 XP','💪'],['meal','Eat a planned recovery meal','+40 XP','🥣'],['strength','Complete a strength workout','+60 XP','ϟ'],['water','Drink 8 glasses of water','+30 XP','💧'],['log','Log your meals today','+25 XP','▤']],
-    'Maintenance': [['balanced','Build one balanced plate','+45 XP','🥗'],['water','Drink 8 glasses of water','+30 XP','💧'],['steps','Move for 30 minutes','+35 XP','⌁'],['log','Log your meals today','+25 XP','▤'],['recipe','Try one new healthy recipe','+50 XP','♨']],
-    'Bulk': [['calories','Hit your daily calorie target','+45 XP','◎'],['protein','Reach your protein target','+50 XP','💪'],['meal','Prepare a calorie-dense meal','+40 XP','🥣'],['strength','Complete a strength workout','+60 XP','ϟ'],['water','Drink 8 glasses of water','+30 XP','💧']],
-    'Endurance': [['carbs','Fuel with a carbohydrate-rich meal','+45 XP','⚡'],['hydration','Meet your hydration goal','+40 XP','💧'],['move','Complete an endurance session','+60 XP','⌁'],['protein','Reach your protein target','+35 XP','💪'],['log','Log your meals today','+25 XP','▤']]
-  };
-  const activityFactor = {'Not very active':1.2,'Lightly active':1.375,'Active':1.55,'Very active':1.725};
-  const goalRules = {
-    'Fat Loss': {delta:-500, protein:2.0, fat:.8, label:'A moderate calorie deficit designed to protect lean mass.'},
-    'Muscle Gain': {delta:250, protein:2.0, fat:.9, label:'A small surplus to support training and muscle growth.'},
-    'Maintenance': {delta:0, protein:1.6, fat:.9, label:'Balanced energy intake to maintain your current weight.'},
-    'Bulk': {delta:500, protein:1.8, fat:1.0, label:'A larger surplus to support weight and strength gains.'},
-    'Endurance': {delta:350, protein:1.6, fat:1.0, label:'Extra energy and carbohydrate support for endurance training.'}
-  };
-  const round10 = n => Math.max(0, Math.round(n / 10) * 10);
-  const nutrition = p => {
-    const age = Number(p.age) || 28, weight = Number(p.weight) || 74, height = Number(p.height) || 178;
-    const bmr = 10 * weight + 6.25 * height - 5 * age + (p.sex === 'Female' ? -161 : 5);
-    const tdee = bmr * (activityFactor[p.activity] || 1.375);
-    const rule = goalRules[p.goal] || goalRules['Maintenance'];
-    const calories = round10(Math.max(1200, tdee + rule.delta));
-    const protein = Math.round(weight * rule.protein);
-    const fat = Math.round(weight * rule.fat);
-    const carbs = Math.max(0, Math.round((calories - protein * 4 - fat * 9) / 4));
-    return { calories, protein, carbs, fat, bmr:Math.round(bmr), tdee:Math.round(tdee), note:rule.label };
-  };
-  const setChoice = (key, value) => { const root = document.querySelector(`[data-choice="${key}"]`); if (!root) return; $$('.choice', root).forEach(b => b.classList.toggle('selected', b.textContent.trim().startsWith(value))); };
-  const showAuth = () => { auth.style.display = 'grid'; onboarding.style.display = 'none'; app.classList.remove('ready'); };
-  const showOnboarding = p => {
-    auth.style.display = 'none'; onboarding.style.display = 'grid'; app.classList.remove('ready'); obStep = 0;
-    $('#userName').value = p.name || p.username || '';
-    $$('.body-grid .onboard-input')[0].value = p.age || 28;
-    $$('.body-grid .onboard-input')[1].value = p.height || 178;
-    $$('.body-grid .onboard-input')[2].value = p.weight || 74;
-    setChoice('goal', p.goal || 'Fat Loss'); setChoice('sex', p.sex || 'Male'); setChoice('activity', p.activity || 'Lightly active');
-    renderObStep();
-  };
-  const renderObStep = () => { obSteps.forEach((s,i) => s.classList.toggle('active', i === obStep)); obDots.forEach((d,i) => d.classList.toggle('active', i <= obStep)); $('#obBack').style.visibility = obStep ? 'visible' : 'hidden'; $('#obNext').textContent = obStep === obSteps.length - 1 ? 'Create my plan →' : 'Continue →'; };
-  const register = () => {
-    const username = $('#registerUser').value.trim(), password = $('#registerPass').value;
-    if (username.length < 3 || password.length < 4) return $('#authError').textContent = 'Use a username of 3+ characters and a password of 4+ characters.';
-    profile = { username, password, name:username, completed:false, streak:0, xp:0, lastLogin:null, dailyDate:null, dailyCompleted:[] };
-    save(profile); $('#authError').textContent = ''; showOnboarding(profile);
-  };
-  const login = () => {
-    const saved = safeGet();
-    if (!saved || saved.username !== $('#loginUser').value.trim() || saved.password !== $('#loginPass').value) return $('#authError').textContent = 'That username or password does not match this browser account.';
-    profile = saved; $('#authError').textContent = ''; profile.completed ? signIn() : showOnboarding(profile);
-  };
-  const refreshDay = () => {
-    const today = todayKey(), previous = profile.lastLogin;
-    if (previous !== today) {
-      const yesterday = new Date(); yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayKey = yesterday.toLocaleDateString('en-CA');
-      profile.streak = previous === yesterdayKey ? (profile.streak || 0) + 1 : 1;
-      profile.lastLogin = today;
-    }
-    if (profile.dailyDate !== today) { profile.dailyDate = today; profile.dailyCompleted = []; }
-    save(profile);
-  };
-  const getTasks = () => {
-    const pool = challengePools[profile.goal] || challengePools['Maintenance'], start = dayIndex() % pool.length;
-    return [0,1,2,3].map(n => pool[(start + n) % pool.length]);
-  };
-  const taskMarkup = task => {
-    const done = (profile.dailyCompleted || []).includes(task[0]);
-    return `<button class="challenge ${done ? 'done' : ''}" data-daily="${task[0]}"><span class="challenge-icon">${task[3]}</span><span class="challenge-text">${task[1]}<small class="challenge-meta">Daily challenge · ${task[2]}</small></span><span class="reward">${done ? '✓' : task[2]}</span></button>`;
-  };
-  const renderDaily = () => {
-    const tasks = getTasks();
-    const dashboardButtons = $$('#dashboard .challenge');
-    dashboardButtons.forEach((button, i) => { if (tasks[i]) { const holder = document.createElement('div'); holder.innerHTML = taskMarkup(tasks[i]); button.replaceWith(holder.firstElementChild); } });
-    $('#allChallenges').innerHTML = tasks.map(taskMarkup).join('');
-    const done = (profile.dailyCompleted || []).filter(id => tasks.some(t => t[0] === id)).length;
-    $('#doneCount').textContent = `${done}/4 Done`;
-  };
-  const renderDashboard = () => {
-    const n = nutrition(profile), name = profile.name || profile.username || 'Friend';
-    $('#dashboardGreeting').textContent = `HEY, ${name.toUpperCase()} 👋`;
-    $('#dashboardGoal').textContent = profile.goal;
-    $('#profileName').textContent = name;
-    $('#userInitials').textContent = name.split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
-    $('.m1 strong').textContent = profile.streak || 1; $('.m1 small').textContent = 'days';
-    $('.m2 .metric-label').textContent = 'Daily target'; $('.m2 strong').textContent = n.calories.toLocaleString(); $('.m2 small').textContent = 'kcal';
-    $('.m3 .metric-label').textContent = 'Protein target'; $('.m3 strong').textContent = n.protein + 'g'; $('.m3 small').textContent = 'per day';
-    $('#library .highlight').textContent = profile.goal;
-    $('.motivation q').textContent = dailyQuotes[dayIndex() % dailyQuotes.length];
-    let summary = $('#nutritionSummary');
-    if (!summary) { $('.metrics').insertAdjacentHTML('afterend', '<section class="card nutrition-summary" id="nutritionSummary"></section>'); summary = $('#nutritionSummary'); }
-    summary.innerHTML = `<div class="nutrition-intro"><h2>Your daily plan</h2><p>${n.note}</p><div class="calc-note">Estimated from age, height, weight, sex, activity, and goal. BMR: ${n.bmr} kcal · maintenance: ${n.tdee} kcal. Consult a clinician for medical, pregnancy, or eating-disorder-related needs.</div></div><div class="nutrition-stat"><b>${n.calories}</b><span>kcal target</span></div><div class="nutrition-stat"><b>${n.protein}g</b><span>protein</span></div><div class="nutrition-stat"><b>${n.carbs}g / ${n.fat}g</b><span>carbs / fat</span></div>`;
-    renderDaily();
-  };
-  const signIn = () => { refreshDay(); sessionStorage.setItem(SESSION, '1'); auth.style.display = 'none'; onboarding.style.display = 'none'; app.classList.add('ready'); renderDashboard(); window.scrollTo(0,0); };
+        <!-- Views: Dashboard and Body Analysis -->
+        <div id="dashboardView" style="display:none">
+          <div class="card" style="margin-bottom:12px;display:flex;justify-content:space-between;gap:12px">
+            <div style="flex:1" class="card">
+              <div class="muted small">Body Score</div>
+              <div style="display:flex;align-items:center;justify-content:space-between">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div class="score-circle" id="dashScore">--</div>
+                  <div><div style="font-weight:700" id="dashGrade">--</div><div class="muted small">Overall wellness index</div></div>
+                </div>
+                <div style="text-align:right"><div class="muted small">Latest weight</div><div style="font-weight:800" id="dashWeight">-- kg</div><div style="margin-top:8px" class="muted small">Last measured</div></div>
+              </div>
+            </div>
+            <div style="width:320px" class="card">
+              <div class="muted small">Water progress</div>
+              <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+                <div style="flex:1"><div class="progress"><i id="dashWaterBar"></i></div></div>
+                <div style="width:80px;text-align:right" id="dashWaterText">-- ml</div>
+              </div>
+              <div class="muted small" style="margin-top:8px">Track daily hydration progress from Body Analysis</div>
+            </div>
+          </div>
 
-  $$('[data-auth-tab]').forEach(tab => tab.addEventListener('click', () => { $$('[data-auth-tab]').forEach(x => x.classList.toggle('active', x === tab)); $$('.auth-panel').forEach(x => x.classList.toggle('active', x.id === tab.dataset.authTab)); $('#authError').textContent = ''; }));
-  $('#registerButton').addEventListener('click', register); $('#loginButton').addEventListener('click', login);
-  document.addEventListener('click', event => {
-    const b = event.target.closest('[data-daily]'); if (!b || !profile) return;
-    const id = b.dataset.daily, completed = profile.dailyCompleted || [];
-    profile.dailyCompleted = completed.includes(id) ? completed.filter(x => x !== id) : [...completed, id];
-    save(profile); renderDaily();
-  });
-  document.addEventListener('click', event => {
-    const target = event.target.closest('#obNext, #obBack'); if (!target) return;
-    event.preventDefault(); event.stopImmediatePropagation();
-    if (target.id === 'obBack') { if (obStep) { obStep--; renderObStep(); } return; }
-    if (obStep < obSteps.length - 1) { obStep++; renderObStep(); return; }
-    const bodyInputs = $$('.body-grid .onboard-input');
-    const activityText = $('[data-choice="activity"] .selected').textContent.trim();
-    const activity = Object.keys(activityFactor).find(label => activityText.startsWith(label)) || 'Lightly active';
-    profile = { ...profile, completed:true, name:$('#userName').value.trim() || profile.username || 'Friend', goal:$('[data-choice="goal"] .selected').textContent.trim(), activity, sex:$('[data-choice="sex"] .selected').textContent.trim(), age:Number(bodyInputs[0].value) || 28, height:Number(bodyInputs[1].value) || 178, weight:Number(bodyInputs[2].value) || 74 };
-    save(profile); signIn();
-  }, true);
-  if (profile && profile.completed && sessionStorage.getItem(SESSION) === '1') signIn(); else showAuth();
-})();
-</script><script>
-(() => {
-  const KEY = 'nutriquest-local-account-v2', SESSION = 'nutriquest-session-v1';
-  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } };
-  const nav = document.querySelector('.nav'), main = document.querySelector('.main');
-  nav.insertAdjacentHTML('beforeend', '<button data-screen="profile"><span class="ico">◉</span>My Profile</button>');
-  main.insertAdjacentHTML('beforeend', '<section class="screen profile-page" id="profile"><div class="topline">ACCOUNT &amp; PREFERENCES</div><h1 class="heading">MY PROFILE</h1><p class="sub">Your goals, nutrition inputs, and account details.</p><div id="profileContent"></div></section>');
-  [...nav.querySelectorAll('button')].filter(b => b.dataset.screen !== 'profile').forEach(button => button.addEventListener('click', () => { [...nav.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === button)); document.querySelector('#profile').classList.remove('active'); }));
-  const renderProfile = () => {
-    const p = read(); if (!p) return;
-    const initials = (p.name || p.username || 'U').split(/\s+/).map(x => x[0]).join('').slice(0,2).toUpperCase();
-    const body = document.querySelector('#profileContent');
-    body.innerHTML = `<div class="profile-hero"><div class="profile-avatar-big">${initials}</div><div><h2>${p.name || p.username}</h2><div class="card-note">@${p.username} · Level 7 · 🔥 ${p.streak || 1}-day streak</div></div></div><div class="profile-grid"><section class="card profile-card"><h2>Personal plan</h2><div class="profile-row"><span>Primary goal</span><b>${p.goal || 'Not set'}</b></div><div class="profile-row"><span>Activity level</span><b>${p.activity || 'Not set'}</b></div><div class="profile-row"><span>Age</span><b>${p.age || '—'} years</b></div><div class="profile-row"><span>Height / Weight</span><b>${p.height || '—'} cm / ${p.weight || '—'} kg</b></div></section><section class="card profile-card"><h2>Account</h2><div class="profile-row"><span>Username</span><b>${p.username}</b></div><div class="profile-row"><span>Current streak</span><b>🔥 ${p.streak || 1} days</b></div><div class="profile-row"><span>Saved daily goals</span><b>${(p.dailyCompleted || []).length} / 4</b></div><div class="profile-actions"><button class="profile-action" id="profileDashboard">View dashboard</button><button class="profile-action logout" id="logoutButton">Log out</button></div></section></div>`;
-    document.querySelector('#profileDashboard').addEventListener('click', () => document.querySelector('.nav [data-screen="dashboard"]').click());
-    document.querySelector('#logoutButton').addEventListener('click', () => { sessionStorage.removeItem(SESSION); document.querySelector('#profile').classList.remove('active'); document.querySelector('#app').classList.remove('ready'); document.querySelector('#auth').style.display = 'grid'; window.scrollTo(0,0); });
-  };
-  nav.querySelector('[data-screen="profile"]').addEventListener('click', function () {
-    [...nav.querySelectorAll('button')].forEach(x => x.classList.toggle('active', x === this));
-    document.querySelectorAll('.screen').forEach(x => x.classList.toggle('active', x.id === 'profile'));
-    renderProfile(); window.scrollTo({top:0,behavior:'smooth'});
-  });
-})();
-</script></body></html>
+          <div class="card">
+            <strong>Dashboard Charts</strong>
+            <div class="muted small">Quick glance at recent trends</div>
+            <div class="charts" style="margin-top:12px">
+              <canvas id="dashChartWeight" height="100"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="bodyView">
+        <div class="grid">
+          <div>
+            <div class="card">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <div><strong>Upload latest body analysis (PDF)</strong><div class="muted">Supports InBody, Tanita, SECA, Boditrax</div></div>
+                <div><button id="uploadBtn" class="btn">Upload PDF</button></div>
+              </div>
+              <div id="uploadArea" class="upload-area">
+                <div class="muted">Drag & Drop PDF here or click to choose</div>
+                <div class="muted small">Only PDF files are accepted for now</div>
+                <div style="width:100%"><div class="progress" style="margin-top:10px"><i id="progBar"></i></div></div>
+                <input type="file" id="fileInput" accept="application/pdf" style="display:none">
+                <div id="uploadStatus" class="muted small">No uploads yet</div>
+              </div>
+
+              <div style="margin-top:12px"><strong>Upload History</strong>
+                <div id="history" class="history-list"></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <strong>Manual Measurement</strong>
+              <div class="muted small">If your PDF isn't parsed yet, add measurement values manually.</div>
+              <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                <div class="form-row"><input id="mWeight" placeholder="Weight (kg)"><input id="mFat" placeholder="Fat (%)"></div>
+                <div class="form-row"><input id="mMuscle" placeholder="Muscle (kg)"><input id="mWater" placeholder="Water (%)"></div>
+                <div style="display:flex;gap:8px"><button id="addMeasurement" class="btn">Add Measurement</button><button id="clearData" class="muted">Clear All</button></div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display:flex;gap:12px;margin-bottom:12px">
+              <div class="card" style="flex:2">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <div><strong>Latest Snapshot</strong><div class="muted small">Values from last uploaded report or manual input</div></div>
+                  <div class="body-score">
+                    <div class="score-circle" id="scoreCircle">--</div>
+                    <div style="text-align:right"><div class="muted small">Body Score</div><div id="scoreGrade" style="font-weight:700"></div></div>
+                  </div>
+                </div>
+                <div class="big-cards" style="margin-top:12px">
+                  <div class="info-card"><div class="muted small">Weight</div><div class="value" id="cardWeight">--</div><div class="delta" id="deltaWeight"></div></div>
+                  <div class="info-card"><div class="muted small">Fat %</div><div class="value" id="cardFat">--</div><div class="delta" id="deltaFat"></div></div>
+                  <div class="info-card"><div class="muted small">Muscle</div><div class="value" id="cardMuscle">--</div><div class="delta" id="deltaMuscle"></div></div>
+                  <div class="info-card"><div class="muted small">Water %</div><div class="value" id="cardWater">--</div><div class="delta" id="deltaWater"></div></div>
+                </div>
+              </div>
+
+              <div class="card" style="width:320px">
+                <strong>Goal Builder</strong>
+                <div class="muted small">Choose a target and we calculate targets & macros</div>
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:8px">
+                  <select id="goalSelect">
+                    <option value="maintain">Maintain</option>
+                    <option value="fat_loss">Yağ Yakma</option>
+                    <option value="muscle_gain">Kas Kazanımı</option>
+                    <option value="general_health">Genel Sağlık</option>
+                    <option value="sport_basketball">Basketbol</option>
+                    <option value="sport_marathon">Maraton</option>
+                  </select>
+                  <div class="form-row"><input id="gAge" placeholder="Age" type="number"><input id="gHeight" placeholder="Height (cm)" type="number"></div>
+                  <div class="form-row"><input id="gWeight" placeholder="Weight (kg)" type="number"><select id="gActivity"><option value="1.2">Sedentary</option><option value="1.375">Light</option><option value="1.55">Moderate</option><option value="1.725">Active</option><option value="1.9">Very Active</option></select></div>
+                  <div style="display:flex;gap:8px"><button id="calcGoals" class="btn">Calculate</button></div>
+                  <div class="muted small" id="goalResult"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <strong>Progress Charts</strong>
+              <div class="muted small">Weekly and monthly trends</div>
+              <div class="charts">
+                <canvas id="chartWeight" height="120"></canvas>
+                <canvas id="chartFat" height="120" style="margin-top:10px"></canvas>
+                <canvas id="chartMuscle" height="120" style="margin-top:10px"></canvas>
+                <canvas id="chartWater" height="120" style="margin-top:10px"></canvas>
+                <div style="margin-top:10px"><canvas id="chartComparison" height="120"></canvas></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <strong>Prediction & Nutrition</strong>
+              <div class="muted small">Estimated target date and daily macros</div>
+              <div style="display:flex;gap:12px;margin-top:10px">
+                <div style="flex:1">
+                  <div class="muted small">Estimated target date</div>
+                  <div id="predDate" style="font-weight:700;margin-top:6px">--</div>
+                  <div class="muted small" style="margin-top:8px" id="predWeekly">-- per week</div>
+                </div>
+                <div style="width:220px">
+                  <div class="muted small">Daily calories & macros</div>
+                  <div id="calories" style="font-weight:800;font-size:18px;margin-top:6px">-- kcal</div>
+                  <div class="muted small" id="macros">--</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <footer>Prototype: Body Analysis module (frontend). Reports persisted locally.</footer>
+      </main>
+    </div>
+
+    <script>
+      // Data storage keys
+      const KEY_REPORTS = 'bodyAnalysis.reports'
+      const KEY_PROFILE = 'bodyAnalysis.profile'
+
+      function qs(id){return document.getElementById(id)}
+
+      // Init
+      let reports = JSON.parse(localStorage.getItem(KEY_REPORTS) || '[]')
+      let profile = JSON.parse(localStorage.getItem(KEY_PROFILE) || '{}')
+
+      const uploadArea = qs('uploadArea')
+      const fileInput = qs('fileInput')
+      const progBar = qs('progBar')
+      const uploadStatus = qs('uploadStatus')
+      const historyEl = qs('history')
+
+      function renderHistory(){
+        historyEl.innerHTML = ''
+        reports.slice().reverse().forEach(r=>{
+          const el = document.createElement('div'); el.className='history-item'
+          const left = document.createElement('div'); left.innerHTML = `<div style="font-weight:700">${r.name}</div><div class="muted small">${new Date(r.date).toLocaleString()}</div>`
+          const right = document.createElement('div'); right.innerHTML = `<button class="muted small" data-id="${r.id}">View</button>`
+          el.appendChild(left); el.appendChild(right)
+          historyEl.appendChild(el)
+        })
+      }
+
+      function saveReports(){ localStorage.setItem(KEY_REPORTS, JSON.stringify(reports)) }
+
+      function simulateUpload(file, cb){
+        let progress = 0
+        progBar.style.width = '0%'
+        uploadStatus.textContent = 'Uploading...'
+        const iv = setInterval(()=>{
+          progress += Math.random()*20
+          if(progress>=100) progress=100
+          progBar.style.width = progress+'%'
+          if(progress>=100){ clearInterval(iv); setTimeout(()=>{cb()},300) }
+        },300)
+      }
+
+      uploadArea.addEventListener('click',()=>fileInput.click())
+      uploadArea.addEventListener('dragover',e=>{e.preventDefault();uploadArea.style.borderColor='rgba(255,255,255,0.18)'} )
+      uploadArea.addEventListener('dragleave',e=>{uploadArea.style.borderColor='rgba(255,255,255,0.04)'} )
+
+      uploadArea.addEventListener('drop',e=>{
+        e.preventDefault(); uploadArea.style.borderColor='rgba(255,255,255,0.04)'
+        const f = e.dataTransfer.files[0]
+        if(f) handleFile(f)
+      })
+
+      qs('uploadBtn').addEventListener('click',()=>fileInput.click())
+      fileInput.addEventListener('change',e=>{ const f = e.target.files[0]; if(f) handleFile(f) })
+
+      function handleFile(file){
+        if(file.type !== 'application/pdf'){ alert('Sadece PDF destekleniyor.'); return }
+        simulateUpload(file, ()=>{
+          const reader = new FileReader()
+          reader.onload = ()=>{
+            const dataUrl = reader.result
+            const id = Date.now().toString(36)
+            const r = {id,name:file.name,date:Date.now(),dataUrl,values:{}}
+            reports.push(r)
+            saveReports(); renderHistory(); uploadStatus.textContent = 'Uploaded: '+file.name
+            // Prompt manual entry for parsed values
+            setTimeout(()=>{ promptManualForReport(r) },200)
+          }
+          reader.readAsDataURL(file)
+        })
+      }
+
+      function promptManualForReport(report){
+        const weight = prompt('Son ölçülen kilo (kg) — raporda görünen değeri girin','')
+        const fat = prompt('Vücut yağ oranı (%) — raporda görünen değeri girin','')
+        const muscle = prompt('Kas kütlesi (kg)','')
+        const water = prompt('Su oranı (%)','')
+        report.values = {weight: parseFloat(weight)||null, fat:parseFloat(fat)||null, muscle:parseFloat(muscle)||null, water:parseFloat(water)||null}
+        saveReports(); renderHistory(); renderSnapshot(); updateCharts()
+      }
+
+      // Manual measurement
+      qs('addMeasurement').addEventListener('click',()=>{
+        const w = parseFloat(qs('mWeight').value)
+        const f = parseFloat(qs('mFat').value)
+        const m = parseFloat(qs('mMuscle').value)
+        const wa = parseFloat(qs('mWater').value)
+        if(!w || !f){ alert('En az kilo ve yağ bilgisi girin.'); return }
+        const id = Date.now().toString(36)
+        const r = {id,name:'manual-'+id,date:Date.now(),dataUrl:null,values:{weight:w,fat:f,muscle:m||null,water:wa||null}}
+        reports.push(r); saveReports(); renderHistory(); renderSnapshot(); updateCharts()
+        qs('mWeight').value='';qs('mFat').value='';qs('mMuscle').value='';qs('mWater').value=''
+      })
+
+      qs('clearData').addEventListener('click',()=>{ if(confirm('Tüm verileri silmek istediğinizden emin misiniz?')){ reports=[]; localStorage.removeItem(KEY_REPORTS); renderHistory(); renderSnapshot(); updateCharts(); uploadStatus.textContent='No uploads yet' } })
+
+      // Snapshot & Body Score
+      function lastReports(){ return reports.filter(r=>r.values && r.values.weight).sort((a,b)=>a.date-b.date) }
+
+      function renderSnapshot(){
+        const arr = lastReports()
+        const last = arr[arr.length-1]
+        const prev = arr[arr.length-2]
+        if(!last){ qs('cardWeight').textContent='--'; qs('scoreCircle').textContent='--'; qs('cardFat').textContent='--'; return }
+        setAnimatedValue('cardWeight', last.values.weight, prev && prev.values.weight)
+        setAnimatedValue('cardFat', last.values.fat, prev && prev.values.fat)
+        setAnimatedValue('cardMuscle', last.values.muscle, prev && prev.values.muscle)
+        setAnimatedValue('cardWater', last.values.water, prev && prev.values.water)
+        const score = computeBodyScore(last.values)
+        qs('scoreCircle').textContent = Math.round(score)
+        qs('scoreGrade').textContent = gradeFromScore(score)
+      }
+
+      function setAnimatedValue(id, value, prev){
+        const el = qs(id); const deltaEl = qs('delta'+id.replace('card',''))
+        if(value==null){ el.textContent='--'; deltaEl.textContent=''; return }
+        const start = prev||value
+        const duration = 800
+        const startTime = performance.now()
+        function tick(now){
+          const p = Math.min(1,(now-startTime)/duration)
+          const cur = start + (value-start)*p
+          el.textContent = (Math.round(cur*100)/100)
+          if(p<1) requestAnimationFrame(tick)
+        }
+        requestAnimationFrame(tick)
+        if(prev!=null){ const diff = value - prev; deltaEl.innerHTML = (diff>0?'<span style="color:#6ee7b7">▲ +'+Math.abs(diff).toFixed(2)+'</span>':'<span style="color:#ff6b6b">▼ '+Math.abs(diff).toFixed(2)+'</span>') }
+      }
+
+      function computeBodyScore(values){
+        // Simple heuristic for prototype
+        const w = values.weight || 0
+        const fat = values.fat || 0
+        const muscle = values.muscle || 0
+        const water = values.water || 0
+        let score = 100
+        score -= fat * 0.9
+        score += Math.min(10, (muscle / Math.max(1,w)) * 50)
+        score += Math.min(6, (water-50)*0.2)
+        return Math.max(0, Math.min(100, score))
+      }
+
+      function gradeFromScore(s){ if(s>=95) return 'A+'; if(s>=90) return 'A'; if(s>=80) return 'B+'; if(s>=70) return 'B'; if(s>=60) return 'C'; return 'D' }
+
+      // Goal Builder & Nutrition Engine
+      qs('calcGoals').addEventListener('click',()=>{
+        const age = parseFloat(qs('gAge').value)||30
+        const height = parseFloat(qs('gHeight').value)||170
+        const weight = parseFloat(qs('gWeight').value)||75
+        const activity = parseFloat(qs('gActivity').value)||1.55
+        const goal = qs('goalSelect').value
+        const bmr = mifflinBmr(weight,height,age)
+        const tdee = Math.round(bmr * activity)
+        // basic macro percentages
+        let protein = 1.6, carbsPercent=0.45, fatPercent=0.25
+        if(goal==='fat_loss'){ protein=1.8; carbsPercent=0.35; fatPercent=0.30 }
+        if(goal==='muscle_gain'){ protein=2.0; carbsPercent=0.5; fatPercent=0.2 }
+        const calories = tdee
+        const proteinGrams = Math.round(protein * weight)
+        const proteinCals = proteinGrams*4
+        const fatGrams = Math.round((calories*fatPercent)/9)
+        const carbsGrams = Math.round((calories - proteinCals - fatGrams*9)/4)
+        const waterTarget = Math.round(weight * 35) // ml
+        qs('goalResult').innerHTML = `Calories: <strong>${calories} kcal</strong><br>Protein: <strong>${proteinGrams} g</strong> · Carbs: <strong>${carbsGrams} g</strong> · Fat: <strong>${fatGrams} g</strong><br>Water target: <strong>${waterTarget} ml</strong>`
+        qs('calories').textContent = calories + ' kcal'
+        qs('macros').textContent = `${proteinGrams}g protein · ${carbsGrams}g carbs · ${fatGrams}g fat · Water ${waterTarget}ml`
+
+        // Prediction target using sample target weight (5% change heuristic)
+        const targetWeight = goal==='fat_loss' ? Math.round(weight*0.95*10)/10 : (goal==='muscle_gain'? Math.round((weight*1.03)*10)/10:weight)
+        const weeklyChange = estimateWeeklyChange(calories - tdee)
+        let weeks = Math.abs((targetWeight - weight) / Math.abs(weeklyChange || 0.1))
+        if(!isFinite(weeks)||weeks>520) weeks = 0
+        const date = weeks>0 ? new Date(Date.now() + weeks*7*24*60*60*1000).toLocaleDateString() : '—'
+        qs('predDate').textContent = date
+        qs('predWeekly').textContent = (weeklyChange>0? '+' : '') + weeklyChange.toFixed(2) + ' kg/week'
+      })
+
+      function mifflinBmr(weight, height, age){ // male default prototype
+        // Using male equation; in production include sex
+        return Math.round(10*weight + 6.25*height - 5*age + 5)
+      }
+
+      function estimateWeeklyChange(dailyCalDiff){
+        // 7700 kcal ~ 1kg fat
+        return (dailyCalDiff*7)/7700
+      }
+
+      // Charts
+      let chartW, chartF, chartM, chartWa, chartComp, dashChart
+      function updateCharts(){
+        const arr = lastReports()
+        const labels = arr.map(r=>new Date(r.date).toLocaleDateString())
+        const weights = arr.map(r=>r.values.weight)
+        const fats = arr.map(r=>r.values.fat)
+        const muscles = arr.map(r=>r.values.muscle)
+        const waters = arr.map(r=>r.values.water)
+
+        if(!chartW){
+          chartW = new Chart(qs('chartWeight').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Weight (kg)', data:weights, borderColor:'#6ee7b7', backgroundColor:'rgba(110,231,183,0.08)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+          chartF = new Chart(qs('chartFat').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Fat %', data:fats, borderColor:'#38bdf8', backgroundColor:'rgba(56,189,248,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+          chartM = new Chart(qs('chartMuscle').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Muscle (kg)', data:muscles, borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+          chartWa = new Chart(qs('chartWater').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Water %', data:waters, borderColor:'#60a5fa', backgroundColor:'rgba(96,165,250,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+          chartComp = new Chart(qs('chartComparison').getContext('2d'),{type:'bar',data:{labels:['Weight','Fat %','Muscle','Water %'], datasets:[]}, options:{responsive:true, plugins:{legend:{position:'top'}}}})
+          dashChart = new Chart(qs('dashChartWeight').getContext('2d'),{type:'line',data:{labels, datasets:[{label:'Weight (kg)', data:weights, borderColor:'#6ee7b7', backgroundColor:'rgba(110,231,183,0.06)', tension:0.2}]}, options:{plugins:{legend:{display:false}}}})
+        } else {
+          chartW.data.labels = labels; chartW.data.datasets[0].data = weights; chartW.update()
+          chartF.data.labels = labels; chartF.data.datasets[0].data = fats; chartF.update()
+          chartM.data.labels = labels; chartM.data.datasets[0].data = muscles; chartM.update()
+          chartWa.data.labels = labels; chartWa.data.datasets[0].data = waters; chartWa.update()
+          dashChart.data.labels = labels; dashChart.data.datasets[0].data = weights; dashChart.update()
+          // comparison: first vs last
+          if(arr.length>=1){
+            const first = arr[0].values || {}
+            const last = arr[arr.length-1].values || {}
+            chartComp.data.datasets = [
+              {label:'First', data:[first.weight||0, first.fat||0, first.muscle||0, first.water||0], backgroundColor:'rgba(99,102,241,0.6)'},
+              {label:'Latest', data:[last.weight||0, last.fat||0, last.muscle||0, last.water||0], backgroundColor:'rgba(34,197,94,0.6)'}
+            ]
+            chartComp.update()
+          }
+        }
+      }
+
+      // View switching and Dashboard render
+      function showView(name){
+        qs('dashboardView').style.display = name==='dashboard' ? '' : 'none'
+        qs('bodyView').style.display = name==='body' ? '' : 'none'
+        // nav active
+        document.querySelectorAll('.nav a').forEach(a=>a.classList.remove('active'))
+        if(name==='dashboard') qs('nav-dashboard').classList.add('active')
+        if(name==='body') qs('nav-body').classList.add('active')
+        if(name==='dashboard') renderDashboard()
+      }
+
+      qs('nav-dashboard').addEventListener('click',e=>{ e.preventDefault(); showView('dashboard') })
+      qs('nav-body').addEventListener('click',e=>{ e.preventDefault(); showView('body') })
+
+      function renderDashboard(){
+        const arr = lastReports()
+        const last = arr[arr.length-1]
+        if(!last){ qs('dashScore').textContent='--'; qs('dashGrade').textContent='--'; qs('dashWeight').textContent='-- kg'; qs('dashWaterText').textContent='--'; return }
+        const score = computeBodyScore(last.values)
+        qs('dashScore').textContent = Math.round(score)
+        qs('dashGrade').textContent = gradeFromScore(score)
+        qs('dashWeight').textContent = (last.values.weight||'--') + ' kg'
+        const waterML = Math.round((last.values.water||50) * (last.values.weight||70) * 10 / 100) // heuristic ml
+        const pct = Math.min(100, Math.round((last.values.water||50)))
+        qs('dashWaterBar').style.width = pct+'%'
+        qs('dashWaterText').textContent = waterML + ' ml'
+        // update charts
+        updateCharts()
+      }
+
+      // Initial render
+      renderHistory(); renderSnapshot(); updateCharts()
+
+      // Small UX: clicking view shows report preview
+      historyEl.addEventListener('click',e=>{
+        const btn = e.target.closest('button')
+        if(!btn) return
+        const id = btn.dataset.id
+        const r = reports.find(x=>x.id===id)
+        if(!r) return
+        if(r.dataUrl){
+          const w = window.open('')
+          w.document.write(`<iframe src="${r.dataUrl}" style="width:100%;height:100vh;border:none"></iframe>`)
+        } else {
+          alert('No PDF for this item. Values: '+JSON.stringify(r.values))
+        }
+      })
+    </script>
+  </body>
+</html>
