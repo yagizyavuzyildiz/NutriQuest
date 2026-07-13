@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>NutriQuest v0.3 — Gamified Health App</title>
+  <title>NutriQuest v0.4 — Gamified Health App</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {--accent:#6ee7b7;--muted:#9aa4b2;--danger:#ff6b6b;--warning:#f59e0b;--bg:#071018;--panel:rgba(255,255,255,0.06)}
@@ -66,6 +66,17 @@
     .body-progress-row {display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
     .body-progress-bar {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
     .body-progress-bar > div {height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#38bdf8);transition:width .4s}
+    .plan-detail {margin:16px 0;padding:18px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);display:grid;gap:12px}
+    .plan-detail-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .plan-pill {display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:11px;background:rgba(110,231,183,0.12);color:#d7fbea;border:1px solid rgba(110,231,183,0.2)}
+    .challenge-card {padding:14px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;gap:8px}
+    .challenge-card .progress-track {width:100%}
+    .challenge-tag {font-size:11px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,0.06);display:inline-block;width:max-content}
+    .achievement-filters {display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .achievement-filter-btn {padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#e6eef6;cursor:pointer}
+    .achievement-filter-btn.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.28)}
+    .profile-form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
     .tiny {font-size:12px;color:var(--muted)}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
@@ -143,6 +154,21 @@
             <div id="nutritionScoreLabel" class="muted small" style="margin-top:8px">No data yet</div>
           </div>
         </div>
+        <div class="grid" style="margin-top:16px">
+          <div class="card">
+            <div class="metric-title">Weekly summary</div>
+            <div id="weeklySummary" style="margin-top:10px;display:grid;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Next goal</div>
+            <div id="nextGoal" style="margin-top:10px;font-size:18px;font-weight:800"></div>
+            <div id="nextGoalHint" class="muted small" style="margin-top:8px"></div>
+          </div>
+          <div class="card">
+            <div class="metric-title">AI recommendation</div>
+            <div id="aiRecommendation" style="margin-top:10px;font-size:16px;font-weight:700;color:#d7fbea"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Meal Library -->
@@ -163,6 +189,7 @@
           <div class="pill">Daily nutrition summary</div>
           <div id="planNutritionSummary" style="margin-top:10px;display:grid;gap:8px"></div>
         </div>
+        <div id="planDetail" class="plan-detail"></div>
         <div class="plan-grid" id="planCards"></div>
       </div>
 
@@ -170,14 +197,27 @@
       <div id="challenges" class="page hidden">
         <div class="header"><div><div class="title">Challenges</div><div class="muted">Complete tasks and earn XP</div></div></div>
         <div class="grid">
-          <div class="card"><strong>Daily ⚡</strong><div id="dailyChallenges" style="margin-top:12px"></div></div>
-          <div class="card"><strong>Weekly 📈</strong><div id="weeklyChallenges" style="margin-top:12px"></div></div>
+          <div class="card"><strong>Daily ⚡</strong><div id="dailyChallenges" style="margin-top:12px;display:grid;gap:10px"></div></div>
+          <div class="card"><strong>Weekly 📈</strong><div id="weeklyChallenges" style="margin-top:12px;display:grid;gap:10px"></div></div>
         </div>
+        <div class="grid" style="margin-top:16px">
+          <div class="card"><strong>Monthly 🗓️</strong><div id="monthlyChallenges" style="margin-top:12px;display:grid;gap:10px"></div></div>
+          <div class="card"><strong>Seasonal 🌦️</strong><div id="seasonalChallenges" style="margin-top:12px;display:grid;gap:10px"></div></div>
+        </div>
+        <div id="challengeDetail" class="card" style="margin-top:16px;display:none"></div>
       </div>
 
       <!-- Achievements -->
       <div id="achievements" class="page hidden">
         <div class="header"><div><div class="title">Achievements</div><div class="muted">Unlock badges as your routine grows</div></div></div>
+        <div class="achievement-filters">
+          <button class="achievement-filter-btn active" data-filter="all">All</button>
+          <button class="achievement-filter-btn" data-filter="Nutrition">Nutrition</button>
+          <button class="achievement-filter-btn" data-filter="Workout">Workout</button>
+          <button class="achievement-filter-btn" data-filter="Consistency">Consistency</button>
+          <button class="achievement-filter-btn" data-filter="Special">Special</button>
+          <button class="achievement-filter-btn" data-filter="Hidden">Hidden</button>
+        </div>
         <div id="achievementsList"></div>
       </div>
 
@@ -254,12 +294,38 @@
         <div class="profile-grid">
           <div class="card">
             <strong>Health Profile</strong>
-            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+            <div class="profile-form-grid" style="margin-top:12px">
               <input id="profAge" placeholder="Age" type="number" />
               <input id="profHeight" placeholder="Height (cm)" type="number" />
               <input id="profWeight" placeholder="Weight (kg)" type="number" />
-              <button class="btn" onclick="saveProfile()">Save</button>
+              <select id="profActivity">
+                <option value="Sedentary">Sedentary</option>
+                <option value="Moderately Active">Moderately Active</option>
+                <option value="Active">Active</option>
+                <option value="Very Active">Very Active</option>
+              </select>
+              <select id="profDiet">
+                <option value="Omnivore">Omnivore</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+                <option value="Keto">Keto</option>
+                <option value="Low Carb">Low Carb</option>
+                <option value="Mediterranean">Mediterranean</option>
+              </select>
             </div>
+            <div class="profile-form-grid" style="margin-top:12px">
+              <input id="profAllergies" placeholder="Allergies (comma separated)" />
+              <input id="profWaterTarget" placeholder="Daily water target" type="number" />
+              <input id="profProteinTarget" placeholder="Protein target (g)" type="number" />
+              <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" />
+            </div>
+            <div class="profile-form-grid" style="margin-top:12px">
+              <div class="checkbox-row"><input type="checkbox" id="reminderWater" /><label for="reminderWater">Water reminder</label></div>
+              <div class="checkbox-row"><input type="checkbox" id="reminderMeal" /><label for="reminderMeal">Meal reminder</label></div>
+              <div class="checkbox-row"><input type="checkbox" id="reminderWorkout" /><label for="reminderWorkout">Workout reminder</label></div>
+              <div class="checkbox-row"><input type="checkbox" id="reminderSleep" /><label for="reminderSleep">Sleep reminder</label></div>
+            </div>
+            <button class="btn" style="margin-top:12px" onclick="saveProfile()">Save</button>
           </div>
           <div class="card">
             <strong>Current snapshot</strong>
@@ -267,6 +333,8 @@
             <div class="stat"><span class="muted">Streak</span><span id="profStreak">0 days 🔥</span></div>
             <div class="stat"><span class="muted">Level</span><span id="profLevel">Level 1</span></div>
             <div class="stat"><span class="muted">Total XP</span><span id="profXP">0 XP</span></div>
+            <div class="stat"><span class="muted">Activity</span><span id="profActivitySummary">Sedentary</span></div>
+            <div class="stat"><span class="muted">Diet</span><span id="profDietSummary">Omnivore</span></div>
           </div>
         </div>
         <div class="card" style="margin-top:16px">
@@ -317,11 +385,12 @@
 
   <script>
     const app = {
-      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"lose-weight","age":0,"height":0,"weight":0}'),
+      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"lose-weight","age":0,"height":0,"weight":0,"activity":"Sedentary","diet":"Omnivore","allergies":[],"waterTarget":8,"proteinTarget":140,"workoutGoal":3,"reminders":{"water":true,"meal":true,"workout":false,"sleep":false}}'),
       bodyMetrics: JSON.parse(localStorage.getItem('nq_metrics') || '[]'),
       dailyLog: JSON.parse(localStorage.getItem('nq_tracking') || '[]'),
       dailyCompleted: [],
-      weeklyProgress: {}
+      weeklyProgress: {},
+      ui: {achievementFilter:'all'}
     }
 
     const meals = [
@@ -343,34 +412,48 @@
     ]
 
     const dailyChalls = [
-      {id:'d1',name:'Log Meals',desc:'Track all meals',xp:50,done:false},
-      {id:'d2',name:'Water Goal',desc:'8 glasses',xp:30,done:false},
-      {id:'d3',name:'Workout',desc:'30 min exercise',xp:100,done:false},
-      {id:'d4',name:'Calorie',desc:'Within range',xp:60,done:false},
-      {id:'d5',name:'Protein',desc:'Hit target',xp:40,done:false}
+      {id:'d1',name:'Drink Water',desc:'Hydration goal',current:6,target:8,reward:30,unit:'glasses',category:'Nutrition',status:'Almost there',done:false},
+      {id:'d2',name:'Protein Goal',desc:'Hit your protein target',current:126,target:140,reward:40,unit:'g',category:'Nutrition',status:'Almost complete',done:false},
+      {id:'d3',name:'Workout',desc:'30 min exercise',current:25,target:30,reward:100,unit:'min',category:'Workout',status:'Almost done',done:false},
+      {id:'d4',name:'Calories',desc:'Stay in range',current:1750,target:1800,reward:60,unit:'kcal',category:'Nutrition',status:'Close',done:false}
     ]
 
     const weeklyChalls = [
-      {id:'w1',name:'Gym 5x',desc:'5 workouts',xp:250,prog:0,max:5},
-      {id:'w2',name:'Meal Prep',desc:'7 meals',xp:200,prog:0,max:7},
-      {id:'w3',name:'Hydration',desc:'56 glasses',xp:150,prog:0,max:56},
-      {id:'w4',name:'Log 6 Days',desc:'6 day logs',xp:180,prog:0,max:6}
+      {id:'w1',name:'Gym',desc:'5 workouts',current:4,target:5,reward:250,unit:'workouts',category:'Workout',status:'80% done',done:false},
+      {id:'w2',name:'Meal Prep',desc:'7 meal prep days',current:5,target:7,reward:200,unit:'days',category:'Nutrition',status:'On track',done:false},
+      {id:'w3',name:'Hydration',desc:'56 glasses',current:42,target:56,reward:150,unit:'glasses',category:'Consistency',status:'Steady',done:false},
+      {id:'w4',name:'Log Meals',desc:'7 day logs',current:6,target:7,reward:180,unit:'days',category:'Consistency',status:'Almost done',done:false}
+    ]
+
+    const monthlyChalls = [
+      {id:'m1',name:'Lose 2 kg',desc:'Sustainable fat loss',current:1,target:2,reward:300,unit:'kg',category:'Weight',status:'In progress',done:false},
+      {id:'m2',name:'Walk 100 km',desc:'Build daily movement',current:74,target:100,reward:220,unit:'km',category:'Workout',status:'Good pace',done:false},
+      {id:'m3',name:'Complete 20 workouts',desc:'Stay consistent',current:14,target:20,reward:260,unit:'sessions',category:'Workout',status:'Getting there',done:false}
+    ]
+
+    const seasonalChalls = [
+      {id:'s1',name:'Summer Challenge',desc:'Lose 5 kg before August',current:2,target:5,reward:500,unit:'kg',category:'Special',status:'Halfway',done:false},
+      {id:'s2',name:'30 Day Streak',desc:'Maintain your streak',current:18,target:30,reward:400,unit:'days',category:'Consistency',status:'Growing',done:false}
     ]
 
     const achievements = [
-      {id:'a1',name:'First Step',desc:'Log 1 metric',icon:'🚀',unlocked:false},
-      {id:'a2',name:'Streak',desc:'7 day streak',icon:'🔥',unlocked:false},
-      {id:'a3',name:'Level 5',desc:'Reach Level 5',icon:'⭐',unlocked:false},
-      {id:'a4',name:'50 Meals',desc:'Log 50 meals',icon:'🍽️',unlocked:false},
-      {id:'a5',name:'Champion',desc:'10 challenges',icon:'🏆',unlocked:false}
+      {id:'a1',name:'First Step',desc:'Log 1 metric',icon:'🚀',category:'Consistency',reward:100,unlocked:false,target:1,progress:0,hidden:false,featured:true,date:'—'},
+      {id:'a2',name:'Streak',desc:'7 day streak',icon:'🔥',category:'Consistency',reward:250,unlocked:false,target:7,progress:0,hidden:false,featured:true,date:'—'},
+      {id:'a3',name:'Level 5',desc:'Reach Level 5',icon:'⭐',category:'Special',reward:400,unlocked:false,target:5,progress:0,hidden:false,featured:true,date:'—'},
+      {id:'a4',name:'50 Meals',desc:'Log 50 meals',icon:'🍽️',category:'Nutrition',reward:300,unlocked:false,target:50,progress:0,hidden:false,featured:false,date:'—'},
+      {id:'a5',name:'Champion',desc:'Complete 10 challenges',icon:'🏆',category:'Special',reward:500,unlocked:false,target:10,progress:0,hidden:false,featured:true,date:'—'},
+      {id:'a6',name:'Protein Master',desc:'Hit protein target for 30 days',icon:'💪',category:'Nutrition',reward:500,unlocked:false,target:30,progress:0,hidden:true,featured:false,date:'—'}
     ]
 
     const mealPlans = [
-      {id:'lose-weight',title:'Lose Weight',subtitle:'Light and lean',accent:'Fat burn',calories:1800,protein:140,carbs:160,fat:55,meals:['High-protein breakfast','Light lunch','Vegetable dinner'],tips:['Hydrate often','Prioritize fiber']},
-      {id:'maintain-weight',title:'Maintain Weight',subtitle:'Balanced daily rhythm',accent:'Steady energy',calories:2200,protein:150,carbs:220,fat:70,meals:['Balanced breakfast','Protein lunch','Smart dinner'],tips:['Keep portions consistent','Move daily']},
-      {id:'gain-weight',title:'Gain Weight',subtitle:'More fuel, gentle pace',accent:'Healthy mass',calories:2600,protein:165,carbs:260,fat:85,meals:['Calorie-dense breakfast','Hearty lunch','Comfort dinner'],tips:['Eat every 3-4 hours','Sleep well']},
-      {id:'gain-muscle',title:'Gain Muscle',subtitle:'Performance focused',accent:'Muscle gain',calories:2500,protein:190,carbs:240,fat:75,meals:['Protein-rich breakfast','Post-workout meal','Recovery dinner'],tips:['Lift consistently','Recover well']},
-      {id:'stay-fit',title:'Stay Fit',subtitle:'Clean and sustainable',accent:'Daily balance',calories:2100,protein:155,carbs:200,fat:65,meals:['Fresh breakfast','Balanced lunch','Light dinner'],tips:['Keep protein steady','Avoid overcomplication']}
+      {id:'lose-weight',title:'Lose Weight',subtitle:'Light and lean',accent:'Fat burn',badge:'⭐ Most Popular',calories:1800,protein:140,carbs:160,fat:55,difficulty:'Easy',prepTime:'20 min',cost:'Low Budget',meals:['High-protein breakfast','Light lunch','Vegetable dinner'],tips:['Hydrate often','Prioritize fiber'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Eggs','Oats','Banana'],lunch:['Chicken Breast','Rice','Salad'],snack:['Greek Yogurt','Almonds'],dinner:['Salmon','Vegetables']},recommended:['Chicken','Eggs','Rice','Broccoli','Tuna','Greek Yogurt'],avoid:['Sugary drinks','Fried food','Fast food','Excess sweets'],allergens:{contains:['Eggs','Milk'],freeFrom:['Peanuts','Soy','Shellfish']},alternatives:['Chicken → Turkey','Rice → Quinoa','Salmon → Cod'],suitableFor:'High Protein',description:'Ideal for preserving muscle while reducing body fat.',shoppingList:['Chicken Breast','Eggs','Rice','Milk','Greek Yogurt','Banana','Broccoli','Olive Oil']},
+      {id:'maintain-weight',title:'Maintain Weight',subtitle:'Balanced daily rhythm',accent:'Steady energy',badge:'✨ Beginner Friendly',calories:2200,protein:150,carbs:220,fat:70,difficulty:'Easy',prepTime:'25 min',cost:'Medium',meals:['Balanced breakfast','Protein lunch','Smart dinner'],tips:['Keep portions consistent','Move daily'],schedule:['08:30 Breakfast','13:00 Lunch','16:30 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Greek Yogurt','Granola','Berries'],lunch:['Turkey Wrap','Vegetable Salad'],snack:['Apple','Peanut Butter'],dinner:['Chicken','Potatoes','Green Beans']},recommended:['Turkey','Chicken','Oats','Apples','Greek Yogurt'],avoid:['Oversized portions','Late snacks','Highly processed meals'],allergens:{contains:['Milk'],freeFrom:['Peanuts','Shellfish']},alternatives:['Turkey → Chicken','Granola → Muesli','Chicken → Tofu'],suitableFor:'Balanced Lifestyle',description:'Perfect for long-term healthy eating and steady energy.',shoppingList:['Turkey','Chicken','Oats','Apples','Greek Yogurt','Salad','Potatoes','Olive Oil']},
+      {id:'gain-weight',title:'Gain Weight',subtitle:'More fuel, gentle pace',accent:'Healthy mass',badge:'💪 Athlete Choice',calories:2600,protein:165,carbs:260,fat:85,difficulty:'Medium',prepTime:'30 min',cost:'Medium',meals:['Calorie-dense breakfast','Hearty lunch','Comfort dinner'],tips:['Eat every 3-4 hours','Sleep well'],schedule:['08:00 Breakfast','11:30 Snack','14:00 Lunch','19:00 Dinner'],sampleMenu:{breakfast:['Oats','Milk','Banana','Peanut Butter'],lunch:['Lean Beef','Rice','Avocado'],snack:['Trail Mix','Yogurt'],dinner:['Salmon','Sweet Potato','Vegetables']},recommended:['Lean Beef','Salmon','Oats','Avocado','Milk'],avoid:['Skipping meals','Liquid calories only','Ultra-processed snacks'],allergens:{contains:['Milk','Peanuts'],freeFrom:['Soy','Shellfish']},alternatives:['Lean Beef → Chicken','Salmon → Turkey','Avocado → Olive Oil'],suitableFor:'Mass Gain',description:'A practical plan for users who need gentle and steady weight gain.',shoppingList:['Oats','Milk','Banana','Peanut Butter','Lean Beef','Rice','Avocado','Salmon']},
+      {id:'gain-muscle',title:'Gain Muscle',subtitle:'Performance focused',accent:'Muscle gain',badge:'🔥 Trending',calories:2500,protein:190,carbs:240,fat:75,difficulty:'Advanced',prepTime:'35 min',cost:'Medium',meals:['Protein-rich breakfast','Post-workout meal','Recovery dinner'],tips:['Lift consistently','Recover well'],schedule:['07:30 Breakfast','10:30 Snack','13:30 Lunch','19:30 Dinner'],sampleMenu:{breakfast:['Eggs','Oats','Protein Shake'],lunch:['Chicken Breast','Rice','Broccoli'],snack:['Greek Yogurt','Almonds'],dinner:['Tuna','Potatoes','Salad']},recommended:['Chicken','Eggs','Rice','Broccoli','Tuna','Greek Yogurt'],avoid:['Low protein intake','Too little recovery','Skipping post-workout meals'],allergens:{contains:['Eggs','Milk'],freeFrom:['Peanuts','Shellfish']},alternatives:['Chicken → Turkey','Tuna → Salmon','Rice → Quinoa'],suitableFor:'Athletes',description:'Optimized for strength and muscle support with high protein intake.',shoppingList:['Chicken Breast','Eggs','Oats','Protein Powder','Rice','Broccoli','Greek Yogurt','Almonds']},
+      {id:'stay-fit',title:'Stay Fit',subtitle:'Clean and sustainable',accent:'Daily balance',badge:'❤️ Heart Healthy',calories:2100,protein:155,carbs:200,fat:65,difficulty:'Easy',prepTime:'20 min',cost:'Low Budget',meals:['Fresh breakfast','Balanced lunch','Light dinner'],tips:['Keep protein steady','Avoid overcomplication'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Smoothie','Oats'],lunch:['Grilled Fish','Salad'],snack:['Fruit','Nuts'],dinner:['Tofu Bowl','Vegetables']},recommended:['Salmon','Tofu','Vegetables','Fruit','Oats'],avoid:['Crash dieting','Overeating late','Highly processed snacks'],allergens:{contains:['Milk'],freeFrom:['Peanuts','Soy','Gluten']},alternatives:['Fish → Tofu','Yogurt → Kefir','Salmon → Chicken'],suitableFor:'Daily Balance',description:'Best for users who value steady energy and a sustainable routine.',shoppingList:['Salmon','Tofu','Vegetables','Fruit','Oats','Yogurt']},
+      {id:'high-protein',title:'High Protein',subtitle:'Muscle-friendly and filling',accent:'Protein focus',badge:'💪 Athlete Choice',calories:2300,protein:200,carbs:180,fat:70,difficulty:'Medium',prepTime:'25 min',cost:'Medium',meals:['Protein breakfast','Lunch bowl','Recovery snack'],tips:['Keep protein every meal','Hydrate well'],schedule:['08:00 Breakfast','12:30 Lunch','16:30 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Eggs','Oats','Protein Shake'],lunch:['Turkey','Rice','Broccoli'],snack:['Greek Yogurt','Nuts'],dinner:['Chicken','Sweet Potato']},recommended:['Turkey','Chicken','Eggs','Greek Yogurt','Protein Shake'],avoid:['Low protein meals','Skipping snacks','Sugary drinks'],allergens:{contains:['Eggs','Milk'],freeFrom:['Shellfish']},alternatives:['Turkey → Chicken','Oats → Quinoa','Greek Yogurt → Cottage Cheese'],suitableFor:'Muscle Preservation',description:'A protein-forward plan ideal for lean muscle retention and satiety.',shoppingList:['Turkey','Chicken','Eggs','Greek Yogurt','Protein Powder','Rice','Broccoli','Sweet Potato']},
+      {id:'mediterranean',title:'Mediterranean',subtitle:'Heart healthy and sustainable',accent:'Heart friendly',badge:'❤️ Heart Healthy',calories:2100,protein:145,carbs:210,fat:65,difficulty:'Easy',prepTime:'30 min',cost:'Medium',meals:['Fresh breakfast','Seafood lunch','Vegetable dinner'],tips:['Use olive oil','Eat slowly'],schedule:['08:30 Breakfast','13:00 Lunch','16:30 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Greek Yogurt','Fruit','Honey'],lunch:['Salmon','Quinoa','Salad'],snack:['Olives','Cheese'],dinner:['Chickpea Bowl','Vegetables']},recommended:['Salmon','Chickpeas','Olives','Quinoa','Greek Yogurt'],avoid:['Ultra-processed food','Too much salt','Fried dishes'],allergens:{contains:['Milk'],freeFrom:['Peanuts','Shellfish']},alternatives:['Salmon → Tuna','Quinoa → Rice','Chickpeas → Lentils'],suitableFor:'Cardiovascular Health',description:'Mediterranean inspired nutrition focused on whole foods and long-term wellness.',shoppingList:['Salmon','Chickpeas','Quinoa','Olives','Greek Yogurt','Vegetables','Fruit']},
+      {id:'vegetarian',title:'Vegetarian',subtitle:'Plant-forward nutrition',accent:'Plant friendly',badge:'🌱 Plant Friendly',calories:2000,protein:135,carbs:220,fat:60,difficulty:'Easy',prepTime:'25 min',cost:'Low Budget',meals:['Protein breakfast','Plant lunch','Comfort dinner'],tips:['Balance protein sources','Eat legumes often'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Oats','Soy Milk','Banana'],lunch:['Tofu Bowl','Rice'],snack:['Hummus','Vegetables'],dinner:['Lentil Soup','Salad']},recommended:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk'],avoid:['Low protein meals','Too much refined carbs','Skipping legumes'],allergens:{contains:['Soy'],freeFrom:['Meat','Fish','Shellfish']},alternatives:['Tofu → Tempeh','Lentils → Chickpeas','Soy Milk → Almond Milk'],suitableFor:'Plant-Based Nutrition',description:'A flexible vegetarian plan for users who want a lighter and more plant-based routine.',shoppingList:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk','Banana','Vegetables','Olive Oil']}
     ]
 
     const goalLabels = {
@@ -479,7 +562,8 @@
 
       let html = ''
       dailyChalls.slice(0, 3).forEach(c => {
-        html += `<div class="challenge-item"><span>${c.name}: ${c.desc}</span><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
+        const progress = Math.min(100, Math.round((c.current / c.target) * 100))
+        html += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="tiny">${c.status}</div></div><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.reward}</button></div>`
       })
       qs('todayChalls').innerHTML = html
       renderDashboardExtras()
@@ -512,9 +596,32 @@
         <div class="stat"><span class="muted">Carbs</span><span>${selected.carbs}g</span></div>
         <div class="stat"><span class="muted">Fat</span><span>${selected.fat}g</span></div>
       `
+      qs('planDetail').innerHTML = `
+        <div class="plan-meta"><strong>${selected.title}</strong><span>${selected.badge}</span></div>
+        <div style="font-size:15px;color:#d7fbea">${selected.description}</div>
+        <div class="plan-detail-grid">
+          <div><strong>Best for</strong><div class="tiny" style="margin-top:4px">${selected.suitableFor}</div></div>
+          <div><strong>Prep</strong><div class="tiny" style="margin-top:4px">${selected.prepTime}</div></div>
+          <div><strong>Cost</strong><div class="tiny" style="margin-top:4px">${selected.cost}</div></div>
+          <div><strong>Difficulty</strong><div class="tiny" style="margin-top:4px">${selected.difficulty}</div></div>
+        </div>
+        <div class="plan-detail-grid">
+          <div><strong>Meals</strong><div class="tiny" style="margin-top:6px">${selected.schedule.join(' • ')}</div></div>
+          <div><strong>Sample menu</strong><div class="tiny" style="margin-top:6px">${Object.entries(selected.sampleMenu).map(([k,v]) => `${k}: ${v.join(', ')}`).join(' • ')}</div></div>
+        </div>
+        <div class="plan-detail-grid">
+          <div><strong>Recommended</strong><div class="tiny" style="margin-top:6px">${selected.recommended.join(' • ')}</div></div>
+          <div><strong>To avoid</strong><div class="tiny" style="margin-top:6px">${selected.avoid.join(' • ')}</div></div>
+        </div>
+        <div class="plan-detail-grid">
+          <div><strong>Allergens</strong><div class="tiny" style="margin-top:6px">Contains ${selected.allergens.contains.join(', ')} • Free from ${selected.allergens.freeFrom.join(', ')}</div></div>
+          <div><strong>Alternatives</strong><div class="tiny" style="margin-top:6px">${selected.alternatives.join(' • ')}</div></div>
+        </div>
+        <div><strong>Shopping list</strong><div class="tiny" style="margin-top:6px">${selected.shoppingList.join(' • ')}</div></div>
+      `
       qs('planCards').innerHTML = mealPlans.map(plan => `
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
-          <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.accent}</span></div>
+          <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.badge}</span></div>
           <div style="font-size:14px;color:#d7fbea">${plan.subtitle}</div>
           <div class="muted">${plan.calories} kcal • ${plan.protein}g protein • ${plan.carbs}g carbs • ${plan.fat}g fat</div>
           <div><strong>Meals</strong><div class="tiny" style="margin-top:4px">${plan.meals.join(' • ')}</div></div>
@@ -537,63 +644,151 @@
       if(selected) setPlan(selected)
     }
 
+    function showChallengeDetail(challengeId, listName) {
+      const list = listName === 'daily' ? dailyChalls : listName === 'weekly' ? weeklyChalls : listName === 'monthly' ? monthlyChalls : seasonalChalls
+      const c = list.find(item => item.id === challengeId)
+      if(!c) return
+      qs('challengeDetail').style.display = 'block'
+      qs('challengeDetail').innerHTML = `
+        <div class="metric-title">${c.name}</div>
+        <div class="muted" style="margin-top:6px">${c.desc}</div>
+        <div class="stat" style="margin-top:12px"><span class="muted">Category</span><span>${c.category}</span></div>
+        <div class="stat"><span class="muted">Progress</span><span>${c.current}/${c.target} ${c.unit}</span></div>
+        <div class="stat"><span class="muted">Status</span><span>${c.status}</span></div>
+        <div class="tiny" style="margin-top:8px">Reward: +${c.reward} XP</div>
+      `
+    }
+
     function renderChallenges() {
       let dailyHTML = ''
       dailyChalls.forEach(c => {
-        dailyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc}</div><div class="progress-track" style="margin-top:8px;width:180px"><div class="progress-fill" style="width:${c.done ? '100%' : '0%'}"></div></div></div><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
+        const pct = Math.min(100, Math.round((c.current / c.target) * 100))
+        dailyHTML += `<div class="challenge-card">
+          <div class="challenge-tag">${c.category}</div>
+          <div><strong>${c.name}</strong><div class="tiny">${c.desc}</div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="body-progress-row"><span>${c.current}/${c.target} ${c.unit}</span><span>${c.status}</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <button class="btn secondary" onclick="showChallengeDetail('${c.id}','daily')">View</button>
+            <button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.reward}</button>
+          </div>
+        </div>`
       })
       qs('dailyChallenges').innerHTML = dailyHTML
 
       let weeklyHTML = ''
       weeklyChalls.forEach(c => {
-        const pct = Math.round((c.prog / c.max) * 100)
-        weeklyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc} [${c.prog}/${c.max}]</div><div class="progress-track" style="margin-top:8px;width:180px"><div class="progress-fill" style="width:${pct}%"></div></div></div><button class="btn secondary" onclick="addWeekly('${c.id}')">+${c.xp}</button></div>`
+        const pct = Math.min(100, Math.round((c.current / c.target) * 100))
+        weeklyHTML += `<div class="challenge-card">
+          <div class="challenge-tag">${c.category}</div>
+          <div><strong>${c.name}</strong><div class="tiny">${c.desc}</div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="body-progress-row"><span>${c.current}/${c.target} ${c.unit}</span><span>${c.status}</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+            <button class="btn secondary" onclick="showChallengeDetail('${c.id}','weekly')">View</button>
+            <button class="btn secondary" onclick="addWeekly('${c.id}')">+${c.reward}</button>
+          </div>
+        </div>`
       })
       qs('weeklyChallenges').innerHTML = weeklyHTML
+
+      let monthlyHTML = ''
+      monthlyChalls.forEach(c => {
+        const pct = Math.min(100, Math.round((c.current / c.target) * 100))
+        monthlyHTML += `<div class="challenge-card">
+          <div class="challenge-tag">${c.category}</div>
+          <div><strong>${c.name}</strong><div class="tiny">${c.desc}</div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="body-progress-row"><span>${c.current}/${c.target} ${c.unit}</span><span>${c.status}</span></div>
+          <button class="btn secondary" onclick="showChallengeDetail('${c.id}','monthly')">View</button>
+        </div>`
+      })
+      qs('monthlyChallenges').innerHTML = monthlyHTML
+
+      let seasonalHTML = ''
+      seasonalChalls.forEach(c => {
+        const pct = Math.min(100, Math.round((c.current / c.target) * 100))
+        seasonalHTML += `<div class="challenge-card">
+          <div class="challenge-tag">${c.category}</div>
+          <div><strong>${c.name}</strong><div class="tiny">${c.desc}</div></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="body-progress-row"><span>${c.current}/${c.target} ${c.unit}</span><span>${c.status}</span></div>
+          <button class="btn secondary" onclick="showChallengeDetail('${c.id}','seasonal')">View</button>
+        </div>`
+      })
+      qs('seasonalChallenges').innerHTML = seasonalHTML
     }
 
     function completeDaily(id) {
       const c = dailyChalls.find(x => x.id === id)
       if(c && !c.done) {
         c.done = true
-        addXP(c.xp)
-        alert(`+${c.xp} XP!`)
+        c.current = c.target
+        c.status = 'Completed'
+        addXP(c.reward)
+        alert(`+${c.reward} XP!`)
         renderChallenges()
         renderDash()
+        renderAchieve()
       }
     }
 
     function addWeekly(id) {
       const c = weeklyChalls.find(x => x.id === id)
-      if(c && c.prog < c.max) {
-        c.prog++
-        if(c.prog >= c.max) {
-          addXP(c.xp)
-          alert(`Completed! +${c.xp} XP`)
-        } else {
-          alert(`${c.prog}/${c.max}`)
+      if(c && c.current < c.target) {
+        c.current++
+        c.status = c.current >= c.target ? 'Completed' : `${Math.round((c.current / c.target) * 100)}% done`
+        if(c.current >= c.target) {
+          addXP(c.reward)
+          alert(`Completed! +${c.reward} XP`)
         }
         renderChallenges()
+        renderAchieve()
       }
     }
 
     function renderAchieve() {
-      achievements[0].unlocked = app.dailyLog.length > 0 || app.bodyMetrics.length > 0
-      achievements[1].unlocked = app.user.streak >= 7
-      achievements[2].unlocked = app.user.level >= 5
-      achievements[3].unlocked = app.dailyLog.length >= 50
-      achievements[4].unlocked = app.user.xp >= 1000 || dailyChalls.filter(c => c.done).length >= 5
+      const filter = app.ui.achievementFilter || 'all'
+      achievements.forEach(a => {
+        const progress = Math.min(100, Math.round(((a.progress || 0) / a.target) * 100))
+        a.progress = a.id === 'a1' ? Math.max(0, Math.min(a.target, app.dailyLog.length + app.bodyMetrics.length)) : a.id === 'a2' ? Math.min(a.target, app.user.streak) : a.id === 'a3' ? Math.min(a.target, app.user.level) : a.id === 'a4' ? Math.min(a.target, app.dailyLog.length) : a.id === 'a5' ? Math.min(a.target, dailyChalls.filter(ch => ch.done).length + weeklyChalls.filter(ch => ch.current >= ch.target).length + monthlyChalls.filter(ch => ch.current >= ch.target).length + seasonalChalls.filter(ch => ch.current >= ch.target).length) : a.id === 'a6' ? Math.min(a.target, app.dailyLog.filter(item => (item.protein || 0) >= app.user.proteinTarget).length) : 0
+        a.unlocked = a.progress >= a.target
+      })
+
+      document.querySelectorAll('.achievement-filter-btn').forEach(btn => {
+        btn.onclick = () => {
+          app.ui.achievementFilter = btn.dataset.filter
+          renderAchieve()
+        }
+        btn.classList.toggle('active', (btn.dataset.filter || 'all') === filter)
+      })
+
+      const visibleAchievements = achievements.filter(a => {
+        if(filter === 'Hidden') return a.hidden
+        if(filter === 'all') return !a.hidden
+        return !a.hidden && a.category === filter
+      })
 
       let html = ''
-      achievements.forEach(a => {
-        html += `<div class="achievement-item" style="opacity:${a.unlocked?1:0.5}"><div class="achievement-icon">${a.icon}</div><div><strong>${a.name}</strong><div class="muted small">${a.desc}</div></div><span style="background:rgba(110,231,183,0.2);color:var(--accent);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'✓':'Locked'}</span></div>`
+      visibleAchievements.forEach(a => {
+        const pct = Math.min(100, Math.round((a.progress / a.target) * 100))
+        html += `<div class="achievement-item" style="opacity:${a.unlocked?1:0.6}">
+          <div class="achievement-icon">${a.icon}</div>
+          <div style="flex:1">
+            <strong>${a.name}</strong>
+            <div class="muted small">${a.desc}</div>
+            <div class="progress-track" style="margin-top:8px"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="tiny" style="margin-top:4px">${a.progress}/${a.target} • +${a.reward} XP</div>
+          </div>
+          <span style="background:${a.unlocked?'rgba(110,231,183,0.2)':'rgba(255,255,255,0.06)'};color:${a.unlocked?'var(--accent)':'#e6eef6'};padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'✓':'Locked'}</span>
+        </div>`
       })
       qs('achievementsList').innerHTML = html
-      qs('profileAchievements').innerHTML = achievements.map(a => `
-        <div class="achievement-item" style="opacity:${a.unlocked?1:0.5}">
+      qs('profileAchievements').innerHTML = visibleAchievements.map(a => `
+        <div class="achievement-item" style="opacity:${a.unlocked?1:0.6}">
           <div class="achievement-icon">${a.icon}</div>
           <div><strong>${a.name}</strong><div class="muted small">${a.desc}</div></div>
-          <span style="background:rgba(110,231,183,0.2);color:var(--accent);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'Unlocked':'Locked'}</span>
+          <span style="background:${a.unlocked?'rgba(110,231,183,0.2)':'rgba(255,255,255,0.06)'};color:${a.unlocked?'var(--accent)':'#e6eef6'};padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'Unlocked':'Locked'}</span>
         </div>
       `).join('')
     }
@@ -606,6 +801,18 @@
       qs('profAge').value = app.user.age || ''
       qs('profHeight').value = app.user.height || ''
       qs('profWeight').value = app.user.weight || ''
+      qs('profActivity').value = app.user.activity || 'Sedentary'
+      qs('profDiet').value = app.user.diet || 'Omnivore'
+      qs('profAllergies').value = (app.user.allergies || []).join(', ')
+      qs('profWaterTarget').value = app.user.waterTarget || ''
+      qs('profProteinTarget').value = app.user.proteinTarget || ''
+      qs('profWorkoutGoal').value = app.user.workoutGoal || ''
+      qs('reminderWater').checked = app.user.reminders?.water ?? true
+      qs('reminderMeal').checked = app.user.reminders?.meal ?? true
+      qs('reminderWorkout').checked = app.user.reminders?.workout ?? false
+      qs('reminderSleep').checked = app.user.reminders?.sleep ?? false
+      qs('profActivitySummary').innerHTML = app.user.activity || 'Sedentary'
+      qs('profDietSummary').innerHTML = app.user.diet || 'Omnivore'
       renderAchieve()
     }
 
@@ -613,7 +820,21 @@
       app.user.age = parseInt(qs('profAge').value) || 0
       app.user.height = parseInt(qs('profHeight').value) || 0
       app.user.weight = parseInt(qs('profWeight').value) || 0
+      app.user.activity = qs('profActivity').value
+      app.user.diet = qs('profDiet').value
+      app.user.allergies = qs('profAllergies').value.split(',').map(item => item.trim()).filter(Boolean)
+      app.user.waterTarget = parseInt(qs('profWaterTarget').value) || 8
+      app.user.proteinTarget = parseInt(qs('profProteinTarget').value) || 140
+      app.user.workoutGoal = parseInt(qs('profWorkoutGoal').value) || 3
+      app.user.reminders = {
+        water: qs('reminderWater').checked,
+        meal: qs('reminderMeal').checked,
+        workout: qs('reminderWorkout').checked,
+        sleep: qs('reminderSleep').checked
+      }
       save()
+      renderProfile()
+      renderDashboardExtras()
       alert('Saved!')
     }
 
