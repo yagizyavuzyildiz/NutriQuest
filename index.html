@@ -101,6 +101,12 @@
     .chip-row {display:flex;flex-wrap:wrap;gap:8px}
     .chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e6eef6;cursor:pointer}
     .chip.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.22)}
+    .habits-editor {background:rgba(3,10,16,0.9)!important;border:1px solid rgba(110,231,183,0.28)!important;color:#e9fff5;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
+    .label-with-help {display:inline-flex;align-items:center;gap:6px}
+    .hint-badge {position:relative;display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;font-size:11px;font-weight:700;line-height:1;background:rgba(110,231,183,0.16);color:#dcfff1;border:1px solid rgba(110,231,183,0.4);cursor:help}
+    .hint-badge .hint-tip {position:absolute;left:50%;bottom:125%;transform:translateX(-50%);min-width:220px;max-width:300px;padding:8px 10px;border-radius:10px;background:rgba(2,8,12,0.95);border:1px solid rgba(110,231,183,0.25);color:#dffcf0;font-size:11px;line-height:1.4;text-transform:none;letter-spacing:0;opacity:0;visibility:hidden;transition:all .15s ease;z-index:20;box-shadow:0 12px 30px rgba(0,0,0,0.3)}
+    .hint-badge:hover .hint-tip {opacity:1;visibility:visible;bottom:140%}
+    .hint-badge.active .hint-tip {opacity:1;visibility:visible;bottom:140%}
     .onboarding-step {display:grid;gap:12px}
     .progress-track {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:16px}
     .progress-track > div {height:100%;background:linear-gradient(90deg,var(--accent),#38bdf8);transition:width .3s ease}
@@ -448,9 +454,13 @@
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <input id="profAllergies" placeholder="Allergies (comma separated)" />
-              <input id="profCountry" placeholder="Country" />
-              <input id="profWaterTarget" placeholder="Daily water target" type="number" />
-              <input id="profProteinTarget" placeholder="Protein target (g)" type="number" />
+              <div class="field-group" style="margin-bottom:0">
+                <label>Country</label>
+                <input id="profCountrySearch" placeholder="Search country" oninput="filterCountryOptions(this.value, 'profCountry')" />
+                <select id="profCountry"></select>
+              </div>
+              <input id="profWaterTarget" placeholder="Daily water target" type="number" readonly />
+              <input id="profProteinTarget" placeholder="Protein target (g)" type="number" readonly />
               <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" />
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
@@ -476,7 +486,8 @@
             </div>
             <div class="field-group" style="margin-top:12px">
               <label>Healthy Habits (comma separated)</label>
-              <textarea id="profHabits" placeholder="Track calories, Eat more protein, Drink more water" style="min-height:90px"></textarea>
+              <textarea id="profHabits" class="habits-editor" placeholder="Track calories, Eat more protein, Drink more water" style="min-height:90px"></textarea>
+              <div class="tiny">You can enter multiple habits separated by commas.</div>
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <div class="checkbox-row"><input type="checkbox" id="reminderWater" /><label for="reminderWater">Water reminder</label></div>
@@ -506,15 +517,34 @@
       <div id="body" class="page hidden">
         <div class="header"><div><div class="title">Body Analysis</div><div class="muted">Track changes with elegance</div></div></div>
         <div class="grid" style="grid-template-columns:1.1fr .9fr">
-          <div class="card"><strong>Add measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number" /><input id="bodyFat" placeholder="Fat %" type="number" /><input id="bodyMuscle" placeholder="Muscle (kg)" type="number" /><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
-          <div class="card"><strong>Latest summary</strong><div class="stat" style="margin-top:12px"><span class="muted">Weight</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle</span><span id="bodyM">--</span></div><div class="body-progress"><div class="body-progress-row"><span>Target progress</span><span id="bodyProgressText">0%</span></div><div class="body-progress-bar"><div id="bodyProgressBar"></div></div><div class="tiny" id="bodyProgressHint">Add a reading to start tracking.</div></div></div>
+          <div class="card">
+            <strong>Add measurement</strong>
+            <div class="muted small" style="margin-top:8px">Optional values can vary by device and gym equipment.</div>
+            <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+              <input id="bodyWeight" placeholder="Weight (kg)" type="number" />
+              <input id="bodyFat" placeholder="Fat %" type="number" />
+              <input id="bodyMuscle" placeholder="Muscle (kg)" type="number" />
+              <input id="bodyVisceralFat" placeholder="Visceral fat (optional)" type="number" />
+              <input id="bodyWaterPct" placeholder="Body water % (optional)" type="number" />
+              <button class="btn" onclick="addBodyMetric()">Save</button>
+            </div>
+          </div>
+          <div class="card">
+            <strong>Latest summary</strong>
+            <div class="stat" style="margin-top:12px"><span class="label-with-help muted">Weight <span class="hint-badge">i<span class="hint-tip">Scale weight can change based on hydration, timing, and clothing.</span></span></span><span id="bodyW">--</span></div>
+            <div class="stat"><span class="label-with-help muted">Fat <span class="hint-badge">i<span class="hint-tip">Body fat estimates vary by machine type and measurement conditions.</span></span></span><span id="bodyF">--</span></div>
+            <div class="stat"><span class="label-with-help muted">Muscle <span class="hint-badge">i<span class="hint-tip">Muscle mass is an estimate and should be tracked by trend, not single readings.</span></span></span><span id="bodyM">--</span></div>
+            <div class="stat"><span class="muted">Visceral fat</span><span id="bodyVF">--</span></div>
+            <div class="stat"><span class="muted">Body water</span><span id="bodyWater">--</span></div>
+            <div class="body-progress"><div class="body-progress-row"><span>Target progress</span><span id="bodyProgressText">0%</span></div><div class="body-progress-bar"><div id="bodyProgressBar"></div></div><div class="tiny" id="bodyProgressHint">Add a reading to start tracking.</div></div>
+          </div>
         </div>
         <div class="card" style="margin-top:16px">
           <strong>Health insights</strong>
-          <div class="stat" style="margin-top:12px"><span class="muted">BMI</span><span id="bodyBMI">--</span></div>
-          <div class="stat"><span class="muted">BMI category</span><span id="bodyBMICategory">--</span></div>
-          <div class="stat"><span class="muted">Target weight</span><span id="bodyTargetWeight">--</span></div>
-          <div class="stat"><span class="muted">Remaining</span><span id="bodyRemaining">--</span></div>
+          <div class="stat" style="margin-top:12px"><span class="label-with-help muted">BMI <span class="hint-badge">i<span class="hint-tip">BMI is a general screening metric and does not directly measure body composition.</span></span></span><span id="bodyBMI">--</span></div>
+          <div class="stat"><span class="label-with-help muted">BMI category <span class="hint-badge">i<span class="hint-tip">Categories are guideline ranges. Athletic users can appear higher despite low fat levels.</span></span></span><span id="bodyBMICategory">--</span></div>
+          <div class="stat"><span class="label-with-help muted">Target weight <span class="hint-badge">i<span class="hint-tip">Target weight is estimated from BMI 22 as a practical baseline.</span></span></span><span id="bodyTargetWeight">--</span></div>
+          <div class="stat"><span class="label-with-help muted">Remaining <span class="hint-badge">i<span class="hint-tip">Difference between latest weight and target. Use trend direction as the key signal.</span></span></span><span id="bodyRemaining">--</span></div>
           <div class="chart-card">
             <div class="tiny" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
               <span>Weight trend</span>
@@ -531,7 +561,7 @@
           </div>
           <div style="overflow:auto;margin-top:10px">
             <table class="table">
-              <thead><tr><th>Date</th><th>Weight</th><th>Fat</th><th>Muscle</th></tr></thead>
+              <thead><tr><th>Date</th><th>Weight</th><th>Fat</th><th>Muscle</th><th>Visceral</th><th>Water</th></tr></thead>
               <tbody id="bodyHistory"></tbody>
             </table>
           </div>
@@ -842,6 +872,7 @@
       app.user.dashboardMessage = `Welcome, ${app.user.fullName.split(' ')[0]} — your plan is ready.`
       app.user.nutritionSnapshot = onboardingState.goals.length ? `Focused on ${onboardingState.goals.slice(0, 2).join(', ')}` : 'Balanced and ready for action.'
       recalculateTargets()
+      applyPlanTargetsToUser()
       save()
       showAppShell()
     }
@@ -906,8 +937,8 @@
         return false
       }
       if(onboardingState.step === 6) {
-        if(!onboardingState.age || !onboardingState.country || !onboardingState.zip) {
-          alert('Please complete age, country, and ZIP / Postal Code.')
+        if(!onboardingState.age || !onboardingState.country) {
+          alert('Please complete age and country.')
           return false
         }
       }
@@ -987,8 +1018,9 @@
       } else if(onboardingState.step === 6) {
         html += `<div class="field-group" style="margin-top:12px"><label>Biological Sex</label><select id="onboardingSex"><option value="Female" ${onboardingState.sex === 'Female' ? 'selected' : ''}>Female</option><option value="Male" ${onboardingState.sex === 'Male' ? 'selected' : ''}>Male</option></select></div>`
         html += `<div class="field-group"><label>Age</label><input id="onboardingAge" type="number" value="${onboardingState.age}" placeholder="30" /></div>`
-        html += `<div class="field-group"><label>Country</label><input id="onboardingCountry" value="${onboardingState.country}" placeholder="United States" /></div>`
-        html += `<div class="field-group"><label>ZIP / Postal Code</label><input id="onboardingZip" value="${onboardingState.zip}" placeholder="10001" /></div>`
+        html += `<div class="field-group"><label>Search Country</label><input id="onboardingCountrySearch" placeholder="Search country" oninput="filterCountryOptions(this.value, 'onboardingCountry')" /></div>`
+        html += `<div class="field-group"><label>Country</label><select id="onboardingCountry">${renderCountryOptions(onboardingState.country)}</select></div>`
+        html += `<div class="field-group"><label>ZIP / Postal Code (optional)</label><input id="onboardingZip" value="${onboardingState.zip}" placeholder="10001" /></div>`
         html += `<div class="tiny">Biological sex is used only for calorie estimation.</div>`
       } else if(onboardingState.step === 7) {
         html += `<div class="field-group" style="margin-top:12px"><label>Units</label><select id="onboardingUnits" onchange="syncOnboardingMeasurementsFromInputs(); renderOnboarding()"><option value="metric" ${onboardingState.units === 'metric' ? 'selected' : ''}>Metric (cm / kg)</option><option value="imperial" ${onboardingState.units === 'imperial' ? 'selected' : ''}>Imperial (ft/in / lb)</option></select></div>`
@@ -1007,6 +1039,7 @@
 
     function initializeAppView() {
       if(!app.user) return
+      populateCountryDropdowns()
       checkStreak()
       updateXP()
       renderDash()
@@ -1018,6 +1051,7 @@
     }
 
     loadUsers()
+    populateCountryDropdowns()
     app.activeUserId = null
     app.user = null
     saveUsers()
@@ -1094,7 +1128,70 @@
       'stay-fit':'Stay Fit'
     }
 
+    const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe']
+
+    const planWaterTargets = {
+      'lose-weight': 2.7,
+      'maintain-weight': 2.8,
+      'gain-weight': 3.2,
+      'gain-muscle': 3.4,
+      'stay-fit': 2.9,
+      'high-protein': 3.3,
+      'mediterranean': 2.8,
+      'vegetarian': 2.6
+    }
+
+    mealPlans.forEach(plan => {
+      plan.waterTarget = planWaterTargets[plan.id] || 2.7
+    })
+
     function qs(id) { return document.getElementById(id) }
+
+    function renderCountryOptions(selectedCountry) {
+      return `<option value="">Select country</option>${COUNTRIES.map(country => `<option value="${country}" ${country === (selectedCountry || '') ? 'selected' : ''}>${country}</option>`).join('')}`
+    }
+
+    function renderCountryOptionsFromList(selectedCountry, countryList) {
+      return `<option value="">Select country</option>${countryList.map(country => `<option value="${country}" ${country === (selectedCountry || '') ? 'selected' : ''}>${country}</option>`).join('')}`
+    }
+
+    function filterCountryOptions(query, selectId) {
+      const select = qs(selectId)
+      if(!select) return
+      const currentSelection = select.value
+      const normalized = (query || '').trim().toLowerCase()
+      const filtered = normalized ? COUNTRIES.filter(country => country.toLowerCase().includes(normalized)) : COUNTRIES
+      select.innerHTML = renderCountryOptionsFromList(currentSelection, filtered)
+      if(currentSelection && filtered.includes(currentSelection)) select.value = currentSelection
+      else if(selectId === 'onboardingCountry') onboardingState.country = ''
+    }
+
+    function populateCountryDropdowns() {
+      const profileCountry = qs('profCountry')
+      if(profileCountry) {
+        profileCountry.innerHTML = renderCountryOptions(app.user?.country || '')
+      }
+      const profileSearch = qs('profCountrySearch')
+      if(profileSearch) profileSearch.value = ''
+    }
+
+    function applyPlanTargetsToUser() {
+      if(!app.user) return
+      const plan = getPlanDetail(app.user.goal)
+      app.user.dailyCalories = plan.calories
+      app.user.proteinTarget = plan.protein
+      app.user.carbsTarget = plan.carbs
+      app.user.fatTarget = plan.fat
+      app.user.waterTarget = plan.waterTarget
+      app.user.weeklyTargets = [
+        {label:'Calories', target: plan.calories},
+        {label:'Protein', target: plan.protein},
+        {label:'Carbs', target: plan.carbs},
+        {label:'Fat', target: plan.fat},
+        {label:'Water', target: plan.waterTarget}
+      ]
+    }
+
     function saveAiConversation() {
       if(!app.user) return
       app.user.aiConversation = app.ui.aiConversation || []
@@ -1122,6 +1219,16 @@
         qs(page).classList.remove('hidden')
         render(page)
       })
+    })
+
+    document.addEventListener('click', event => {
+      const badge = event.target.closest('.hint-badge')
+      document.querySelectorAll('.hint-badge.active').forEach(item => {
+        if(item !== badge) item.classList.remove('active')
+      })
+      if(badge) {
+        badge.classList.toggle('active')
+      }
     })
 
     function render(page) {
@@ -1381,6 +1488,7 @@
 
     function setPlan(id) {
       app.user.goal = id
+      applyPlanTargetsToUser()
       save()
       renderPlan()
       renderProfile()
@@ -1391,12 +1499,13 @@
 
     function renderPlan() {
       const selected = getPlanDetail()
-      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal • ${selected.protein}g protein • ${selected.carbs}g carbs • ${selected.fat}g fat`
+      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal • ${selected.protein}g protein • ${selected.carbs}g carbs • ${selected.fat}g fat • ${selected.waterTarget}L water`
       qs('planNutritionSummary').innerHTML = `
         <div class="stat"><span class="muted">Calories</span><span>${selected.calories} kcal</span></div>
         <div class="stat"><span class="muted">Protein</span><span>${selected.protein}g</span></div>
         <div class="stat"><span class="muted">Carbs</span><span>${selected.carbs}g</span></div>
         <div class="stat"><span class="muted">Fat</span><span>${selected.fat}g</span></div>
+        <div class="stat"><span class="muted">Daily Water</span><span>${selected.waterTarget}L</span></div>
       `
       qs('planDetail').innerHTML = `
         <div class="plan-meta"><strong>${selected.title}</strong><span>${selected.badge}</span></div>
@@ -1606,9 +1715,11 @@
       qs('profActivity').value = app.user.activity || 'Not Very Active'
       qs('profDiet').value = app.user.diet || 'Omnivore'
       qs('profAllergies').value = (app.user.allergies || []).join(', ')
+      populateCountryDropdowns()
       qs('profCountry').value = app.user.country || ''
-      qs('profWaterTarget').value = app.user.waterTarget || ''
-      qs('profProteinTarget').value = app.user.proteinTarget || ''
+      const plan = getPlanDetail(app.user.goal)
+      qs('profWaterTarget').value = (app.user.waterTarget || plan.waterTarget || 2.7)
+      qs('profProteinTarget').value = (app.user.proteinTarget || plan.protein || 140)
       qs('profWorkoutGoal').value = app.user.workoutGoal || ''
       qs('profGoalSelect').value = app.user.goal || 'lose-weight'
       qs('profMealPlanning').value = app.user.mealPlanning || 'Occasionally'
@@ -1630,9 +1741,7 @@
       app.user.activity = qs('profActivity').value
       app.user.diet = qs('profDiet').value
       app.user.allergies = qs('profAllergies').value.split(',').map(item => item.trim()).filter(Boolean)
-      app.user.country = qs('profCountry').value.trim()
-      app.user.waterTarget = parseInt(qs('profWaterTarget').value) || 8
-      app.user.proteinTarget = parseInt(qs('profProteinTarget').value) || 140
+      app.user.country = qs('profCountry').value
       app.user.workoutGoal = parseInt(qs('profWorkoutGoal').value) || 3
       app.user.goal = qs('profGoalSelect').value
       app.user.mealPlanning = qs('profMealPlanning').value
@@ -1646,6 +1755,7 @@
         sleep: qs('reminderSleep').checked
       }
       recalculateTargets()
+      applyPlanTargetsToUser()
       save()
       renderProfile()
       renderPlan()
@@ -1723,6 +1833,7 @@
         <div class="stat"><span class="muted">Protein</span><span>${proteinTarget}g</span></div>
         <div class="stat"><span class="muted">Carbs</span><span>${carbsTarget}g</span></div>
         <div class="stat"><span class="muted">Fat</span><span>${fatTarget}g</span></div>
+        <div class="stat"><span class="muted">Water</span><span>${(app.user.waterTarget || planDetail.waterTarget || 2.7)} L</span></div>
       `
       setMacroRing(qs('proteinRing'), proteinPercent, '#38bdf8')
       setMacroRing(qs('carbRing'), carbsPercent, '#6ee7b7')
@@ -1819,6 +1930,8 @@
         qs('bodyW').innerHTML = latest.weight + ' kg'
         qs('bodyF').innerHTML = latest.fat + '%'
         qs('bodyM').innerHTML = latest.muscle ? latest.muscle + ' kg' : '--'
+        qs('bodyVF').innerHTML = latest.visceralFat ? latest.visceralFat : '--'
+        qs('bodyWater').innerHTML = latest.bodyWater ? `${latest.bodyWater}%` : '--'
         const heightInM = (app.user.height || 170) / 100
         const bmi = latest.weight / (heightInM * heightInM)
         const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'
@@ -1844,6 +1957,11 @@
           dates: app.bodyMetrics.map(item => item.date)
         })
       } else {
+        qs('bodyW').innerHTML = '--'
+        qs('bodyF').innerHTML = '--'
+        qs('bodyM').innerHTML = '--'
+        qs('bodyVF').innerHTML = '--'
+        qs('bodyWater').innerHTML = '--'
         qs('bodyBMI').innerHTML = '--'
         qs('bodyBMICategory').innerHTML = '--'
         qs('bodyTargetWeight').innerHTML = '--'
@@ -1857,24 +1975,51 @@
       }
 
       qs('bodyHistory').innerHTML = app.bodyMetrics.length > 0
-        ? app.bodyMetrics.slice().reverse().map(item => `<tr><td>${item.date}</td><td>${item.weight} kg</td><td>${item.fat}%</td><td>${item.muscle ? item.muscle + ' kg' : '—'}</td></tr>`).join('')
-        : '<tr><td colspan="4" class="tiny">No measurements yet.</td></tr>'
+        ? app.bodyMetrics.slice().reverse().map(item => `<tr><td>${item.date}</td><td>${item.weight} kg</td><td>${item.fat}%</td><td>${item.muscle ? item.muscle + ' kg' : '—'}</td><td>${item.visceralFat ?? '—'}</td><td>${item.bodyWater ? item.bodyWater + '%' : '—'}</td></tr>`).join('')
+        : '<tr><td colspan="6" class="tiny">No measurements yet.</td></tr>'
     }
 
     function addBodyMetric() {
       const w = parseFloat(qs('bodyWeight').value)
       const f = parseFloat(qs('bodyFat').value)
       const m = parseFloat(qs('bodyMuscle').value)
+      const vf = parseFloat(qs('bodyVisceralFat').value)
+      const bw = parseFloat(qs('bodyWaterPct').value)
+      if(!w || !f) {
+        alert('Please enter at least weight and fat values.')
+        return
+      }
+      if(w < 20 || w > 350) {
+        alert('Weight must be between 20 and 350 kg.')
+        return
+      }
+      if(f < 2 || f > 70) {
+        alert('Fat % must be between 2 and 70.')
+        return
+      }
+      if(Number.isFinite(m) && (m < 5 || m > 220)) {
+        alert('Muscle mass must be between 5 and 220 kg when provided.')
+        return
+      }
+      if(Number.isFinite(vf) && (vf < 1 || vf > 30)) {
+        alert('Visceral fat should be between 1 and 30 when provided.')
+        return
+      }
+      if(Number.isFinite(bw) && (bw < 20 || bw > 80)) {
+        alert('Body water % should be between 20 and 80 when provided.')
+        return
+      }
       if(w && f) {
-        app.bodyMetrics.push({date:new Date().toLocaleDateString(),weight:w,fat:f,muscle:m||null})
+        app.bodyMetrics.push({date:new Date().toLocaleDateString(),weight:w,fat:f,muscle:m||null,visceralFat:Number.isFinite(vf) ? vf : null,bodyWater:Number.isFinite(bw) ? bw : null})
         qs('bodyWeight').value = ''
         qs('bodyFat').value = ''
         qs('bodyMuscle').value = ''
+        qs('bodyVisceralFat').value = ''
+        qs('bodyWaterPct').value = ''
         addXP(25)
         alert('Saved!')
         renderBody()
         renderDash()
-        renderDashboardExtras()
         renderDashboardExtras()
       }
     }
