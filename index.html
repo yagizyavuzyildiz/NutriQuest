@@ -79,6 +79,11 @@
     .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
     .ai-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8}
+    .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding-right:4px;max-height:320px;overflow:auto}
+    .chat-bubble {padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:#e6eef6;line-height:1.5}
+    .chat-bubble.user {margin-left:auto;background:rgba(110,231,183,0.14);border-color:rgba(110,231,183,0.22)}
+    .chat-input-row {display:flex;gap:10px;align-items:flex-end}
+    .chat-input-row textarea {min-height:90px;resize:vertical;flex:1}
     .ai-chip-row {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .ai-chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:#e6eef6;font-size:13px}
     textarea {min-height:120px;resize:vertical}
@@ -234,19 +239,22 @@
         </div>
         <div class="ai-grid">
           <div class="card">
-            <div class="pill">Ask your coach</div>
-            <textarea id="aiPrompt" placeholder="Örn: Bugün protein hedefime nasıl yaklaşırım? veya bugün ne yemeliyim?"></textarea>
+            <div class="pill">Chat with your coach</div>
+            <div id="aiChatHistory" class="chat-list"></div>
+            <div class="chat-input-row">
+              <textarea id="aiPrompt" placeholder="Örn: Bugün protein hedefime nasıl yaklaşırım? veya bugün ne yemeliyim?"></textarea>
+              <button class="btn" onclick="askAI()">Send</button>
+            </div>
             <div class="ai-chip-row">
               <button class="ai-chip" onclick="quickAsk('protein')">Protein focus</button>
               <button class="ai-chip" onclick="quickAsk('workout')">Workout focus</button>
               <button class="ai-chip" onclick="quickAsk('weight')">Weight plan</button>
               <button class="ai-chip" onclick="quickAsk('habit')">Habit boost</button>
             </div>
-            <button class="btn" style="margin-top:12px" onclick="askAI()">Get recommendation</button>
-            <div class="muted small" style="margin-top:10px">AI suggestions use your current goal, daily intake, streak, and body data.</div>
+            <div class="muted small" style="margin-top:10px">Suggestions use your current goal, meals, streak, and body data.</div>
           </div>
           <div class="card">
-            <div class="metric-title">AI response</div>
+            <div class="metric-title">Latest AI response</div>
             <div id="aiResponse" class="ai-bubble" style="margin-top:12px">Your coach is ready. Ask a question to get a focused recommendation.</div>
             <div id="aiQuickTips" style="margin-top:12px;display:grid;gap:8px"></div>
           </div>
@@ -432,7 +440,7 @@
       dailyLog: JSON.parse(localStorage.getItem('nq_tracking') || '[]'),
       dailyCompleted: [],
       weeklyProgress: {},
-      ui: {achievementFilter:'all'}
+      ui: {achievementFilter:'all', aiConversation: JSON.parse(localStorage.getItem('nq_ai_chat') || '[]')}
     }
 
     const meals = [
@@ -508,6 +516,17 @@
 
     function qs(id) { return document.getElementById(id) }
     function save() { localStorage.setItem('nq_user', JSON.stringify(app.user)) }
+    function saveAiConversation() { localStorage.setItem('nq_ai_chat', JSON.stringify(app.ui.aiConversation || [])) }
+
+    const aiPromptEl = qs('aiPrompt')
+    if(aiPromptEl) {
+      aiPromptEl.addEventListener('keydown', event => {
+        if(event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault()
+          askAI()
+        }
+      })
+    }
 
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
@@ -548,6 +567,13 @@
       return {todayCalories, todayProtein, target, latestWeight, plan, streak: app.user.streak, level: app.user.level, goal: getGoalLabel(), proteinTarget: app.user.proteinTarget || plan.protein}
     }
 
+    function renderChat() {
+      const history = app.ui.aiConversation || []
+      qs('aiChatHistory').innerHTML = history.length
+        ? history.map(msg => `<div class="chat-bubble ${msg.role === 'user' ? 'user' : ''}">${msg.text}</div>`).join('')
+        : `<div class="tiny">Start with a question like “What should I focus on today?”</div>`
+    }
+
     function quickAsk(topic) {
       const prompts = {
         protein: 'How can I hit my protein target today?',
@@ -561,48 +587,62 @@
 
     function askAI(promptOverride) {
       const context = getAiContext()
-      const prompt = (promptOverride || qs('aiPrompt').value || '').toLowerCase()
+      const prompt = (promptOverride || qs('aiPrompt').value || '').trim()
+      if(!prompt) return
+
+      app.ui.aiConversation.push({role:'user', text:prompt})
+      saveAiConversation()
+      renderChat()
+      qs('aiPrompt').value = ''
+
       let response = ''
       let tips = []
       let actions = []
 
-      if(prompt.includes('protein') || prompt.includes('besin') || prompt.includes('protein hedef')) {
+      const normalized = prompt.toLowerCase()
+      if(normalized.includes('protein') || normalized.includes('besin') || normalized.includes('protein hedef')) {
         const remaining = Math.max(0, context.proteinTarget - context.todayProtein)
-        response = `Your protein intake is ${context.todayProtein}g today. You are ${remaining}g away from your target of ${context.proteinTarget}g. A simple move is to add one protein-rich snack such as Greek yogurt, eggs, or a shake.`
+        response = `I checked your current intake and you’re at ${context.todayProtein}g protein so far. You’re about ${remaining}g away from your target, so the smartest move is to add one protein-forward snack or make dinner more protein-heavy.`
         tips = ['Add a high-protein snack', 'Keep lunch protein-forward', 'Aim for 25–35g protein per meal']
         actions = ['Log one more protein-rich meal', 'Choose grilled chicken or tofu for dinner', 'Drink water and keep the meal balanced']
-      } else if(prompt.includes('workout') || prompt.includes('antrenman') || prompt.includes('egzersiz')) {
-        response = `Your current streak is ${context.streak} days and your goal is ${context.goal}. A focused workout today would be a 25–30 minute session with mobility, a short strength block, and a brisk walk.`
+      } else if(normalized.includes('workout') || normalized.includes('antrenman') || normalized.includes('egzersiz')) {
+        response = `Your streak is ${context.streak} days and your goal is ${context.goal}. A strong choice today is a 25–30 minute session with mobility, a short strength block, and a brisk walk to keep recovery easy.`
         tips = ['Do 20–30 min strength work', 'Add a 10 min walk after dinner', 'Keep recovery simple and consistent']
         actions = ['Open your challenge page', 'Log your workout after finishing', 'Use a protein-rich post-workout meal']
-      } else if(prompt.includes('weight') || prompt.includes('kilo') || prompt.includes('zayıf') || prompt.includes('vermek')) {
-        response = `Your current plan is ${context.plan.title}. To support your target, stay close to your daily calorie target of ${context.target} kcal and keep protein high. Your latest recorded weight is ${context.latestWeight} kg.`
+      } else if(normalized.includes('weight') || normalized.includes('kilo') || normalized.includes('zayıf') || normalized.includes('vermek')) {
+        response = `Your current plan is ${context.plan.title}, and your latest recorded weight is ${context.latestWeight} kg. The best move is to stay close to your calorie target, keep protein high, and keep meals predictable rather than extreme.`
         tips = ['Keep portions predictable', 'Prioritize vegetables and lean protein', 'Avoid late-night grazing']
         actions = ['Review your meal plan', 'Track today’s meals', 'Check your body analysis trend']
-      } else if(prompt.includes('habit') || prompt.includes('alışkanlık') || prompt.includes('rut')) {
-        response = `Consistency is your strongest lever right now. Since your streak is ${context.streak} days, a small win like logging one meal or drinking a glass of water now will build momentum.`
+      } else if(normalized.includes('habit') || normalized.includes('alışkanlık') || normalized.includes('rut')) {
+        response = `Consistency is your strongest lever right now. Since your streak is ${context.streak} days, a small win like logging one meal or drinking a glass of water will build momentum fast.`
         tips = ['Log one meal before dinner', 'Set a reminder for water', 'Keep your plan visible']
         actions = ['Complete one daily challenge', 'Open the tracking page', 'Take a 5-minute reset walk']
       } else {
         const calorieGap = Math.max(0, context.target - context.todayCalories)
-        response = `Today’s snapshot looks promising. You have logged ${context.todayCalories} kcal out of ${context.target} kcal, and your current focus is ${context.goal}. The best next step is to close the ${calorieGap} kcal gap with a balanced meal or snack.`
+        response = `Today’s snapshot looks solid. You’ve logged ${context.todayCalories} kcal out of ${context.target} kcal, and your focus is ${context.goal}. The best next step is to close the ${calorieGap} kcal gap with one balanced meal or snack.`
         tips = ['Stay close to your calorie target', 'Balance carbs and protein', 'Use a simple meal prep routine']
         actions = ['Log your next meal', 'Review your plan', 'Check your AI tips again later']
       }
 
-      qs('aiResponse').innerHTML = response
-      qs('aiQuickTips').innerHTML = tips.map(tip => `<div class="stat"><span class="muted">Tip</span><span>${tip}</span></div>`).join('')
-      qs('aiSignals').innerHTML = `
-        <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
-        <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
-        <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
-        <div class="stat"><span class="muted">Streak</span><span>${context.streak} days</span></div>
-      `
-      qs('aiActions').innerHTML = actions.map(action => `<div class="challenge-item"><span>${action}</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Go</button></div>`).join('')
+      setTimeout(() => {
+        app.ui.aiConversation.push({role:'assistant', text:response})
+        saveAiConversation()
+        renderChat()
+        qs('aiResponse').innerHTML = response
+        qs('aiQuickTips').innerHTML = tips.map(tip => `<div class="stat"><span class="muted">Tip</span><span>${tip}</span></div>`).join('')
+        qs('aiSignals').innerHTML = `
+          <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
+          <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
+          <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
+          <div class="stat"><span class="muted">Streak</span><span>${context.streak} days</span></div>
+        `
+        qs('aiActions').innerHTML = actions.map(action => `<div class="challenge-item"><span>${action}</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Go</button></div>`).join('')
+      }, 450)
     }
 
     function renderAI() {
       const context = getAiContext()
+      renderChat()
       qs('aiSignals').innerHTML = `
         <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
         <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
@@ -614,8 +654,8 @@
         <div class="challenge-item"><span>Track today's meals</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Track</button></div>
         <div class="challenge-item"><span>Complete a challenge</span><button class="btn secondary" onclick="document.querySelector('[data-page=challenges]').click()">Start</button></div>
       `
-      if(!qs('aiResponse').innerText || qs('aiResponse').innerText.includes('ready')) {
-        askAI('What should I focus on today?')
+      if(!app.ui.aiConversation.length) {
+        qs('aiResponse').innerHTML = 'Your coach is ready. Ask a question to get a focused recommendation.'
       }
     }
 
