@@ -62,6 +62,10 @@
     .macro-ring span {position:relative;z-index:1}
     .note-box {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);padding:10px 12px;border-radius:12px;max-width:320px;color:#d8fcea;font-size:13px;line-height:1.5}
     .chart-card {margin-top:14px;padding:12px;border-radius:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05)}
+    .body-progress {margin-top:12px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);display:flex;flex-direction:column;gap:8px}
+    .body-progress-row {display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted)}
+    .body-progress-bar {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
+    .body-progress-bar > div {height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#38bdf8);transition:width .4s}
     .tiny {font-size:12px;color:var(--muted)}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
@@ -276,7 +280,7 @@
         <div class="header"><div><div class="title">Body Analysis</div><div class="muted">Track changes with elegance</div></div></div>
         <div class="grid" style="grid-template-columns:1.1fr .9fr">
           <div class="card"><strong>Add measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number" /><input id="bodyFat" placeholder="Fat %" type="number" /><input id="bodyMuscle" placeholder="Muscle (kg)" type="number" /><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
-          <div class="card"><strong>Latest summary</strong><div class="stat" style="margin-top:12px"><span class="muted">Weight</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle</span><span id="bodyM">--</span></div></div>
+          <div class="card"><strong>Latest summary</strong><div class="stat" style="margin-top:12px"><span class="muted">Weight</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle</span><span id="bodyM">--</span></div><div class="body-progress"><div class="body-progress-row"><span>Target progress</span><span id="bodyProgressText">0%</span></div><div class="body-progress-bar"><div id="bodyProgressBar"></div></div><div class="tiny" id="bodyProgressHint">Add a reading to start tracking.</div></div></div>
         </div>
         <div class="card" style="margin-top:16px">
           <strong>Health insights</strong>
@@ -285,12 +289,19 @@
           <div class="stat"><span class="muted">Target weight</span><span id="bodyTargetWeight">--</span></div>
           <div class="stat"><span class="muted">Remaining</span><span id="bodyRemaining">--</span></div>
           <div class="chart-card">
-            <div class="tiny">Weight trend</div>
-            <svg id="bodyTrendChart" viewBox="0 0 280 120" width="100%" height="120"></svg>
+            <div class="tiny" style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <span>Weight trend</span>
+              <span id="bodyTrendLabel" class="tiny">No data yet</span>
+            </div>
+            <svg id="bodyTrendChart" viewBox="0 0 280 140" width="100%" height="140"></svg>
           </div>
         </div>
         <div class="card" style="margin-top:16px">
           <strong>Progress timeline</strong>
+          <div class="chart-card" style="margin-top:10px">
+            <div class="tiny">Progress overview</div>
+            <svg id="bodyTimelineChart" viewBox="0 0 280 140" width="100%" height="140"></svg>
+          </div>
           <div style="overflow:auto;margin-top:10px">
             <table class="table">
               <thead><tr><th>Date</th><th>Weight</th><th>Fat</th><th>Muscle</th></tr></thead>
@@ -699,6 +710,60 @@
       renderDashboardExtras()
     }
 
+    function renderBodyLineChart(svg, values, color, label, options = {}) {
+      if(!svg) return
+      if(!values || values.length === 0) {
+        svg.innerHTML = `<text x="20" y="72" fill="#9aa4b2" font-size="12">${label}</text>`
+        return
+      }
+
+      const width = 280
+      const height = 140
+      const padding = {top: 18, right: 16, bottom: 28, left: 28}
+      const min = Math.min(...values) - 1
+      const max = Math.max(...values) + 1
+      const range = max - min || 1
+      const {showValueLabels = true, showDateLabels = false, dates = []} = options
+
+      const points = values.map((value, index) => {
+        const x = padding.left + (index / Math.max(1, values.length - 1)) * (width - padding.left - padding.right)
+        const y = padding.top + (1 - (value - min) / range) * (height - padding.top - padding.bottom)
+        return {x, y, value}
+      })
+
+      const linePath = points.map((point, index) => `${index === 0 ? 'M' : 'L'} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`).join(' ')
+      const areaPath = `${linePath} L ${points[points.length - 1].x.toFixed(2)} ${(height - padding.bottom).toFixed(2)} L ${points[0].x.toFixed(2)} ${(height - padding.bottom).toFixed(2)} Z`
+      const gridLines = Array.from({length: 4}, (_, i) => {
+        const y = padding.top + ((height - padding.top - padding.bottom) / 3) * i
+        return `<line x1="${padding.left}" y1="${y}" x2="${width - padding.right}" y2="${y}" stroke="rgba(255,255,255,0.08)" stroke-width="1"></line>`
+      }).join('')
+      const pointMarkup = points.map((point, index) => {
+        const shouldShowDate = showDateLabels && (index === 0 || index === points.length - 1 || index % 2 === 0)
+        const shortDate = dates[index] ? String(dates[index]).slice(0, 6) : ''
+        const valueLabel = `<text x="${point.x.toFixed(2)}" y="${(point.y - 10).toFixed(2)}" text-anchor="middle" fill="#d7fbea" font-size="10">${point.value.toFixed(1)}</text>`
+        const dateLabel = shouldShowDate ? `<text x="${point.x.toFixed(2)}" y="${(height - 8).toFixed(2)}" text-anchor="middle" fill="#9aa4b2" font-size="10">${shortDate}</text>` : ''
+        return `
+          <circle cx="${point.x.toFixed(2)}" cy="${point.y.toFixed(2)}" r="4.5" fill="#071018" stroke="${color}" stroke-width="2"></circle>
+          ${showValueLabels ? valueLabel : ''}
+          ${dateLabel}
+        `
+      }).join('')
+
+      svg.innerHTML = `
+        <rect x="0" y="0" width="${width}" height="${height}" rx="16" fill="rgba(255,255,255,0.03)"></rect>
+        <defs>
+          <linearGradient id="bodyGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.35"></stop>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0"></stop>
+          </linearGradient>
+        </defs>
+        ${gridLines}
+        <path d="${areaPath}" fill="url(#bodyGlow)"></path>
+        <path d="${linePath}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round"></path>
+        ${pointMarkup}
+      `
+    }
+
     function renderBody() {
       if(app.bodyMetrics.length > 0) {
         const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
@@ -714,19 +779,32 @@
         qs('bodyBMICategory').innerHTML = bmiCategory
         qs('bodyTargetWeight').innerHTML = `${targetWeight} kg`
         qs('bodyRemaining').innerHTML = `${remaining > 0 ? '+' : ''}${remaining.toFixed(1)} kg`
+        const progressPct = Math.max(0, Math.min(100, 100 - Math.abs(remaining) * 10))
+        qs('bodyProgressText').innerHTML = `${Math.round(progressPct)}%`
+        qs('bodyProgressBar').style.width = `${progressPct}%`
+        qs('bodyProgressHint').innerHTML = remaining <= 0 ? 'You are at or below your target weight.' : `${Math.abs(remaining).toFixed(1)} kg to your goal.`
 
-        const points = app.bodyMetrics.slice(-7).map((item, index) => `${40 + index * 35},${120 - Math.min(90, (item.weight - 40) * 2)}`).join(' ')
-        qs('bodyTrendChart').innerHTML = `
-          <rect x="0" y="0" width="280" height="120" rx="14" fill="rgba(255,255,255,0.03)"></rect>
-          <line x1="30" y1="90" x2="250" y2="90" stroke="rgba(255,255,255,0.12)"></line>
-          <polyline fill="none" stroke="#6ee7b7" stroke-width="3" points="${points}"></polyline>
-        `
+        const recentWeights = app.bodyMetrics.slice(-7).map(item => item.weight)
+        const delta = recentWeights[recentWeights.length - 1] - recentWeights[0]
+        const trendText = delta < 0 ? `↓ ${Math.abs(delta).toFixed(1)} kg` : delta > 0 ? `↑ ${Math.abs(delta).toFixed(1)} kg` : 'steady'
+        qs('bodyTrendLabel').innerHTML = `${recentWeights.length} measurements • ${trendText}`
+        renderBodyLineChart(qs('bodyTrendChart'), recentWeights, '#6ee7b7', 'Add measurements to see your trend.', {showValueLabels:true})
+        renderBodyLineChart(qs('bodyTimelineChart'), app.bodyMetrics.map(item => item.weight), '#38bdf8', 'Add measurements to see your timeline.', {
+          showValueLabels:true,
+          showDateLabels:true,
+          dates: app.bodyMetrics.map(item => item.date)
+        })
       } else {
         qs('bodyBMI').innerHTML = '--'
         qs('bodyBMICategory').innerHTML = '--'
         qs('bodyTargetWeight').innerHTML = '--'
         qs('bodyRemaining').innerHTML = '--'
-        qs('bodyTrendChart').innerHTML = '<text x="20" y="60" fill="#9aa4b2" font-size="12">Add measurements to see your trend.</text>'
+        qs('bodyProgressText').innerHTML = '0%'
+        qs('bodyProgressBar').style.width = '0%'
+        qs('bodyProgressHint').innerHTML = 'Add a reading to start tracking.'
+        qs('bodyTrendLabel').innerHTML = 'No data yet'
+        renderBodyLineChart(qs('bodyTrendChart'), [], '#6ee7b7', 'Add measurements to see your trend.')
+        renderBodyLineChart(qs('bodyTimelineChart'), [], '#38bdf8', 'Add measurements to see your timeline.')
       }
 
       qs('bodyHistory').innerHTML = app.bodyMetrics.length > 0
