@@ -109,6 +109,14 @@
     .step-card.active {border-color:rgba(110,231,183,0.3);background:rgba(110,231,183,0.1)}
     .auth-error {color:#ffb3b3;font-size:13px;margin-top:8px}
     .hidden {display:none!important}
+    .onboarding-step {animation:stepIn .28s ease}
+    @keyframes stepIn {from {opacity:0;transform:translateY(6px)} to {opacity:1;transform:translateY(0)}}
+    @media (max-width: 960px) {
+      .app {flex-direction:column;height:auto;min-height:100vh}
+      .sidebar {width:100%;border-right:none;border-bottom:1px solid rgba(255,255,255,0.05)}
+      .content {padding:18px}
+      .hero-card, .profile-grid, .ai-grid {grid-template-columns:1fr}
+    }
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
 </head>
@@ -180,6 +188,7 @@
         <a class="nav-link" data-page="body">📈 Body Analysis</a>
       </nav>
       <footer style="margin-top:auto">v0.4 AI</footer>
+      <button class="btn secondary" style="width:100%;margin-top:10px" onclick="signOut()">Sign Out</button>
     </aside>
     <main class="content">
       <!-- Dashboard -->
@@ -422,6 +431,7 @@
               <input id="profHeight" placeholder="Height (cm)" type="number" />
               <input id="profWeight" placeholder="Weight (kg)" type="number" />
               <select id="profActivity">
+                <option value="Not Very Active">Not Very Active</option>
                 <option value="Sedentary">Sedentary</option>
                 <option value="Moderately Active">Moderately Active</option>
                 <option value="Active">Active</option>
@@ -438,9 +448,35 @@
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <input id="profAllergies" placeholder="Allergies (comma separated)" />
+              <input id="profCountry" placeholder="Country" />
               <input id="profWaterTarget" placeholder="Daily water target" type="number" />
               <input id="profProteinTarget" placeholder="Protein target (g)" type="number" />
               <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" />
+            </div>
+            <div class="profile-form-grid" style="margin-top:12px">
+              <select id="profGoalSelect">
+                <option value="lose-weight">Lose Weight</option>
+                <option value="maintain-weight">Maintain Weight</option>
+                <option value="gain-weight">Gain Weight</option>
+                <option value="gain-muscle">Gain Muscle</option>
+                <option value="stay-fit">Stay Fit</option>
+              </select>
+              <select id="profMealPlanning">
+                <option value="Never">Meal planning: Never</option>
+                <option value="Rarely">Meal planning: Rarely</option>
+                <option value="Occasionally">Meal planning: Occasionally</option>
+                <option value="Frequently">Meal planning: Frequently</option>
+                <option value="Always">Meal planning: Always</option>
+              </select>
+              <select id="profWeeklyMealPlan">
+                <option value="Yes, definitely">Weekly plan: Yes, definitely</option>
+                <option value="Open to trying">Weekly plan: Open to trying</option>
+                <option value="No thanks">Weekly plan: No thanks</option>
+              </select>
+            </div>
+            <div class="field-group" style="margin-top:12px">
+              <label>Healthy Habits (comma separated)</label>
+              <textarea id="profHabits" placeholder="Track calories, Eat more protein, Drink more water" style="min-height:90px"></textarea>
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <div class="checkbox-row"><input type="checkbox" id="reminderWater" /><label for="reminderWater">Water reminder</label></div>
@@ -519,7 +555,7 @@
       ui: {achievementFilter:'all', aiConversation: []}
     }
 
-    const onboardingState = {step:1, goals:[], habits:[], mealPlanning:'Occasionally', weeklyMealPlan:'Open to trying', activity:'Sedentary', sex:'Female', age:'', country:'', zip:'', height:'', weight:'', units:'metric'}
+    const onboardingState = {step:1, goals:[], habits:[], mealPlanning:'Occasionally', weeklyMealPlan:'Open to trying', activity:'Not Very Active', sex:'Female', age:'', country:'', zip:'', height:'', weight:'', units:'metric', heightFeet:'', heightInches:'', weightLb:''}
 
     function normalizeUser(user) {
       const base = user || {}
@@ -536,7 +572,7 @@
         age: base.age || 0,
         height: base.height || 0,
         weight: base.weight || 0,
-        activity: base.activity || 'Sedentary',
+        activity: base.activity || 'Not Very Active',
         diet: base.diet || 'Omnivore',
         sex: base.sex || 'Female',
         country: base.country || '',
@@ -639,7 +675,7 @@
       onboardingState.habits = []
       onboardingState.mealPlanning = 'Occasionally'
       onboardingState.weeklyMealPlan = 'Open to trying'
-      onboardingState.activity = 'Sedentary'
+      onboardingState.activity = 'Not Very Active'
       onboardingState.sex = 'Female'
       onboardingState.age = ''
       onboardingState.country = ''
@@ -647,6 +683,9 @@
       onboardingState.height = ''
       onboardingState.weight = ''
       onboardingState.units = 'metric'
+      onboardingState.heightFeet = ''
+      onboardingState.heightInches = ''
+      onboardingState.weightLb = ''
       qs('authScreen').classList.add('hidden')
       qs('appShell').classList.add('hidden')
       qs('onboardingShell').classList.remove('hidden')
@@ -742,9 +781,9 @@
       const sex = app.user.sex || 'Female'
       const height = Number(app.user.height || 170)
       const weight = Number(app.user.weight || 70)
-      const activity = app.user.activity || 'Sedentary'
+      const activity = app.user.activity || 'Not Very Active'
       const goals = Array.isArray(app.user.goals) ? app.user.goals : []
-      const factor = {Sedentary:1.2,'Lightly Active':1.375,Active:1.55,'Very Active':1.725}[activity] || 1.2
+      const factor = {'Not Very Active':1.2,Sedentary:1.2,'Lightly Active':1.375,'Moderately Active':1.375,Active:1.55,'Very Active':1.725}[activity] || 1.2
       const base = sex === 'Male' ? (10 * weight + 6.25 * height - 5 * age + 5) : (10 * weight + 6.25 * height - 5 * age - 161)
       let calories = Math.round(base * factor)
       if(goals.includes('Lose Weight')) calories -= 300
@@ -783,7 +822,10 @@
         zip: onboardingState.zip,
         height: onboardingState.height,
         weight: onboardingState.weight,
-        units: onboardingState.units
+        units: onboardingState.units,
+        heightFeet: onboardingState.heightFeet,
+        heightInches: onboardingState.heightInches,
+        weightLb: onboardingState.weightLb
       }
       app.user.goals = onboardingState.goals
       app.user.habits = onboardingState.habits
@@ -816,6 +858,94 @@
       renderOnboarding()
     }
 
+    function mapPlanGoalToPrimaryGoal(goalId) {
+      return {
+        'lose-weight':'Lose Weight',
+        'maintain-weight':'Maintain Weight',
+        'gain-weight':'Gain Weight',
+        'gain-muscle':'Gain Muscle',
+        'stay-fit':'Plan Meals'
+      }[goalId] || 'Lose Weight'
+    }
+
+    function syncOnboardingMeasurementsFromInputs() {
+      const unitsEl = qs('onboardingUnits')
+      if(!unitsEl) return
+      onboardingState.units = unitsEl.value || onboardingState.units
+      if(onboardingState.units === 'metric') {
+        onboardingState.height = (qs('onboardingHeight')?.value || '').trim()
+        onboardingState.weight = (qs('onboardingWeight')?.value || '').trim()
+      } else {
+        onboardingState.heightFeet = (qs('onboardingHeightFeet')?.value || '').trim()
+        onboardingState.heightInches = (qs('onboardingHeightInches')?.value || '').trim()
+        onboardingState.weightLb = (qs('onboardingWeightLb')?.value || '').trim()
+        const feet = Number(onboardingState.heightFeet || 0)
+        const inches = Number(onboardingState.heightInches || 0)
+        const lb = Number(onboardingState.weightLb || 0)
+        const totalInches = feet * 12 + inches
+        onboardingState.height = totalInches > 0 ? String(Math.round(totalInches * 2.54)) : ''
+        onboardingState.weight = lb > 0 ? String(Math.round(lb * 0.453592 * 10) / 10) : ''
+      }
+    }
+
+    function captureOnboardingInputs() {
+      if(onboardingState.step === 6) {
+        onboardingState.sex = qs('onboardingSex')?.value || onboardingState.sex
+        onboardingState.age = (qs('onboardingAge')?.value || '').trim()
+        onboardingState.country = (qs('onboardingCountry')?.value || '').trim()
+        onboardingState.zip = (qs('onboardingZip')?.value || '').trim()
+      }
+      if(onboardingState.step === 7) {
+        syncOnboardingMeasurementsFromInputs()
+      }
+    }
+
+    function validateOnboardingStep() {
+      if(onboardingState.step === 1 && onboardingState.goals.length === 0) {
+        alert('Please choose at least one goal.')
+        return false
+      }
+      if(onboardingState.step === 6) {
+        if(!onboardingState.age || !onboardingState.country || !onboardingState.zip) {
+          alert('Please complete age, country, and ZIP / Postal Code.')
+          return false
+        }
+      }
+      if(onboardingState.step === 7) {
+        if(onboardingState.units === 'metric') {
+          if(!Number(onboardingState.height) || !Number(onboardingState.weight)) {
+            alert('Please enter height and weight.')
+            return false
+          }
+        } else {
+          if(!Number(onboardingState.heightFeet) || !Number(onboardingState.weightLb)) {
+            alert('Please enter imperial measurements.')
+            return false
+          }
+        }
+      }
+      return true
+    }
+
+    function onboardingNext() {
+      captureOnboardingInputs()
+      if(!validateOnboardingStep()) return
+      if(onboardingState.step < 7) {
+        onboardingState.step++
+        renderOnboarding()
+      } else {
+        completeOnboarding()
+      }
+    }
+
+    function onboardingPrev() {
+      captureOnboardingInputs()
+      if(onboardingState.step > 1) {
+        onboardingState.step--
+        renderOnboarding()
+      }
+    }
+
     function renderOnboarding() {
       const progress = Math.round((onboardingState.step / 7) * 100)
       qs('onboardingProgressBar').style.width = `${progress}%`
@@ -825,13 +955,16 @@
         'Select up to three goals that are most important to you.',
         'Choose habits that match your lifestyle.',
         'How often do you plan your meals in advance?',
-        'Would you like help building weekly meal plans?',
-        'What is your baseline activity level?',
+        'Your custom meal plan will be tailored to your lifestyle and goals.',
+        'Not including workouts — we count that separately.',
         'Tell us a little bit about yourself.',
         'Just a few more questions.'
       ][onboardingState.step - 1]
       let html = `<div class="onboarding-step">`
       html += `<div class="pill">Step ${onboardingState.step} of 7</div>`
+      if(onboardingState.step === 1 && app.user?.fullName) {
+        html += `<div class="muted" style="margin-top:4px">Hey, ${app.user.fullName.split(' ')[0]} 👋 Let's start with your goals.</div>`
+      }
       html += `<h2 style="font-size:24px;font-weight:800;margin-top:8px">${stepTitle}</h2>`
       html += `<div class="muted" style="margin-top:6px">${stepSubtitle}</div>`
       if(onboardingState.step === 1) {
@@ -844,7 +977,13 @@
       } else if(onboardingState.step === 4) {
         html += `<div class="grid" style="margin-top:12px">${['Yes, definitely','Open to trying','No thanks'].map(option => `<div class="step-card ${onboardingState.weeklyMealPlan === option ? 'active' : ''}" onclick="onboardingState.weeklyMealPlan='${option}'; renderOnboarding()">${option}</div>`).join('')}</div>`
       } else if(onboardingState.step === 5) {
-        html += `<div class="grid" style="margin-top:12px">${['Not Very Active','Lightly Active','Active','Very Active'].map(option => `<div class="step-card ${onboardingState.activity === option ? 'active' : ''}" onclick="onboardingState.activity='${option}'; renderOnboarding()">${option}</div>`).join('')}</div>`
+        const activityOptions = [
+          {label:'Not Very Active', desc:'Spend most of the day sitting. Office worker, banker, desk job.'},
+          {label:'Lightly Active', desc:'Spend a good part of the day on your feet. Teacher, salesperson.'},
+          {label:'Active', desc:'Spend a large part of the day physically active. Food server, postal worker.'},
+          {label:'Very Active', desc:'Heavy physical work throughout the day. Carpenter, bike messenger.'}
+        ]
+        html += `<div class="grid" style="margin-top:12px">${activityOptions.map(option => `<div class="step-card ${onboardingState.activity === option.label ? 'active' : ''}" onclick="onboardingState.activity='${option.label}'; renderOnboarding()"><strong>${option.label}</strong><div class="tiny" style="margin-top:6px">${option.desc}</div></div>`).join('')}</div>`
       } else if(onboardingState.step === 6) {
         html += `<div class="field-group" style="margin-top:12px"><label>Biological Sex</label><select id="onboardingSex"><option value="Female" ${onboardingState.sex === 'Female' ? 'selected' : ''}>Female</option><option value="Male" ${onboardingState.sex === 'Male' ? 'selected' : ''}>Male</option></select></div>`
         html += `<div class="field-group"><label>Age</label><input id="onboardingAge" type="number" value="${onboardingState.age}" placeholder="30" /></div>`
@@ -852,11 +991,16 @@
         html += `<div class="field-group"><label>ZIP / Postal Code</label><input id="onboardingZip" value="${onboardingState.zip}" placeholder="10001" /></div>`
         html += `<div class="tiny">Biological sex is used only for calorie estimation.</div>`
       } else if(onboardingState.step === 7) {
-        html += `<div class="field-group" style="margin-top:12px"><label>Units</label><select id="onboardingUnits"><option value="metric" ${onboardingState.units === 'metric' ? 'selected' : ''}>Metric (cm / kg)</option><option value="imperial" ${onboardingState.units === 'imperial' ? 'selected' : ''}>Imperial (ft / lb)</option></select></div>`
-        html += `<div class="field-group"><label>Height</label><input id="onboardingHeight" type="number" value="${onboardingState.height}" placeholder="${onboardingState.units === 'metric' ? '170' : '5'}" /></div>`
-        html += `<div class="field-group"><label>Weight</label><input id="onboardingWeight" type="number" value="${onboardingState.weight}" placeholder="${onboardingState.units === 'metric' ? '70' : '154'}" /></div>`
+        html += `<div class="field-group" style="margin-top:12px"><label>Units</label><select id="onboardingUnits" onchange="syncOnboardingMeasurementsFromInputs(); renderOnboarding()"><option value="metric" ${onboardingState.units === 'metric' ? 'selected' : ''}>Metric (cm / kg)</option><option value="imperial" ${onboardingState.units === 'imperial' ? 'selected' : ''}>Imperial (ft/in / lb)</option></select></div>`
+        if(onboardingState.units === 'metric') {
+          html += `<div class="field-group"><label>Height (cm)</label><input id="onboardingHeight" type="number" value="${onboardingState.height}" placeholder="170" /></div>`
+          html += `<div class="field-group"><label>Weight (kg)</label><input id="onboardingWeight" type="number" value="${onboardingState.weight}" placeholder="70" /></div>`
+        } else {
+          html += `<div class="profile-form-grid"><div class="field-group"><label>Height (ft)</label><input id="onboardingHeightFeet" type="number" value="${onboardingState.heightFeet}" placeholder="5" /></div><div class="field-group"><label>Height (in)</label><input id="onboardingHeightInches" type="number" value="${onboardingState.heightInches}" placeholder="9" /></div></div>`
+          html += `<div class="field-group"><label>Weight (lb)</label><input id="onboardingWeightLb" type="number" value="${onboardingState.weightLb}" placeholder="154" /></div>`
+        }
       }
-      html += `<div class="step-actions"><button class="btn secondary" ${onboardingState.step === 1 ? 'disabled' : ''} onclick="if(onboardingState.step>1){onboardingState.step--; if(onboardingState.step===6){onboardingState.sex=qs('onboardingSex').value||onboardingState.sex; onboardingState.age=qs('onboardingAge').value; onboardingState.country=qs('onboardingCountry').value; onboardingState.zip=qs('onboardingZip').value;} if(onboardingState.step===7){onboardingState.units=qs('onboardingUnits').value||onboardingState.units; onboardingState.height=qs('onboardingHeight').value; onboardingState.weight=qs('onboardingWeight').value;} renderOnboarding()}">Previous</button><button class="btn" onclick="if(onboardingState.step===6){onboardingState.sex=qs('onboardingSex').value||onboardingState.sex; onboardingState.age=qs('onboardingAge').value; onboardingState.country=qs('onboardingCountry').value; onboardingState.zip=qs('onboardingZip').value;} if(onboardingState.step===7){onboardingState.units=qs('onboardingUnits').value||onboardingState.units; onboardingState.height=qs('onboardingHeight').value; onboardingState.weight=qs('onboardingWeight').value;} if(onboardingState.step<7){onboardingState.step++; renderOnboarding()} else {completeOnboarding()}">${onboardingState.step === 7 ? 'Finish' : 'Next'}</button></div>`
+      html += `<div class="step-actions"><button class="btn secondary" ${onboardingState.step === 1 ? 'disabled' : ''} onclick="onboardingPrev()">Previous</button><button class="btn" onclick="onboardingNext()">${onboardingState.step === 7 ? 'Finish' : 'Next'}</button></div>`
       html += `</div>`
       content.innerHTML = html
     }
@@ -874,8 +1018,10 @@
     }
 
     loadUsers()
-    if(app.user) showAppShell()
-    else showAuthScreen()
+    app.activeUserId = null
+    app.user = null
+    saveUsers()
+    showAuthScreen()
 
     const meals = [
       {name:'Grilled Chicken',cal:165,p:31,c:0,f:3.6,icon:'🍗'},
@@ -949,8 +1095,11 @@
     }
 
     function qs(id) { return document.getElementById(id) }
-    function save() { localStorage.setItem('nq_user', JSON.stringify(app.user)) }
-    function saveAiConversation() { localStorage.setItem('nq_ai_chat', JSON.stringify(app.ui.aiConversation || [])) }
+    function saveAiConversation() {
+      if(!app.user) return
+      app.user.aiConversation = app.ui.aiConversation || []
+      save()
+    }
 
     const aiPromptEl = qs('aiPrompt')
     if(aiPromptEl) {
@@ -965,6 +1114,7 @@
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault()
+        if(!app.user) return
         const page = link.dataset.page
         document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'))
         link.classList.add('active')
@@ -975,6 +1125,7 @@
     })
 
     function render(page) {
+      if(!app.user) return
       if(page === 'dashboard') {
         renderDash()
         renderDashboardExtras()
@@ -1177,6 +1328,7 @@
     }
 
     function getTargetCalories() {
+      if(app.user?.dailyCalories) return app.user.dailyCalories
       return getPlanDetail().calories
     }
 
@@ -1451,17 +1603,22 @@
       qs('profAge').value = app.user.age || ''
       qs('profHeight').value = app.user.height || ''
       qs('profWeight').value = app.user.weight || ''
-      qs('profActivity').value = app.user.activity || 'Sedentary'
+      qs('profActivity').value = app.user.activity || 'Not Very Active'
       qs('profDiet').value = app.user.diet || 'Omnivore'
       qs('profAllergies').value = (app.user.allergies || []).join(', ')
+      qs('profCountry').value = app.user.country || ''
       qs('profWaterTarget').value = app.user.waterTarget || ''
       qs('profProteinTarget').value = app.user.proteinTarget || ''
       qs('profWorkoutGoal').value = app.user.workoutGoal || ''
+      qs('profGoalSelect').value = app.user.goal || 'lose-weight'
+      qs('profMealPlanning').value = app.user.mealPlanning || 'Occasionally'
+      qs('profWeeklyMealPlan').value = app.user.weeklyMealPlan || 'Open to trying'
+      qs('profHabits').value = (app.user.habits || []).join(', ')
       qs('reminderWater').checked = app.user.reminders?.water ?? true
       qs('reminderMeal').checked = app.user.reminders?.meal ?? true
       qs('reminderWorkout').checked = app.user.reminders?.workout ?? false
       qs('reminderSleep').checked = app.user.reminders?.sleep ?? false
-      qs('profActivitySummary').innerHTML = app.user.activity || 'Sedentary'
+      qs('profActivitySummary').innerHTML = app.user.activity || 'Not Very Active'
       qs('profDietSummary').innerHTML = app.user.diet || 'Omnivore'
       renderAchieve()
     }
@@ -1473,19 +1630,41 @@
       app.user.activity = qs('profActivity').value
       app.user.diet = qs('profDiet').value
       app.user.allergies = qs('profAllergies').value.split(',').map(item => item.trim()).filter(Boolean)
+      app.user.country = qs('profCountry').value.trim()
       app.user.waterTarget = parseInt(qs('profWaterTarget').value) || 8
       app.user.proteinTarget = parseInt(qs('profProteinTarget').value) || 140
       app.user.workoutGoal = parseInt(qs('profWorkoutGoal').value) || 3
+      app.user.goal = qs('profGoalSelect').value
+      app.user.mealPlanning = qs('profMealPlanning').value
+      app.user.weeklyMealPlan = qs('profWeeklyMealPlan').value
+      app.user.habits = qs('profHabits').value.split(',').map(item => item.trim()).filter(Boolean)
+      app.user.goals = [mapPlanGoalToPrimaryGoal(app.user.goal)]
       app.user.reminders = {
         water: qs('reminderWater').checked,
         meal: qs('reminderMeal').checked,
         workout: qs('reminderWorkout').checked,
         sleep: qs('reminderSleep').checked
       }
+      recalculateTargets()
       save()
       renderProfile()
+      renderPlan()
+      renderTracking()
+      renderDash()
       renderDashboardExtras()
       alert('Saved!')
+    }
+
+    function signOut() {
+      if(app.user) save()
+      app.activeUserId = null
+      app.user = null
+      app.bodyMetrics = []
+      app.dailyLog = []
+      app.ui.aiConversation = []
+      saveUsers()
+      showAuthScreen()
+      toggleAuthMode('signin')
     }
 
     function setMacroRing(element, percent, color) {
@@ -1526,9 +1705,9 @@
       const fatTotal = todayEntries.reduce((sum, item) => sum + (item.fat || 0), 0)
       const target = getTargetCalories()
       const planDetail = getPlanDetail()
-      const proteinTarget = planDetail.protein
-      const carbsTarget = planDetail.carbs
-      const fatTarget = planDetail.fat
+      const proteinTarget = app.user.proteinTarget || planDetail.protein
+      const carbsTarget = app.user.carbsTarget || planDetail.carbs
+      const fatTarget = app.user.fatTarget || planDetail.fat
       const percent = Math.min(100, Math.round((total / target) * 100))
       const proteinPercent = Math.min(100, Math.round((proteinTotal / proteinTarget) * 100))
       const carbsPercent = Math.min(100, Math.round((carbsTotal / carbsTarget) * 100))
@@ -1569,7 +1748,6 @@
       }
       const today = new Date().toDateString()
       app.dailyLog.push({date:today,name:mealName,cals,protein,carbs,fat})
-      localStorage.setItem('nq_tracking', JSON.stringify(app.dailyLog))
       qs('trackingMeal').value = ''
       qs('trackingCals').value = ''
       qs('trackingProtein').value = ''
@@ -1689,7 +1867,6 @@
       const m = parseFloat(qs('bodyMuscle').value)
       if(w && f) {
         app.bodyMetrics.push({date:new Date().toLocaleDateString(),weight:w,fat:f,muscle:m||null})
-        localStorage.setItem('nq_metrics', JSON.stringify(app.bodyMetrics))
         qs('bodyWeight').value = ''
         qs('bodyFat').value = ''
         qs('bodyMuscle').value = ''
@@ -1711,8 +1888,10 @@
       ]
       const completed = missionItems.filter(item => item.done).length
       qs('missionCounter').innerHTML = `${completed}/4 complete`
-      qs('welcomeMessage').innerHTML = `Welcome back — ${app.user.streak} day streak and ${app.user.xp} XP ready to build.`
-      qs('missionSummary').innerHTML = `${completed} of 4 daily missions completed. Keep your momentum going.`
+      const baseWelcome = app.user.dashboardMessage || 'Welcome back — your plan is ready.'
+      const baseSnapshot = app.user.nutritionSnapshot || 'Balanced and ready for action.'
+      qs('welcomeMessage').innerHTML = `${baseWelcome}`
+      qs('missionSummary').innerHTML = `${baseSnapshot} • ${completed} of 4 daily missions completed.`
       qs('missionList').innerHTML = missionItems.map(item => `<div class="stat"><span class="muted">${item.label}</span><span>${item.done ? '✓' : '•'}</span></div>`).join('')
 
       const weekdayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
@@ -1743,14 +1922,7 @@
       qs('nutritionScoreLabel').innerHTML = totalProgress >= 80 ? 'Excellent balance' : totalProgress >= 60 ? 'On the right track' : 'Needs more consistency'
     }
 
-    checkStreak()
-    updateXP()
-    renderDash()
-    renderPlan()
-    renderBody()
-    renderProfile()
-    renderTracking()
-    renderDashboardExtras()
+    if(app.user) initializeAppView()
   </script>
 </body>
 </html>
