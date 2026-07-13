@@ -90,11 +90,82 @@
     .ai-chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:#e6eef6;font-size:13px}
     textarea {min-height:120px;resize:vertical}
     .tiny {font-size:12px;color:var(--muted)}
+    .auth-shell, .onboarding-shell {min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at top left, rgba(110,231,183,0.16), transparent 30%), linear-gradient(180deg,#071018 0%, #071922 100%)}
+    .auth-card, .onboarding-card {width:min(100%, 520px);background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,0.24)}
+    .auth-brand {font-size:28px;font-weight:800;margin-bottom:16px;background:linear-gradient(90deg,var(--accent),#38bdf8);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .auth-tabs {display:flex;gap:8px;margin-bottom:16px}
+    .auth-tab {flex:1;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#e6eef6;cursor:pointer}
+    .auth-tab.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.22)}
+    .field-group {display:grid;gap:10px;margin-bottom:10px}
+    .field-group label {font-size:12px;text-transform:uppercase;letter-spacing:.14em;color:var(--muted)}
+    .chip-row {display:flex;flex-wrap:wrap;gap:8px}
+    .chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:#e6eef6;cursor:pointer}
+    .chip.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.22)}
+    .onboarding-step {display:grid;gap:12px}
+    .progress-track {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden;margin-bottom:16px}
+    .progress-track > div {height:100%;background:linear-gradient(90deg,var(--accent),#38bdf8);transition:width .3s ease}
+    .step-actions {display:flex;justify-content:space-between;gap:10px;margin-top:16px}
+    .step-card {padding:14px;border-radius:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);cursor:pointer}
+    .step-card.active {border-color:rgba(110,231,183,0.3);background:rgba(110,231,183,0.1)}
+    .auth-error {color:#ffb3b3;font-size:13px;margin-top:8px}
+    .hidden {display:none!important}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
 </head>
 <body>
-  <div class="app">
+  <div id="authScreen" class="auth-shell">
+    <div class="auth-card">
+      <div class="auth-brand">🥗 NutriQuest</div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="toggleAuthMode('signup')">Sign Up</button>
+        <button class="auth-tab" onclick="toggleAuthMode('signin')">Sign In</button>
+      </div>
+      <div id="authFormContainer">
+        <div id="signupForm">
+          <div class="field-group">
+            <label>Full Name</label>
+            <input id="signupName" placeholder="Alex Morgan" />
+          </div>
+          <div class="field-group">
+            <label>Email</label>
+            <input id="signupEmail" type="email" placeholder="alex@email.com" />
+          </div>
+          <div class="field-group">
+            <label>Password</label>
+            <input id="signupPassword" type="password" placeholder="Create password" />
+            <div class="tiny">Password must contain at least 7 characters, including one uppercase letter, one lowercase letter, one number, and one special character.</div>
+          </div>
+          <div class="field-group">
+            <label>Confirm Password</label>
+            <input id="signupConfirm" type="password" placeholder="Confirm password" />
+          </div>
+          <button class="btn" style="width:100%" onclick="handleSignUp()">Create account</button>
+          <div id="signupError" class="auth-error"></div>
+        </div>
+        <div id="signinForm" class="hidden">
+          <div class="field-group">
+            <label>Email</label>
+            <input id="signinEmail" type="email" placeholder="alex@email.com" />
+          </div>
+          <div class="field-group">
+            <label>Password</label>
+            <input id="signinPassword" type="password" placeholder="Your password" />
+          </div>
+          <button class="btn" style="width:100%" onclick="handleSignIn()">Sign In</button>
+          <div id="signinError" class="auth-error"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="onboardingShell" class="onboarding-shell hidden">
+    <div class="onboarding-card">
+      <div class="progress-track"><div id="onboardingProgressBar" style="width:14%"></div></div>
+      <div id="onboardingContent"></div>
+    </div>
+  </div>
+
+  <div id="appShell" class="app hidden">
     <aside class="sidebar">
       <div class="logo">🥗 NutriQuest</div>
       <nav class="nav">
@@ -436,14 +507,375 @@
   </div>
 
   <script>
+    const STORAGE_KEYS = {users:'nq_users',activeUser:'nq_active_user',legacyUser:'nq_user'}
     const app = {
-      user: JSON.parse(localStorage.getItem('nq_user') || '{"xp":0,"level":1,"streak":0,"lastLogin":null,"goal":"lose-weight","age":0,"height":0,"weight":0,"activity":"Sedentary","diet":"Omnivore","allergies":[],"waterTarget":8,"proteinTarget":140,"workoutGoal":3,"reminders":{"water":true,"meal":true,"workout":false,"sleep":false}}'),
-      bodyMetrics: JSON.parse(localStorage.getItem('nq_metrics') || '[]'),
-      dailyLog: JSON.parse(localStorage.getItem('nq_tracking') || '[]'),
+      users: [],
+      activeUserId: localStorage.getItem(STORAGE_KEYS.activeUser),
+      user: null,
+      bodyMetrics: [],
+      dailyLog: [],
       dailyCompleted: [],
       weeklyProgress: {},
-      ui: {achievementFilter:'all', aiConversation: JSON.parse(localStorage.getItem('nq_ai_chat') || '[]')}
+      ui: {achievementFilter:'all', aiConversation: []}
     }
+
+    const onboardingState = {step:1, goals:[], habits:[], mealPlanning:'Occasionally', weeklyMealPlan:'Open to trying', activity:'Sedentary', sex:'Female', age:'', country:'', zip:'', height:'', weight:'', units:'metric'}
+
+    function normalizeUser(user) {
+      const base = user || {}
+      return {
+        id: base.id || `user-${Date.now()}`,
+        fullName: base.fullName || base.name || 'NutriQuest User',
+        email: base.email || '',
+        password: base.password || '',
+        xp: base.xp || 0,
+        level: base.level || 1,
+        streak: base.streak || 0,
+        lastLogin: base.lastLogin || null,
+        goal: base.goal || 'lose-weight',
+        age: base.age || 0,
+        height: base.height || 0,
+        weight: base.weight || 0,
+        activity: base.activity || 'Sedentary',
+        diet: base.diet || 'Omnivore',
+        sex: base.sex || 'Female',
+        country: base.country || '',
+        zip: base.zip || '',
+        units: base.units || 'metric',
+        goals: Array.isArray(base.goals) ? base.goals : [],
+        habits: Array.isArray(base.habits) ? base.habits : [],
+        mealPlanning: base.mealPlanning || 'Occasionally',
+        weeklyMealPlan: base.weeklyMealPlan || 'Open to trying',
+        onboardingCompleted: Boolean(base.onboardingCompleted),
+        allergies: Array.isArray(base.allergies) ? base.allergies : [],
+        waterTarget: base.waterTarget || 8,
+        proteinTarget: base.proteinTarget || 140,
+        carbsTarget: base.carbsTarget || 160,
+        fatTarget: base.fatTarget || 55,
+        dailyCalories: base.dailyCalories || 1800,
+        workoutGoal: base.workoutGoal || 3,
+        reminders: base.reminders || {water:true, meal:true, workout:false, sleep:false},
+        bodyMetrics: Array.isArray(base.bodyMetrics) ? base.bodyMetrics : [],
+        dailyLog: Array.isArray(base.dailyLog) ? base.dailyLog : [],
+        aiConversation: Array.isArray(base.aiConversation) ? base.aiConversation : [],
+        onboarding: base.onboarding || {},
+        dashboardMessage: base.dashboardMessage || 'Welcome back — let’s keep your rhythm strong.',
+        nutritionSnapshot: base.nutritionSnapshot || 'Balanced and crafted for your goals.',
+        weeklyTargets: Array.isArray(base.weeklyTargets) ? base.weeklyTargets : []
+      }
+    }
+
+    function loadUsers() {
+      const storedUsers = JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || '[]')
+      app.users = Array.isArray(storedUsers) ? storedUsers.map(normalizeUser) : []
+      const legacyUser = localStorage.getItem(STORAGE_KEYS.legacyUser)
+      if(!app.users.length && legacyUser) {
+        try {
+          const parsed = normalizeUser(JSON.parse(legacyUser))
+          parsed.id = parsed.id || `user-${Date.now()}`
+          parsed.email = parsed.email || `user-${Date.now()}@nutriquest.app`
+          parsed.password = parsed.password || 'Legacy123!'
+          app.users = [parsed]
+          app.activeUserId = parsed.id
+          saveUsers()
+        } catch (error) {
+          console.warn('Legacy user import failed', error)
+        }
+      }
+      if(app.activeUserId) {
+        const found = app.users.find(user => user.id === app.activeUserId)
+        if(found) loadActiveUser(found)
+        else app.activeUserId = null
+      }
+    }
+
+    function saveUsers() {
+      localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(app.users))
+      if(app.activeUserId) localStorage.setItem(STORAGE_KEYS.activeUser, app.activeUserId)
+      else localStorage.removeItem(STORAGE_KEYS.activeUser)
+    }
+
+    function save() {
+      if(!app.user) return
+      app.user.bodyMetrics = app.bodyMetrics
+      app.user.dailyLog = app.dailyLog
+      app.user.aiConversation = app.ui.aiConversation
+      app.user.lastLogin = app.user.lastLogin || new Date().toDateString()
+      if(app.activeUserId) {
+        const index = app.users.findIndex(user => user.id === app.activeUserId)
+        if(index >= 0) app.users[index] = {...app.users[index], ...app.user}
+        else app.users.push(app.user)
+        saveUsers()
+      } else {
+        localStorage.setItem(STORAGE_KEYS.legacyUser, JSON.stringify(app.user))
+      }
+    }
+
+    function loadActiveUser(userData) {
+      app.user = normalizeUser(userData)
+      app.bodyMetrics = Array.isArray(app.user.bodyMetrics) ? app.user.bodyMetrics : []
+      app.dailyLog = Array.isArray(app.user.dailyLog) ? app.user.dailyLog : []
+      app.ui.aiConversation = Array.isArray(app.user.aiConversation) ? app.user.aiConversation : []
+      app.dailyCompleted = []
+      app.weeklyProgress = {}
+    }
+
+    function showAuthScreen() {
+      qs('authScreen').classList.remove('hidden')
+      qs('appShell').classList.add('hidden')
+      qs('onboardingShell').classList.add('hidden')
+    }
+
+    function showAppShell() {
+      qs('authScreen').classList.add('hidden')
+      qs('onboardingShell').classList.add('hidden')
+      qs('appShell').classList.remove('hidden')
+      initializeAppView()
+    }
+
+    function showOnboarding() {
+      onboardingState.step = 1
+      onboardingState.goals = []
+      onboardingState.habits = []
+      onboardingState.mealPlanning = 'Occasionally'
+      onboardingState.weeklyMealPlan = 'Open to trying'
+      onboardingState.activity = 'Sedentary'
+      onboardingState.sex = 'Female'
+      onboardingState.age = ''
+      onboardingState.country = ''
+      onboardingState.zip = ''
+      onboardingState.height = ''
+      onboardingState.weight = ''
+      onboardingState.units = 'metric'
+      qs('authScreen').classList.add('hidden')
+      qs('appShell').classList.add('hidden')
+      qs('onboardingShell').classList.remove('hidden')
+      renderOnboarding()
+    }
+
+    function toggleAuthMode(mode) {
+      document.querySelectorAll('.auth-tab').forEach(button => button.classList.toggle('active', button.textContent.toLowerCase().includes(mode === 'signup' ? 'sign up' : 'sign in')))
+      qs('signupForm').classList.toggle('hidden', mode !== 'signup')
+      qs('signinForm').classList.toggle('hidden', mode !== 'signin')
+    }
+
+    function validatePassword(password) {
+      return password.length >= 7 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /\d/.test(password) && /[^A-Za-z0-9]/.test(password)
+    }
+
+    function handleSignUp() {
+      const name = qs('signupName').value.trim()
+      const email = qs('signupEmail').value.trim().toLowerCase()
+      const password = qs('signupPassword').value
+      const confirm = qs('signupConfirm').value
+      const errorEl = qs('signupError')
+      if(!name || !email || !password || !confirm) {
+        errorEl.textContent = 'Please fill in all fields.'
+        return
+      }
+      if(!validatePassword(password)) {
+        errorEl.textContent = 'Password does not meet the requirements.'
+        return
+      }
+      if(password !== confirm) {
+        errorEl.textContent = 'Passwords do not match.'
+        return
+      }
+      const existing = app.users.find(user => user.email === email)
+      if(existing) {
+        errorEl.textContent = 'This email is already registered.'
+        return
+      }
+      const created = normalizeUser({
+        id: `user-${Date.now()}`,
+        fullName: name,
+        email,
+        password,
+        xp:0,
+        level:1,
+        streak:0,
+        goal:'lose-weight',
+        onboardingCompleted:false,
+        bodyMetrics:[],
+        dailyLog:[],
+        aiConversation:[],
+        reminders:{water:true,meal:true,workout:false,sleep:false},
+        dailyCalories:1800,
+        proteinTarget:140,
+        carbsTarget:160,
+        fatTarget:55
+      })
+      app.users.push(created)
+      app.activeUserId = created.id
+      loadActiveUser(created)
+      saveUsers()
+      showOnboarding()
+    }
+
+    function handleSignIn() {
+      const email = qs('signinEmail').value.trim().toLowerCase()
+      const password = qs('signinPassword').value
+      const errorEl = qs('signinError')
+      const found = app.users.find(user => user.email === email && user.password === password)
+      if(!found) {
+        errorEl.textContent = 'No account found for those credentials.'
+        return
+      }
+      app.activeUserId = found.id
+      loadActiveUser(found)
+      saveUsers()
+      if(!app.user.onboardingCompleted) showOnboarding()
+      else showAppShell()
+    }
+
+    function pickGoalPlan(goals) {
+      if(goals.includes('Gain Muscle')) return 'gain-muscle'
+      if(goals.includes('Gain Weight')) return 'gain-weight'
+      if(goals.includes('Maintain Weight')) return 'maintain-weight'
+      if(goals.includes('Modify My Diet') || goals.includes('Plan Meals')) return 'stay-fit'
+      return 'lose-weight'
+    }
+
+    function recalculateTargets() {
+      if(!app.user) return
+      const age = Number(app.user.age || 18)
+      const sex = app.user.sex || 'Female'
+      const height = Number(app.user.height || 170)
+      const weight = Number(app.user.weight || 70)
+      const activity = app.user.activity || 'Sedentary'
+      const goals = Array.isArray(app.user.goals) ? app.user.goals : []
+      const factor = {Sedentary:1.2,'Lightly Active':1.375,Active:1.55,'Very Active':1.725}[activity] || 1.2
+      const base = sex === 'Male' ? (10 * weight + 6.25 * height - 5 * age + 5) : (10 * weight + 6.25 * height - 5 * age - 161)
+      let calories = Math.round(base * factor)
+      if(goals.includes('Lose Weight')) calories -= 300
+      if(goals.includes('Gain Weight')) calories += 250
+      if(goals.includes('Gain Muscle')) calories += 200
+      if(goals.includes('Plan Meals') || goals.includes('Track Calories')) calories -= 40
+      calories = Math.max(1500, Math.min(3200, calories))
+      const protein = goals.includes('Gain Muscle') ? Math.round(weight * 1.8) : goals.includes('Lose Weight') ? Math.round(weight * 1.6) : Math.round(weight * 1.4)
+      const carbs = Math.round((calories * 0.4) / 4)
+      const fat = Math.round((calories * 0.3) / 9)
+      app.user.dailyCalories = calories
+      app.user.proteinTarget = protein
+      app.user.carbsTarget = carbs
+      app.user.fatTarget = fat
+      app.user.goal = pickGoalPlan(goals)
+      app.user.weeklyTargets = [
+        {label:'Calories', target: calories},
+        {label:'Protein', target: protein},
+        {label:'Carbs', target: carbs},
+        {label:'Fat', target: fat}
+      ]
+      save()
+    }
+
+    function completeOnboarding() {
+      app.user.onboardingCompleted = true
+      app.user.onboarding = {
+        goals: onboardingState.goals,
+        habits: onboardingState.habits,
+        mealPlanning: onboardingState.mealPlanning,
+        weeklyMealPlan: onboardingState.weeklyMealPlan,
+        activity: onboardingState.activity,
+        sex: onboardingState.sex,
+        age: onboardingState.age,
+        country: onboardingState.country,
+        zip: onboardingState.zip,
+        height: onboardingState.height,
+        weight: onboardingState.weight,
+        units: onboardingState.units
+      }
+      app.user.goals = onboardingState.goals
+      app.user.habits = onboardingState.habits
+      app.user.mealPlanning = onboardingState.mealPlanning
+      app.user.weeklyMealPlan = onboardingState.weeklyMealPlan
+      app.user.activity = onboardingState.activity
+      app.user.sex = onboardingState.sex
+      app.user.age = Number(onboardingState.age || 0)
+      app.user.country = onboardingState.country
+      app.user.zip = onboardingState.zip
+      app.user.height = Number(onboardingState.height || 0)
+      app.user.weight = Number(onboardingState.weight || 0)
+      app.user.units = onboardingState.units
+      app.user.dashboardMessage = `Welcome, ${app.user.fullName.split(' ')[0]} — your plan is ready.`
+      app.user.nutritionSnapshot = onboardingState.goals.length ? `Focused on ${onboardingState.goals.slice(0, 2).join(', ')}` : 'Balanced and ready for action.'
+      recalculateTargets()
+      save()
+      showAppShell()
+    }
+
+    function toggleGoal(goal) {
+      if(onboardingState.goals.includes(goal)) onboardingState.goals = onboardingState.goals.filter(item => item !== goal)
+      else if(onboardingState.goals.length < 3) onboardingState.goals.push(goal)
+      renderOnboarding()
+    }
+
+    function toggleHabit(habit) {
+      if(onboardingState.habits.includes(habit)) onboardingState.habits = onboardingState.habits.filter(item => item !== habit)
+      else onboardingState.habits.push(habit)
+      renderOnboarding()
+    }
+
+    function renderOnboarding() {
+      const progress = Math.round((onboardingState.step / 7) * 100)
+      qs('onboardingProgressBar').style.width = `${progress}%`
+      const content = qs('onboardingContent')
+      const stepTitle = ['Primary Goals','Healthy Habits','Meal Planning Frequency','Weekly Meal Plans','Daily Activity Level','Personal Information','Physical Measurements'][onboardingState.step - 1]
+      const stepSubtitle = [
+        'Select up to three goals that are most important to you.',
+        'Choose habits that match your lifestyle.',
+        'How often do you plan your meals in advance?',
+        'Would you like help building weekly meal plans?',
+        'What is your baseline activity level?',
+        'Tell us a little bit about yourself.',
+        'Just a few more questions.'
+      ][onboardingState.step - 1]
+      let html = `<div class="onboarding-step">`
+      html += `<div class="pill">Step ${onboardingState.step} of 7</div>`
+      html += `<h2 style="font-size:24px;font-weight:800;margin-top:8px">${stepTitle}</h2>`
+      html += `<div class="muted" style="margin-top:6px">${stepSubtitle}</div>`
+      if(onboardingState.step === 1) {
+        html += `<div class="chip-row" style="margin-top:14px">${['Lose Weight','Maintain Weight','Gain Weight','Gain Muscle','Modify My Diet','Plan Meals','Manage Stress','Stay Active'].map(goal => `<button class="chip ${onboardingState.goals.includes(goal) ? 'active' : ''}" onclick="toggleGoal('${goal}')">${goal}</button>`).join('')}</div>`
+      } else if(onboardingState.step === 2) {
+        const habits = ['Plan more meals','Eat mindfully','Eat more protein','Track macros','Meal prep and cook','Track calories','Prioritize sleep','Move more','Eat a balanced diet','Workout more','Track nutrients','Eat whole foods','Eat more fiber','Eat more vegetables','Eat more fruit','Drink more water','Something else','I\'m not sure']
+        html += `<div class="chip-row" style="margin-top:14px">${habits.map(habit => `<button class="chip ${onboardingState.habits.includes(habit) ? 'active' : ''}" onclick="toggleHabit('${habit}')">${habit}</button>`).join('')}</div>`
+      } else if(onboardingState.step === 3) {
+        html += `<div class="grid" style="margin-top:12px">${['Never','Rarely','Occasionally','Frequently','Always'].map(option => `<div class="step-card ${onboardingState.mealPlanning === option ? 'active' : ''}" onclick="onboardingState.mealPlanning='${option}'; renderOnboarding()">${option}</div>`).join('')}</div>`
+      } else if(onboardingState.step === 4) {
+        html += `<div class="grid" style="margin-top:12px">${['Yes, definitely','Open to trying','No thanks'].map(option => `<div class="step-card ${onboardingState.weeklyMealPlan === option ? 'active' : ''}" onclick="onboardingState.weeklyMealPlan='${option}'; renderOnboarding()">${option}</div>`).join('')}</div>`
+      } else if(onboardingState.step === 5) {
+        html += `<div class="grid" style="margin-top:12px">${['Not Very Active','Lightly Active','Active','Very Active'].map(option => `<div class="step-card ${onboardingState.activity === option ? 'active' : ''}" onclick="onboardingState.activity='${option}'; renderOnboarding()">${option}</div>`).join('')}</div>`
+      } else if(onboardingState.step === 6) {
+        html += `<div class="field-group" style="margin-top:12px"><label>Biological Sex</label><select id="onboardingSex"><option value="Female" ${onboardingState.sex === 'Female' ? 'selected' : ''}>Female</option><option value="Male" ${onboardingState.sex === 'Male' ? 'selected' : ''}>Male</option></select></div>`
+        html += `<div class="field-group"><label>Age</label><input id="onboardingAge" type="number" value="${onboardingState.age}" placeholder="30" /></div>`
+        html += `<div class="field-group"><label>Country</label><input id="onboardingCountry" value="${onboardingState.country}" placeholder="United States" /></div>`
+        html += `<div class="field-group"><label>ZIP / Postal Code</label><input id="onboardingZip" value="${onboardingState.zip}" placeholder="10001" /></div>`
+        html += `<div class="tiny">Biological sex is used only for calorie estimation.</div>`
+      } else if(onboardingState.step === 7) {
+        html += `<div class="field-group" style="margin-top:12px"><label>Units</label><select id="onboardingUnits"><option value="metric" ${onboardingState.units === 'metric' ? 'selected' : ''}>Metric (cm / kg)</option><option value="imperial" ${onboardingState.units === 'imperial' ? 'selected' : ''}>Imperial (ft / lb)</option></select></div>`
+        html += `<div class="field-group"><label>Height</label><input id="onboardingHeight" type="number" value="${onboardingState.height}" placeholder="${onboardingState.units === 'metric' ? '170' : '5'}" /></div>`
+        html += `<div class="field-group"><label>Weight</label><input id="onboardingWeight" type="number" value="${onboardingState.weight}" placeholder="${onboardingState.units === 'metric' ? '70' : '154'}" /></div>`
+      }
+      html += `<div class="step-actions"><button class="btn secondary" ${onboardingState.step === 1 ? 'disabled' : ''} onclick="if(onboardingState.step>1){onboardingState.step--; if(onboardingState.step===6){onboardingState.sex=qs('onboardingSex').value||onboardingState.sex; onboardingState.age=qs('onboardingAge').value; onboardingState.country=qs('onboardingCountry').value; onboardingState.zip=qs('onboardingZip').value;} if(onboardingState.step===7){onboardingState.units=qs('onboardingUnits').value||onboardingState.units; onboardingState.height=qs('onboardingHeight').value; onboardingState.weight=qs('onboardingWeight').value;} renderOnboarding()}">Previous</button><button class="btn" onclick="if(onboardingState.step===6){onboardingState.sex=qs('onboardingSex').value||onboardingState.sex; onboardingState.age=qs('onboardingAge').value; onboardingState.country=qs('onboardingCountry').value; onboardingState.zip=qs('onboardingZip').value;} if(onboardingState.step===7){onboardingState.units=qs('onboardingUnits').value||onboardingState.units; onboardingState.height=qs('onboardingHeight').value; onboardingState.weight=qs('onboardingWeight').value;} if(onboardingState.step<7){onboardingState.step++; renderOnboarding()} else {completeOnboarding()}">${onboardingState.step === 7 ? 'Finish' : 'Next'}</button></div>`
+      html += `</div>`
+      content.innerHTML = html
+    }
+
+    function initializeAppView() {
+      if(!app.user) return
+      checkStreak()
+      updateXP()
+      renderDash()
+      renderPlan()
+      renderBody()
+      renderProfile()
+      renderTracking()
+      renderDashboardExtras()
+    }
+
+    loadUsers()
+    if(app.user) showAppShell()
+    else showAuthScreen()
 
     const meals = [
       {name:'Grilled Chicken',cal:165,p:31,c:0,f:3.6,icon:'🍗'},
