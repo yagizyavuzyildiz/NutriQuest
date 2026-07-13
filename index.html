@@ -168,6 +168,10 @@
                 <div class="muted" style="margin-top:6px" id="trackingMacro">Protein 0g • Carbs 0g • Fat 0g</div>
               </div>
             </div>
+            <div class="chart-card" style="margin-top:12px">
+              <div class="tiny">Selected plan targets</div>
+              <div id="trackingTargets" style="margin-top:8px;display:grid;gap:8px"></div>
+            </div>
             <div class="progress-track" style="margin-top:16px"><div id="trackingBar" class="progress-fill" style="width:0%"></div></div>
             <div class="macro-rings">
               <div class="macro-ring-card"><div class="macro-ring" id="proteinRing" style="--ring-color:#38bdf8;--ring-value:0deg"><span id="proteinRingText">0%</span></div><div class="tiny">Protein</div></div>
@@ -573,9 +577,10 @@
       const carbsTotal = todayEntries.reduce((sum, item) => sum + (item.carbs || 0), 0)
       const fatTotal = todayEntries.reduce((sum, item) => sum + (item.fat || 0), 0)
       const target = getTargetCalories()
-      const proteinTarget = getPlanDetail().protein
-      const carbsTarget = getPlanDetail().carbs
-      const fatTarget = getPlanDetail().fat
+      const planDetail = getPlanDetail()
+      const proteinTarget = planDetail.protein
+      const carbsTarget = planDetail.carbs
+      const fatTarget = planDetail.fat
       const percent = Math.min(100, Math.round((total / target) * 100))
       const proteinPercent = Math.min(100, Math.round((proteinTotal / proteinTarget) * 100))
       const carbsPercent = Math.min(100, Math.round((carbsTotal / carbsTarget) * 100))
@@ -584,7 +589,14 @@
       qs('trackingCircle').innerHTML = `${percent}%`
       qs('trackingBar').style.width = percent + '%'
       qs('trackingCalories').innerHTML = `${total} / ${target} kcal`
-      qs('trackingMacro').innerHTML = `Protein ${proteinTotal}g • Carbs ${carbsTotal}g • Fat ${fatTotal}g`
+      qs('trackingMacro').innerHTML = `Protein ${proteinTotal}/${proteinTarget}g • Carbs ${carbsTotal}/${carbsTarget}g • Fat ${fatTotal}/${fatTarget}g`
+      qs('trackingTargets').innerHTML = `
+        <div class="stat"><span class="muted">Plan</span><span>${planDetail.title}</span></div>
+        <div class="stat"><span class="muted">Calories</span><span>${target} kcal</span></div>
+        <div class="stat"><span class="muted">Protein</span><span>${proteinTarget}g</span></div>
+        <div class="stat"><span class="muted">Carbs</span><span>${carbsTarget}g</span></div>
+        <div class="stat"><span class="muted">Fat</span><span>${fatTarget}g</span></div>
+      `
       setMacroRing(qs('proteinRing'), proteinPercent, '#38bdf8')
       setMacroRing(qs('carbRing'), carbsPercent, '#6ee7b7')
       setMacroRing(qs('fatRing'), fatPercent, '#f59e0b')
