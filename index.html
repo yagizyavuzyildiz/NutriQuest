@@ -1050,15 +1050,6 @@
       renderDashboardExtras()
     }
 
-    loadUsers()
-    populateCountryDropdowns()
-    if(app.user) {
-      if(app.user.onboardingCompleted) showAppShell()
-      else showOnboarding()
-    } else {
-      showAuthScreen()
-    }
-
     const meals = [
       {name:'Grilled Chicken',cal:165,p:31,c:0,f:3.6,icon:'🍗'},
       {name:'Quinoa Salad',cal:222,p:8,c:39,f:4,icon:'🥗'},
@@ -2077,7 +2068,14 @@
       qs('nutritionScoreLabel').innerHTML = totalProgress >= 80 ? 'Excellent balance' : totalProgress >= 60 ? 'On the right track' : 'Needs more consistency'
     }
 
-    if(app.user) initializeAppView()
+    loadUsers()
+    populateCountryDropdowns()
+    if(app.user) {
+      if(app.user.onboardingCompleted) showAppShell()
+      else showOnboarding()
+    } else {
+      showAuthScreen()
+    }
   </script>
 </body>
 </html>
