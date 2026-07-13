@@ -2484,6 +2484,35 @@
       return pool[Math.floor(Math.random() * pool.length)]
     }
 
+    function detectBodyRecompositionIntent(normalizedPrompt) {
+      const text = String(normalizedPrompt || '')
+      const maintainSignals = ['maintain', 'koru', 'korumak', 'maintenance', 'kilomu koru', 'weight maintenance']
+      const muscleSignals = ['muscle', 'kas', 'hypertrophy', 'guclen', 'strength']
+      const fatSignals = ['fat loss', 'yag', 'yağ', 'lean', 'cut', 'body fat']
+      const hasMaintain = maintainSignals.some(token => text.includes(token))
+      const hasMuscle = muscleSignals.some(token => text.includes(token))
+      const hasFatLoss = fatSignals.some(token => text.includes(token))
+      const recompKeyword = text.includes('recomposition') || text.includes('body recomposition')
+      return recompKeyword || (hasMuscle && hasFatLoss) || (hasMaintain && hasMuscle && hasFatLoss)
+    }
+
+    function isOpenRecommendationPrompt(normalizedPrompt) {
+      const text = String(normalizedPrompt || '')
+      const signals = [
+        'ne yapmaliyim', 'ne yapmalıyım', 'what should i do', 'how should i', 'recommend', 'recommendation',
+        'yorumla', 'analiz et', 'plan ver', 'strateji', 'yol haritasi', 'yol haritası', 'program yap'
+      ]
+      return signals.some(token => text.includes(token))
+    }
+
+    function getContextWeightKg(context) {
+      const profileWeight = Number(app.user?.weight || 0)
+      if(profileWeight > 0) return profileWeight
+      const latestWeight = Number(context?.latestWeight || 0)
+      if(latestWeight > 0) return latestWeight
+      return 0
+    }
+
     function buildCoachReply(prompt, context) {
       const normalized = String(prompt || '').toLowerCase()
       const language = detectLanguageHint(prompt)
@@ -2492,6 +2521,10 @@
       const disliked = (memory.dislikes || []).join(', ')
       const turnIndex = app.ui.aiConversation.filter(msg => msg.role === 'user').length
       const suggestion = getMealSuggestion(context)
+      const weightKg = getContextWeightKg(context)
+      const proteinMin = weightKg ? Math.round(weightKg * 1.8) : Math.max(130, context.proteinTarget)
+      const proteinMax = weightKg ? Math.round(weightKg * 2.2) : Math.max(160, context.proteinTarget + 20)
+      const athleteMode = normalized.includes('basket') || normalized.includes('basketball') || normalized.includes('athlete') || String(context.activity || '').toLowerCase().includes('active')
       const variants = tr ? [
         `Bugün ${context.todayCalories}/${context.target} kcal seviyesindesin; kalan enerji ${context.remainingCalories} kcal.`,
         `Bugün ${context.todayProtein}g protein aldın; hedefe ulaşmak için ${context.remainingProtein}g daha gerekiyor.`,
@@ -2555,6 +2588,22 @@
           ? ['Her öğünün merkezine protein koy.', '1-2 yüksek lifli sebze ekle.', 'Yağ porsiyonunu ölçülü tut.']
           : ['Anchor each meal with protein.', 'Add 1-2 high-fiber vegetables.', 'Use fats with measured portions.']
         actions = tr ? ['Makro uyumlu tarif üret', 'Öğünü kaydet', 'Gün özetini incele'] : ['Generate macro-fit recipe', 'Log a meal', 'Review day summary']
+      } else if(detectBodyRecompositionIntent(normalized)) {
+        response = tr
+          ? `Hedefin net: kiloyu korurken kas oranını artırıp yağ oranını azaltmak (body recomposition). Profiline göre ${context.activity.toLowerCase()} seviyesindesin; bu hedef için en kritik nokta günlük enerji dengesini korurken proteini ${proteinMin}-${proteinMax}g aralığında tutmak. ${athleteMode ? 'Basketbol performansı için antrenman günlerinde karbonhidratı antrenman öncesi/sonrası yoğunlaştır.' : 'Antrenman performansı için karbonhidratı özellikle antrenman çevresine topla.'} Pratik plan: antrenman günlerinde kalorini bakım seviyesinde (0 ile +100), dinlenme günlerinde küçük açıkta tut (-150 ila -250). Haftada 3-4 kuvvet antrenmanı + 1-2 düşük yoğunluk kardiyo ile ilerle, haftalık bel çevresi ve güç artışıyla takip et.`
+          : `Your goal is clear: increase muscle while reducing body fat without losing weight (body recomposition). Based on your ${context.activity.toLowerCase()} profile, the key is keeping calories around maintenance while holding protein at ${proteinMin}-${proteinMax}g/day. ${athleteMode ? 'For basketball performance, place more carbs around pre/post training sessions.' : 'For performance, concentrate carbs around training windows.'} Practical split: training days at maintenance (0 to +100 kcal), rest days at a small deficit (-150 to -250 kcal). Combine 3-4 resistance sessions plus 1-2 low-intensity cardio sessions, and track weekly waist trend + strength progression.`
+        tips = tr
+          ? ['Her ana öğünde 35-45g protein hedefle.', 'Antrenmandan 60-90 dk önce karbonhidrat + düşük yağ tercih et.', 'Uyku 7.5-9 saat ve haftalık yük artışını takip et.']
+          : ['Target 35-45g protein in each main meal.', 'Use carbs + lower fat 60-90 minutes before training.', 'Sleep 7.5-9 hours and track progressive overload weekly.']
+        actions = tr ? ['Haftalık recomp planı oluştur', 'Antrenman günü öğünü üret', 'Bel/performans takibi başlat'] : ['Create weekly recomposition plan', 'Generate training-day meal', 'Start waist/performance tracking']
+      } else if(isOpenRecommendationPrompt(normalized)) {
+        response = tr
+          ? `Sorunu profiline göre yorumluyorum: hedefin ${context.goal.toLowerCase()} ve aktivite düzeyin ${context.activity.toLowerCase()}. Bu tip durumda tek öğün önermek yerine çerçeve daha etkilidir: 1) Kaloriyi haftalık ortalamada hedefe yakın tut, 2) proteini gün içine dağıt (en az ${Math.max(30, Math.round(proteinMin / 4))}g x 4 öğün), 3) performans günlerinde karbonhidratı artırıp dinlenme gününde biraz azalt. Bugün için odak: önce protein açığını kapat, sonra kalan kaloriyi lifli karbonhidrat ve kaliteli yağla tamamla.`
+          : `I will interpret this through your profile: your goal is ${context.goal.toLowerCase()} and activity level is ${context.activity.toLowerCase()}. For open recommendation questions, framework beats a random meal suggestion: 1) keep weekly calories close to target, 2) distribute protein across the day (at least ${Math.max(30, Math.round(proteinMin / 4))}g x 4 meals), 3) use higher carbs on performance days and slightly lower on rest days. For today: close protein gap first, then complete calories with fiber-rich carbs and quality fats.`
+        tips = tr
+          ? ['Öğün sırası: protein -> sebze/lif -> karbonhidrat.', 'Haftada 1 kez bel çevresi + performans notu al.', 'Kalori sapmasını günlük değil haftalık değerlendir.']
+          : ['Meal order: protein -> vegetables/fiber -> carbs.', 'Log waist + performance once per week.', 'Evaluate calorie drift weekly, not only daily.']
+        actions = tr ? ['Profil bazlı haftalık plan üret', 'Bugünlük makro dağılımı çıkar', 'Takip hedefleri ayarla'] : ['Generate profile-based weekly plan', 'Build today macro split', 'Set tracking targets']
       } else {
         response += tr
           ? `En iyi sonraki adım: kalan makrolarına uyan tek bir öğün seç ve kaydet. Öneri: ${suggestion}.`
