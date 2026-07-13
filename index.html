@@ -2674,15 +2674,20 @@
       }
 
       if(isCircuitBreakerOpen()) {
-        const answer = language === 'tr'
-          ? 'Model servisi kısa süreli koruma modunda. Bu sırada güvenli yerel öneri moduyla devam ediyorum.'
-          : 'Model service is in short protection mode. Continuing with safe local guidance for now.'
-        const formatted = ensurePremiumFormat(answer, language, true)
+        const guarded = hasBlockedSafetyTopic(prompt)
+        const answer = guarded
+          ? (language === 'tr'
+            ? 'Bu konuda yardımcı olamam. İstersen hedefinle uyumlu güvenli bir beslenme/sağlık planı oluşturalım.'
+            : 'I cannot help with that request. I can help you with a safe nutrition/health plan aligned to your goal.')
+          : (heuristic.response || (language === 'tr'
+            ? 'Model servisi geçici olarak koruma modunda. Bu sırada profiline göre güvenli yerel koç önerileriyle devam ediyorum.'
+            : 'Model service is in temporary protection mode. Continuing with profile-based safe local coaching.'))
+        const formatted = ensurePremiumFormat(answer, language, !guarded)
         metricsEvent.ok = true
         metricsEvent.usedFallback = true
         metricsEvent.answer = formatted
         metricsEvent.outputTokensApprox = estimateTokens(formatted)
-        metricsEvent.finishReason = 'error'
+        metricsEvent.finishReason = guarded ? 'stop' : 'error'
         metricsEvent.latencyMs = Math.round(performance.now() - startedAt)
         updateAiMetrics(metricsEvent)
         renderAiRuntimeStatus('warn', 'Circuit breaker open - fallback mode')
