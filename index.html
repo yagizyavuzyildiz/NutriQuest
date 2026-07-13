@@ -445,7 +445,7 @@
 
     function renderPlan() {
       const selected = getPlanDetail()
-      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal`
+      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal • ${selected.protein}g protein • ${selected.carbs}g carbs • ${selected.fat}g fat`
       qs('planCards').innerHTML = mealPlans.map(plan => `
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
           <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.accent}</span></div>
