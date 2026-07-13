@@ -1052,10 +1052,12 @@
 
     loadUsers()
     populateCountryDropdowns()
-    app.activeUserId = null
-    app.user = null
-    saveUsers()
-    showAuthScreen()
+    if(app.user) {
+      if(app.user.onboardingCompleted) showAppShell()
+      else showOnboarding()
+    } else {
+      showAuthScreen()
+    }
 
     const meals = [
       {name:'Grilled Chicken',cal:165,p:31,c:0,f:3.6,icon:'🍗'},
@@ -1208,16 +1210,24 @@
       })
     }
 
+    function openPage(page) {
+      if(!app.user) {
+        showAuthScreen()
+        return
+      }
+      if(!qs(page)) return
+      document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'))
+      const activeLink = document.querySelector(`.nav-link[data-page="${page}"]`)
+      if(activeLink) activeLink.classList.add('active')
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'))
+      qs(page).classList.remove('hidden')
+      render(page)
+    }
+
     document.querySelectorAll('.nav-link').forEach(link => {
       link.addEventListener('click', e => {
         e.preventDefault()
-        if(!app.user) return
-        const page = link.dataset.page
-        document.querySelectorAll('.nav-link').forEach(a => a.classList.remove('active'))
-        link.classList.add('active')
-        document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'))
-        qs(page).classList.remove('hidden')
-        render(page)
+        openPage(link.dataset.page)
       })
     })
 
