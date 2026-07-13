@@ -91,9 +91,10 @@
         </div>
         <div class="hero-card">
           <div class="hero-main">
-            <div class="pill">Today’s focus</div>
-            <div style="font-size:26px;font-weight:800;margin-top:10px">Stay consistent — one smart meal can change the whole day.</div>
-            <div class="muted" style="margin-top:8px;max-width:620px">Your dashboard now highlights progress, nutrition balance, and the next best action in one clean view.</div>
+            <div class="pill">Today’s mission</div>
+            <div id="welcomeMessage" style="font-size:26px;font-weight:800;margin-top:10px">Stay consistent — one smart meal can change the whole day.</div>
+            <div id="missionSummary" class="muted" style="margin-top:8px;max-width:620px">Your dashboard now highlights progress, nutrition balance, and the next best action in one clean view.</div>
+            <div id="missionList" style="margin-top:12px;display:grid;gap:8px"></div>
             <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
               <button class="btn" onclick="document.querySelector('[data-page=plan]').click()">View meal plan</button>
               <button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Track calories</button>
@@ -118,6 +119,26 @@
           <div class="card"><strong>Today's challenges</strong><div id="todayChalls" style="margin-top:12px"></div></div>
           <div class="card"><strong>Nutrition snapshot</strong><div class="muted small" style="margin-top:8px">Your goals are now reflected in the plan and calorie tracking experience.</div><div class="stat" style="margin-top:12px"><span class="muted">Current goal</span><span id="dashGoal">Lose Weight</span></div><div class="stat"><span class="muted">Recovery</span><span>On track</span></div></div>
         </div>
+        <div class="grid" style="margin-top:16px">
+          <div class="card">
+            <div class="metric-title">Today's mission</div>
+            <div id="missionCounter" style="font-size:24px;font-weight:800;margin-top:10px">0/4 complete</div>
+            <div class="muted small" style="margin-top:8px">Focus on the habits that move your score.</div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Streak calendar</div>
+            <div id="streakCalendar" style="margin-top:12px;display:grid;grid-template-columns:repeat(7,1fr);gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Weekly nutrition progress</div>
+            <div id="weeklyProgressBars" style="margin-top:12px;display:grid;gap:10px"></div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Nutrition score</div>
+            <div id="nutritionScore" style="font-size:30px;font-weight:800;margin-top:10px">--</div>
+            <div id="nutritionScoreLabel" class="muted small" style="margin-top:8px">No data yet</div>
+          </div>
+        </div>
       </div>
 
       <!-- Meal Library -->
@@ -133,6 +154,10 @@
           <div class="pill">Recommended by goal</div>
           <div style="font-size:22px;font-weight:800;margin-top:10px" id="planSummary">Focused plan</div>
           <div class="muted" style="margin-top:6px">A leaner, cleaner experience built around your desired nutrition rhythm.</div>
+        </div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="pill">Daily nutrition summary</div>
+          <div id="planNutritionSummary" style="margin-top:10px;display:grid;gap:8px"></div>
         </div>
         <div class="plan-grid" id="planCards"></div>
       </div>
@@ -240,6 +265,10 @@
             <div class="stat"><span class="muted">Total XP</span><span id="profXP">0 XP</span></div>
           </div>
         </div>
+        <div class="card" style="margin-top:16px">
+          <strong>Achievement gallery</strong>
+          <div id="profileAchievements" style="margin-top:12px;display:grid;gap:10px"></div>
+        </div>
       </div>
 
       <!-- Body Analysis -->
@@ -248,6 +277,17 @@
         <div class="grid" style="grid-template-columns:1.1fr .9fr">
           <div class="card"><strong>Add measurement</strong><div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><input id="bodyWeight" placeholder="Weight (kg)" type="number" /><input id="bodyFat" placeholder="Fat %" type="number" /><input id="bodyMuscle" placeholder="Muscle (kg)" type="number" /><button class="btn" onclick="addBodyMetric()">Save</button></div></div>
           <div class="card"><strong>Latest summary</strong><div class="stat" style="margin-top:12px"><span class="muted">Weight</span><span id="bodyW">--</span></div><div class="stat"><span class="muted">Fat</span><span id="bodyF">--</span></div><div class="stat"><span class="muted">Muscle</span><span id="bodyM">--</span></div></div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <strong>Health insights</strong>
+          <div class="stat" style="margin-top:12px"><span class="muted">BMI</span><span id="bodyBMI">--</span></div>
+          <div class="stat"><span class="muted">BMI category</span><span id="bodyBMICategory">--</span></div>
+          <div class="stat"><span class="muted">Target weight</span><span id="bodyTargetWeight">--</span></div>
+          <div class="stat"><span class="muted">Remaining</span><span id="bodyRemaining">--</span></div>
+          <div class="chart-card">
+            <div class="tiny">Weight trend</div>
+            <svg id="bodyTrendChart" viewBox="0 0 280 120" width="100%" height="120"></svg>
+          </div>
         </div>
         <div class="card" style="margin-top:16px">
           <strong>Progress timeline</strong>
@@ -346,7 +386,10 @@
     })
 
     function render(page) {
-      if(page === 'dashboard') renderDash()
+      if(page === 'dashboard') {
+        renderDash()
+        renderDashboardExtras()
+      }
       if(page === 'meals') renderMeals()
       if(page === 'plan') renderPlan()
       if(page === 'challenges') renderChallenges()
@@ -428,6 +471,7 @@
         html += `<div class="challenge-item"><span>${c.name}: ${c.desc}</span><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
       })
       qs('todayChalls').innerHTML = html
+      renderDashboardExtras()
     }
 
     function renderMeals() {
@@ -445,11 +489,18 @@
       renderProfile()
       renderDash()
       renderTracking()
+      renderDashboardExtras()
     }
 
     function renderPlan() {
       const selected = getPlanDetail()
       qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal • ${selected.protein}g protein • ${selected.carbs}g carbs • ${selected.fat}g fat`
+      qs('planNutritionSummary').innerHTML = `
+        <div class="stat"><span class="muted">Calories</span><span>${selected.calories} kcal</span></div>
+        <div class="stat"><span class="muted">Protein</span><span>${selected.protein}g</span></div>
+        <div class="stat"><span class="muted">Carbs</span><span>${selected.carbs}g</span></div>
+        <div class="stat"><span class="muted">Fat</span><span>${selected.fat}g</span></div>
+      `
       qs('planCards').innerHTML = mealPlans.map(plan => `
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
           <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.accent}</span></div>
@@ -478,13 +529,14 @@
     function renderChallenges() {
       let dailyHTML = ''
       dailyChalls.forEach(c => {
-        dailyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc}</div></div><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
+        dailyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc}</div><div class="progress-track" style="margin-top:8px;width:180px"><div class="progress-fill" style="width:${c.done ? '100%' : '0%'}"></div></div></div><button class="btn secondary" onclick="completeDaily('${c.id}')">+${c.xp}</button></div>`
       })
       qs('dailyChallenges').innerHTML = dailyHTML
 
       let weeklyHTML = ''
       weeklyChalls.forEach(c => {
-        weeklyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc} [${c.prog}/${c.max}]</div></div><button class="btn secondary" onclick="addWeekly('${c.id}')">+${c.xp}</button></div>`
+        const pct = Math.round((c.prog / c.max) * 100)
+        weeklyHTML += `<div class="challenge-item"><div><strong>${c.name}</strong><div class="muted small">${c.desc} [${c.prog}/${c.max}]</div><div class="progress-track" style="margin-top:8px;width:180px"><div class="progress-fill" style="width:${pct}%"></div></div></div><button class="btn secondary" onclick="addWeekly('${c.id}')">+${c.xp}</button></div>`
       })
       qs('weeklyChallenges').innerHTML = weeklyHTML
     }
@@ -515,11 +567,24 @@
     }
 
     function renderAchieve() {
+      achievements[0].unlocked = app.dailyLog.length > 0 || app.bodyMetrics.length > 0
+      achievements[1].unlocked = app.user.streak >= 7
+      achievements[2].unlocked = app.user.level >= 5
+      achievements[3].unlocked = app.dailyLog.length >= 50
+      achievements[4].unlocked = app.user.xp >= 1000 || dailyChalls.filter(c => c.done).length >= 5
+
       let html = ''
       achievements.forEach(a => {
         html += `<div class="achievement-item" style="opacity:${a.unlocked?1:0.5}"><div class="achievement-icon">${a.icon}</div><div><strong>${a.name}</strong><div class="muted small">${a.desc}</div></div><span style="background:rgba(110,231,183,0.2);color:var(--accent);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'✓':'Locked'}</span></div>`
       })
       qs('achievementsList').innerHTML = html
+      qs('profileAchievements').innerHTML = achievements.map(a => `
+        <div class="achievement-item" style="opacity:${a.unlocked?1:0.5}">
+          <div class="achievement-icon">${a.icon}</div>
+          <div><strong>${a.name}</strong><div class="muted small">${a.desc}</div></div>
+          <span style="background:rgba(110,231,183,0.2);color:var(--accent);padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600">${a.unlocked?'Unlocked':'Locked'}</span>
+        </div>
+      `).join('')
     }
 
     function renderProfile() {
@@ -530,6 +595,7 @@
       qs('profAge').value = app.user.age || ''
       qs('profHeight').value = app.user.height || ''
       qs('profWeight').value = app.user.weight || ''
+      renderAchieve()
     }
 
     function saveProfile() {
@@ -630,6 +696,7 @@
       addXP(10)
       renderTracking()
       renderDash()
+      renderDashboardExtras()
     }
 
     function renderBody() {
@@ -638,6 +705,28 @@
         qs('bodyW').innerHTML = latest.weight + ' kg'
         qs('bodyF').innerHTML = latest.fat + '%'
         qs('bodyM').innerHTML = latest.muscle ? latest.muscle + ' kg' : '--'
+        const heightInM = (app.user.height || 170) / 100
+        const bmi = latest.weight / (heightInM * heightInM)
+        const bmiCategory = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : bmi < 30 ? 'Overweight' : 'Obese'
+        const targetWeight = Math.max(40, Math.round((heightInM * heightInM) * 22))
+        const remaining = latest.weight - targetWeight
+        qs('bodyBMI').innerHTML = bmi.toFixed(1)
+        qs('bodyBMICategory').innerHTML = bmiCategory
+        qs('bodyTargetWeight').innerHTML = `${targetWeight} kg`
+        qs('bodyRemaining').innerHTML = `${remaining > 0 ? '+' : ''}${remaining.toFixed(1)} kg`
+
+        const points = app.bodyMetrics.slice(-7).map((item, index) => `${40 + index * 35},${120 - Math.min(90, (item.weight - 40) * 2)}`).join(' ')
+        qs('bodyTrendChart').innerHTML = `
+          <rect x="0" y="0" width="280" height="120" rx="14" fill="rgba(255,255,255,0.03)"></rect>
+          <line x1="30" y1="90" x2="250" y2="90" stroke="rgba(255,255,255,0.12)"></line>
+          <polyline fill="none" stroke="#6ee7b7" stroke-width="3" points="${points}"></polyline>
+        `
+      } else {
+        qs('bodyBMI').innerHTML = '--'
+        qs('bodyBMICategory').innerHTML = '--'
+        qs('bodyTargetWeight').innerHTML = '--'
+        qs('bodyRemaining').innerHTML = '--'
+        qs('bodyTrendChart').innerHTML = '<text x="20" y="60" fill="#9aa4b2" font-size="12">Add measurements to see your trend.</text>'
       }
 
       qs('bodyHistory').innerHTML = app.bodyMetrics.length > 0
@@ -659,7 +748,50 @@
         alert('Saved!')
         renderBody()
         renderDash()
+        renderDashboardExtras()
+        renderDashboardExtras()
       }
+    }
+
+    function renderDashboardExtras() {
+      const missionItems = [
+        {label:'Log a meal', done: app.dailyLog.length > 0},
+        {label:'Hit protein target', done: app.dailyLog.some(item => (item.protein || 0) >= 30)},
+        {label:'Complete a challenge', done: dailyChalls.some(c => c.done)},
+        {label:'Track your weight', done: app.bodyMetrics.length > 0}
+      ]
+      const completed = missionItems.filter(item => item.done).length
+      qs('missionCounter').innerHTML = `${completed}/4 complete`
+      qs('welcomeMessage').innerHTML = `Welcome back — ${app.user.streak} day streak and ${app.user.xp} XP ready to build.`
+      qs('missionSummary').innerHTML = `${completed} of 4 daily missions completed. Keep your momentum going.`
+      qs('missionList').innerHTML = missionItems.map(item => `<div class="stat"><span class="muted">${item.label}</span><span>${item.done ? '✓' : '•'}</span></div>`).join('')
+
+      const weekdayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+      const streakDays = Array.from({length:7}, (_, i) => {
+        const day = new Date()
+        day.setDate(day.getDate() - (6 - i))
+        const label = day.toDateString()
+        const isActive = app.user.lastLogin === label
+        return `<div style="padding:8px;border-radius:10px;background:${isActive ? 'rgba(110,231,183,0.16)' : 'rgba(255,255,255,0.04)'};text-align:center"><div class="tiny">${weekdayNames[i]}</div><div style="font-weight:700;margin-top:4px">${isActive ? '✓' : '•'}</div></div>`
+      }).join('')
+      qs('streakCalendar').innerHTML = streakDays
+
+      const progressItems = [
+        {label:'Calories', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + item.cals, 0) / getTargetCalories()) * 100))},
+        {label:'Protein', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.protein || 0), 0) / getPlanDetail().protein) * 100))},
+        {label:'Carbs', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.carbs || 0), 0) / getPlanDetail().carbs) * 100))},
+        {label:'Fat', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.fat || 0), 0) / getPlanDetail().fat) * 100))}
+      ]
+      qs('weeklyProgressBars').innerHTML = progressItems.map(item => `
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${item.label}</span><span>${item.value}%</span></div>
+          <div class="progress-track"><div class="progress-fill" style="width:${item.value}%"></div></div>
+        </div>
+      `).join('')
+
+      const totalProgress = Math.round((progressItems.reduce((sum, item) => sum + item.value, 0) / progressItems.length))
+      qs('nutritionScore').innerHTML = `${totalProgress}`
+      qs('nutritionScoreLabel').innerHTML = totalProgress >= 80 ? 'Excellent balance' : totalProgress >= 60 ? 'On the right track' : 'Needs more consistency'
     }
 
     checkStreak()
@@ -669,6 +801,7 @@
     renderBody()
     renderProfile()
     renderTracking()
+    renderDashboardExtras()
   </script>
 </body>
 </html>
