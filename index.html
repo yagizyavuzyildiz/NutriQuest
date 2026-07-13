@@ -88,6 +88,32 @@
     .chat-input-row textarea::placeholder {color:rgba(220,230,240,0.55)}
     .ai-chip-row {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .ai-chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:#e6eef6;font-size:13px}
+    .coach-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+    .fridge-shell {margin-top:16px;padding:16px;border-radius:16px;background:rgba(4,11,18,0.75);border:1px solid rgba(110,231,183,0.18)}
+    .fridge-header {display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .fridge-meta {margin-top:10px;display:grid;gap:8px}
+    .recipe-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+    .recipe-card {padding:14px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:grid;gap:10px}
+    .recipe-title-row {display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    .stars {color:#facc15;font-size:14px;letter-spacing:1px}
+    .safety-badge {display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700}
+    .safety-badge.safe {background:rgba(74,222,128,0.15);border:1px solid rgba(74,222,128,0.35);color:#bbf7d0}
+    .safety-badge.caution {background:rgba(245,158,11,0.14);border:1px solid rgba(245,158,11,0.35);color:#fde68a}
+    .safety-badge.danger {background:rgba(248,113,113,0.14);border:1px solid rgba(248,113,113,0.35);color:#fecaca}
+    .nutrition-card {padding:10px;border-radius:12px;background:rgba(110,231,183,0.08);border:1px solid rgba(110,231,183,0.2);display:grid;gap:6px}
+    .nutrition-row {display:flex;justify-content:space-between;font-size:12px;color:#e6fff4;gap:10px}
+    .split-two {display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .list-block {padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
+    .allergen-alert {padding:10px;border-radius:10px;font-size:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08)}
+    .rating-row {display:flex;gap:4px;align-items:center}
+    .rating-btn {padding:4px 7px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#f8fafc;cursor:pointer;font-size:12px}
+    .recipe-steps {display:grid;gap:4px;font-size:13px;color:#ddf7eb}
+    .grocery-list {display:grid;gap:10px;margin-top:10px}
+    .grocery-category {padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
+    .grocery-item {display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.06)}
+    .grocery-item:last-child {border-bottom:none}
+    .premium-card {padding:14px;border-radius:14px;background:rgba(3,9,15,0.85);border:1px solid rgba(255,255,255,0.08);display:grid;gap:10px}
+    .photo-drop {padding:12px;border-radius:10px;border:1px dashed rgba(110,231,183,0.3);background:rgba(110,231,183,0.06)}
     textarea {min-height:120px;resize:vertical}
     .tiny {font-size:12px;color:var(--muted)}
     .auth-shell, .onboarding-shell {min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at top left, rgba(110,231,183,0.16), transparent 30%), linear-gradient(180deg,#071018 0%, #071922 100%)}
@@ -323,14 +349,14 @@
       <!-- NutriQuest AI -->
       <div id="ai" class="page hidden">
         <div class="header">
-          <div><div class="title">NutriQuest AI</div><div class="muted">Your personal coach for meals, habits, and recovery</div></div>
+          <div><div class="title">NutriQuest AI Coach</div><div class="muted">Context-aware coaching, fridge-powered recipes, and macro-smart planning</div></div>
         </div>
         <div class="ai-grid">
           <div class="card">
-            <div class="pill">Chat with your coach</div>
+            <div class="pill">Chat with your nutrition coach</div>
             <div id="aiChatHistory" class="chat-list"></div>
             <div class="chat-input-row">
-              <textarea id="aiPrompt" placeholder="Örn: Bugün protein hedefime nasıl yaklaşırım? veya bugün ne yemeliyim?"></textarea>
+              <textarea id="aiPrompt" placeholder="Examples: Why am I not losing weight? What should I eat after training? Make this recipe higher-protein."></textarea>
               <button class="btn" onclick="askAI()">Send</button>
             </div>
             <div class="ai-chip-row">
@@ -338,23 +364,69 @@
               <button class="ai-chip" onclick="quickAsk('workout')">Workout focus</button>
               <button class="ai-chip" onclick="quickAsk('weight')">Weight plan</button>
               <button class="ai-chip" onclick="quickAsk('habit')">Habit boost</button>
+              <button class="ai-chip" onclick="quickAsk('fridge')">Fridge ideas</button>
+              <button class="ai-chip" onclick="quickAsk('budget')">Budget meals</button>
             </div>
-            <div class="muted small" style="margin-top:10px">Suggestions use your current goal, meals, streak, and body data.</div>
+            <div class="muted small" style="margin-top:10px">Responses use your profile, goals, consumed meals, activity, allergies, and conversation memory.</div>
           </div>
           <div class="card">
-            <div class="metric-title">Latest AI response</div>
+            <div class="metric-title">Latest Coach Response</div>
             <div id="aiResponse" class="ai-bubble" style="margin-top:12px">Your coach is ready. Ask a question to get a focused recommendation.</div>
             <div id="aiQuickTips" style="margin-top:12px;display:grid;gap:8px"></div>
           </div>
         </div>
-        <div class="grid" style="margin-top:16px">
+
+        <div class="fridge-shell">
+          <div class="fridge-header">
+            <div>
+              <div class="metric-title">Cook With What's In My Fridge</div>
+              <div class="muted small" style="margin-top:6px">Enter ingredients you already have. Recipes use available items; any extra item is marked optional.</div>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn" onclick="runFridgeGenerator()">Generate Recipes</button>
+              <button class="btn secondary" onclick="clearFridgeResults()">Clear</button>
+            </div>
+          </div>
+          <textarea id="fridgeInput" placeholder="I have pasta, salmon, olive oil, garlic, tomatoes, paprika, black pepper, spinach, and onions." style="margin-top:10px;min-height:92px"></textarea>
+          <div id="fridgeMeta" class="fridge-meta"></div>
+          <div id="fridgeRecipes" class="recipe-grid"></div>
+        </div>
+
+        <div class="coach-grid" style="margin-top:16px">
           <div class="card">
-            <div class="metric-title">Current signals</div>
+            <div class="metric-title">Current Nutrition Signals</div>
             <div id="aiSignals" style="margin-top:10px;display:grid;gap:8px"></div>
           </div>
           <div class="card">
-            <div class="metric-title">Suggested next actions</div>
+            <div class="metric-title">Suggested Next Actions</div>
             <div id="aiActions" style="margin-top:10px;display:grid;gap:8px"></div>
+          </div>
+          <div class="premium-card">
+            <div class="metric-title">Smart Grocery List</div>
+            <div class="tiny">Auto-generated from selected plan and AI-generated recipes.</div>
+            <button class="btn secondary" onclick="buildSmartGroceryList()">Build Grocery List</button>
+            <div id="aiGroceryList" class="grocery-list"></div>
+          </div>
+          <div class="premium-card">
+            <div class="metric-title">Weekly AI Meal Planner</div>
+            <input id="weeklyBudget" type="number" placeholder="Weekly budget (example: 40)" />
+            <input id="weeklyMaxTime" type="number" placeholder="Max cook time per meal (minutes)" />
+            <button class="btn secondary" onclick="generateWeeklyPlan()">Generate 7-Day Plan</button>
+            <div id="weeklyPlannerOut" class="tiny"></div>
+          </div>
+          <div class="premium-card">
+            <div class="metric-title">AI Food Photo Analysis (Beta)</div>
+            <div class="photo-drop">
+              <input id="mealPhotoInput" type="file" accept="image/*" />
+            </div>
+            <button class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
+            <div id="photoAnalysisOut" class="tiny"></div>
+          </div>
+          <div class="premium-card">
+            <div class="metric-title">Leftover Meal Generator</div>
+            <textarea id="leftoverInput" placeholder="Example: cooked chicken, rice, broccoli" style="min-height:80px"></textarea>
+            <button class="btn secondary" onclick="generateLeftoverMealIdeas()">Generate Leftover Ideas</button>
+            <div id="leftoverOut" class="tiny"></div>
           </div>
         </div>
       </div>
@@ -454,6 +526,7 @@
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <input id="profAllergies" placeholder="Allergies (comma separated)" />
+              <input id="profAvoidIngredients" placeholder="Disliked ingredients (comma separated)" />
               <div class="field-group" style="margin-bottom:0">
                 <label>Country</label>
                 <input id="profCountrySearch" placeholder="Search country" oninput="filterCountryOptions(this.value, 'profCountry')" />
@@ -462,6 +535,22 @@
               <input id="profWaterTarget" placeholder="Daily water target" type="number" readonly />
               <input id="profProteinTarget" placeholder="Protein target (g)" type="number" readonly />
               <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" />
+            </div>
+            <div class="field-group" style="margin-top:12px">
+              <label>Dietary Restrictions & Safety Preferences</label>
+              <div class="profile-form-grid" id="restrictionGrid">
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Gluten-Free" />Gluten-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Dairy-Free" />Dairy-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Nut-Free" />Nut-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Egg-Free" />Egg-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Soy-Free" />Soy-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Shellfish-Free" />Shellfish-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Sesame-Free" />Sesame-Free</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Vegetarian" />Vegetarian</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Vegan" />Vegan</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Halal" />Halal</label>
+                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Kosher" />Kosher</label>
+              </div>
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
               <select id="profGoalSelect">
@@ -582,7 +671,7 @@
       dailyLog: [],
       dailyCompleted: [],
       weeklyProgress: {},
-      ui: {achievementFilter:'all', aiConversation: []}
+      ui: {achievementFilter:'all', aiConversation: [], lastGeneratedRecipes: []}
     }
 
     const onboardingState = {step:1, goals:[], habits:[], mealPlanning:'Occasionally', weeklyMealPlan:'Open to trying', activity:'Not Very Active', sex:'Female', age:'', country:'', zip:'', height:'', weight:'', units:'metric', heightFeet:'', heightInches:'', weightLb:''}
@@ -608,6 +697,8 @@
         country: base.country || '',
         zip: base.zip || '',
         units: base.units || 'metric',
+        dietaryRestrictions: Array.isArray(base.dietaryRestrictions) ? base.dietaryRestrictions : [],
+        avoidIngredients: Array.isArray(base.avoidIngredients) ? base.avoidIngredients : [],
         goals: Array.isArray(base.goals) ? base.goals : [],
         habits: Array.isArray(base.habits) ? base.habits : [],
         mealPlanning: base.mealPlanning || 'Occasionally',
@@ -624,6 +715,9 @@
         bodyMetrics: Array.isArray(base.bodyMetrics) ? base.bodyMetrics : [],
         dailyLog: Array.isArray(base.dailyLog) ? base.dailyLog : [],
         aiConversation: Array.isArray(base.aiConversation) ? base.aiConversation : [],
+        aiMemory: base.aiMemory || {likes:[], dislikes:[], preferredStyles:[], reminders:[], budget:null, maxTime:null, learnedFromRatings:[]},
+        recipeRatings: base.recipeRatings || {},
+        groceryChecks: base.groceryChecks || {},
         onboarding: base.onboarding || {},
         dashboardMessage: base.dashboardMessage || 'Welcome back — let’s keep your rhythm strong.',
         nutritionSnapshot: base.nutritionSnapshot || 'Balanced and crafted for your goals.',
@@ -1121,6 +1215,87 @@
       'stay-fit':'Stay Fit'
     }
 
+    const COMMON_ALLERGENS = ['Milk / Dairy','Eggs','Gluten / Wheat','Peanuts','Tree Nuts','Soy','Fish','Shellfish','Sesame','Mustard','Celery','Sulphites','Oats']
+
+    const RESTRICTION_TO_ALLERGEN = {
+      'Gluten-Free':['Gluten / Wheat','Oats'],
+      'Dairy-Free':['Milk / Dairy'],
+      'Nut-Free':['Peanuts','Tree Nuts'],
+      'Egg-Free':['Eggs'],
+      'Soy-Free':['Soy'],
+      'Shellfish-Free':['Shellfish'],
+      'Sesame-Free':['Sesame']
+    }
+
+    const SMART_SUBSTITUTIONS = {
+      milk:['oat milk','almond milk'],
+      butter:['olive oil','avocado oil'],
+      chicken:['turkey','tofu'],
+      rice:['potatoes','pasta'],
+      'greek yogurt':['cottage cheese','soy yogurt'],
+      honey:['maple syrup','date syrup'],
+      pasta:['whole wheat pasta','gluten-free pasta'],
+      salmon:['tuna','chicken'],
+      flour:['rice flour','oat flour'],
+      'peanut butter':['sunflower seed butter','almond butter']
+    }
+
+    const INGREDIENT_ALIASES = {
+      tomatoes:'tomato',
+      onions:'onion',
+      chilies:'chili',
+      chillies:'chili',
+      macaroni:'pasta',
+      spaghetti:'pasta',
+      noodles:'pasta',
+      yoghurt:'greek yogurt',
+      yogurt:'greek yogurt',
+      tuna:'tuna',
+      chickpeas:'chickpea',
+      lentils:'lentil',
+      peppers:'bell pepper',
+      capsicum:'bell pepper',
+      avocadoes:'avocado',
+      mushrooms:'mushroom'
+    }
+
+    const INGREDIENT_DB = {
+      salmon:{category:'Proteins', kcal:208, p:20, c:0, f:13, fiber:0, sugar:0, sodium:59, vitA:50, vitC:4, vitD:10, calcium:9, iron:0.3, magnesium:29, potassium:490, allergens:['Fish'], defaultGram:140},
+      tuna:{category:'Proteins', kcal:130, p:29, c:0, f:1, fiber:0, sugar:0, sodium:45, vitA:20, vitC:0, vitD:6, calcium:8, iron:1.3, magnesium:34, potassium:441, allergens:['Fish'], defaultGram:140},
+      chicken:{category:'Proteins', kcal:165, p:31, c:0, f:3.6, fiber:0, sugar:0, sodium:74, vitA:12, vitC:0, vitD:0, calcium:15, iron:1, magnesium:29, potassium:256, allergens:[], defaultGram:140},
+      turkey:{category:'Proteins', kcal:189, p:29, c:0, f:7, fiber:0, sugar:0, sodium:109, vitA:10, vitC:0, vitD:0, calcium:12, iron:1.2, magnesium:30, potassium:239, allergens:[], defaultGram:140},
+      tofu:{category:'Proteins', kcal:76, p:8, c:1.9, f:4.8, fiber:0.3, sugar:0.6, sodium:7, vitA:27, vitC:0, vitD:0, calcium:350, iron:5.4, magnesium:30, potassium:121, allergens:['Soy'], defaultGram:150},
+      egg:{category:'Proteins', kcal:155, p:13, c:1.1, f:11, fiber:0, sugar:1.1, sodium:124, vitA:160, vitC:0, vitD:2, calcium:50, iron:1.8, magnesium:10, potassium:126, allergens:['Eggs'], defaultGram:100},
+      pasta:{category:'Grains', kcal:157, p:5.8, c:30.9, f:0.9, fiber:1.8, sugar:0.6, sodium:1, vitA:0, vitC:0, vitD:0, calcium:7, iron:1.3, magnesium:18, potassium:44, allergens:['Gluten / Wheat'], defaultGram:160},
+      rice:{category:'Grains', kcal:130, p:2.7, c:28, f:0.3, fiber:0.4, sugar:0.1, sodium:1, vitA:0, vitC:0, vitD:0, calcium:10, iron:0.2, magnesium:12, potassium:35, allergens:[], defaultGram:170},
+      potato:{category:'Vegetables', kcal:87, p:1.9, c:20, f:0.1, fiber:1.8, sugar:0.9, sodium:6, vitA:2, vitC:19, vitD:0, calcium:5, iron:0.3, magnesium:23, potassium:379, allergens:[], defaultGram:180},
+      tomato:{category:'Vegetables', kcal:18, p:0.9, c:3.9, f:0.2, fiber:1.2, sugar:2.6, sodium:5, vitA:42, vitC:14, vitD:0, calcium:10, iron:0.3, magnesium:11, potassium:237, allergens:[], defaultGram:120},
+      spinach:{category:'Vegetables', kcal:23, p:2.9, c:3.6, f:0.4, fiber:2.2, sugar:0.4, sodium:79, vitA:469, vitC:28, vitD:0, calcium:99, iron:2.7, magnesium:79, potassium:558, allergens:[], defaultGram:80},
+      onion:{category:'Vegetables', kcal:40, p:1.1, c:9.3, f:0.1, fiber:1.7, sugar:4.2, sodium:4, vitA:0, vitC:7, vitD:0, calcium:23, iron:0.2, magnesium:10, potassium:146, allergens:[], defaultGram:80},
+      garlic:{category:'Spices', kcal:149, p:6.4, c:33, f:0.5, fiber:2.1, sugar:1, sodium:17, vitA:0, vitC:31, vitD:0, calcium:181, iron:1.7, magnesium:25, potassium:401, allergens:[], defaultGram:10},
+      'olive oil':{category:'Pantry Items', kcal:884, p:0, c:0, f:100, fiber:0, sugar:0, sodium:2, vitA:0, vitC:0, vitD:0, calcium:1, iron:0.6, magnesium:0, potassium:1, allergens:[], defaultGram:14},
+      paprika:{category:'Spices', kcal:282, p:14, c:54, f:13, fiber:35, sugar:10, sodium:68, vitA:2460, vitC:0, vitD:0, calcium:229, iron:21, magnesium:178, potassium:2280, allergens:[], defaultGram:5},
+      'black pepper':{category:'Spices', kcal:251, p:10.4, c:64, f:3.3, fiber:25, sugar:0.6, sodium:20, vitA:15, vitC:21, vitD:0, calcium:443, iron:9.7, magnesium:171, potassium:1259, allergens:[], defaultGram:3},
+      chickpea:{category:'Proteins', kcal:164, p:8.9, c:27.4, f:2.6, fiber:7.6, sugar:4.8, sodium:7, vitA:3, vitC:1.3, vitD:0, calcium:49, iron:2.9, magnesium:48, potassium:291, allergens:[], defaultGram:140},
+      lentil:{category:'Proteins', kcal:116, p:9, c:20, f:0.4, fiber:7.9, sugar:1.8, sodium:2, vitA:8, vitC:1.5, vitD:0, calcium:19, iron:3.3, magnesium:36, potassium:369, allergens:[], defaultGram:140},
+      'greek yogurt':{category:'Dairy', kcal:97, p:9, c:3.9, f:5, fiber:0, sugar:3.6, sodium:36, vitA:27, vitC:0.5, vitD:0, calcium:110, iron:0.1, magnesium:11, potassium:141, allergens:['Milk / Dairy'], defaultGram:150},
+      milk:{category:'Dairy', kcal:42, p:3.4, c:5, f:1, fiber:0, sugar:5, sodium:44, vitA:46, vitC:0, vitD:1.3, calcium:125, iron:0, magnesium:11, potassium:150, allergens:['Milk / Dairy'], defaultGram:180},
+      cheese:{category:'Dairy', kcal:402, p:25, c:1.3, f:33, fiber:0, sugar:0.5, sodium:621, vitA:263, vitC:0, vitD:0.6, calcium:721, iron:0.7, magnesium:28, potassium:98, allergens:['Milk / Dairy'], defaultGram:30},
+      mushroom:{category:'Vegetables', kcal:22, p:3.1, c:3.3, f:0.3, fiber:1, sugar:2, sodium:5, vitA:0, vitC:2.1, vitD:0.2, calcium:3, iron:0.5, magnesium:9, potassium:318, allergens:[], defaultGram:90},
+      avocado:{category:'Fruits', kcal:160, p:2, c:9, f:15, fiber:7, sugar:0.7, sodium:7, vitA:7, vitC:10, vitD:0, calcium:12, iron:0.6, magnesium:29, potassium:485, allergens:[], defaultGram:100},
+      broccoli:{category:'Vegetables', kcal:35, p:2.4, c:7, f:0.4, fiber:3.3, sugar:1.7, sodium:41, vitA:31, vitC:89, vitD:0, calcium:47, iron:0.7, magnesium:21, potassium:316, allergens:[], defaultGram:100},
+      oats:{category:'Grains', kcal:389, p:17, c:66, f:7, fiber:11, sugar:0.9, sodium:2, vitA:0, vitC:0, vitD:0, calcium:54, iron:4.7, magnesium:177, potassium:429, allergens:['Oats'], defaultGram:70},
+      bread:{category:'Grains', kcal:265, p:9, c:49, f:3.2, fiber:2.7, sugar:5, sodium:491, vitA:0, vitC:0, vitD:0, calcium:107, iron:3.6, magnesium:23, potassium:115, allergens:['Gluten / Wheat'], defaultGram:90}
+    }
+
+    const RECIPE_TEMPLATES = [
+      {id:'garlic-salmon-pasta', name:'Healthy Garlic Salmon Pasta', category:'Dinner', difficulty:'Easy', minutes:25, servings:2, core:['salmon','pasta','garlic','olive oil'], optional:['tomato','spinach','onion','black pepper','paprika']},
+      {id:'mediterranean-salmon-bowl', name:'Mediterranean Salmon Bowl', category:'Lunch', difficulty:'Easy', minutes:22, servings:2, core:['salmon','rice'], optional:['tomato','spinach','onion','olive oil','black pepper','paprika']},
+      {id:'creamy-spinach-pasta', name:'Creamy Spinach Pasta', category:'Dinner', difficulty:'Easy', minutes:20, servings:2, core:['pasta','spinach','garlic'], optional:['milk','greek yogurt','onion','olive oil','black pepper','cheese']},
+      {id:'high-protein-power-bowl', name:'High-Protein Power Bowl', category:'Lunch', difficulty:'Medium', minutes:18, servings:2, core:['chicken','rice','broccoli'], optional:['olive oil','onion','black pepper','paprika']},
+      {id:'quick-leftover-skillet', name:'Leftover Recovery Skillet', category:'Dinner', difficulty:'Easy', minutes:15, servings:2, core:['olive oil','onion'], optional:['chicken','rice','broccoli','spinach','tomato','egg','garlic','black pepper']}
+    ]
+
     const COUNTRIES = ['Afghanistan','Albania','Algeria','Andorra','Angola','Antigua and Barbuda','Argentina','Armenia','Australia','Austria','Azerbaijan','Bahamas','Bahrain','Bangladesh','Barbados','Belarus','Belgium','Belize','Benin','Bhutan','Bolivia','Bosnia and Herzegovina','Botswana','Brazil','Brunei','Bulgaria','Burkina Faso','Burundi','Cabo Verde','Cambodia','Cameroon','Canada','Central African Republic','Chad','Chile','China','Colombia','Comoros','Congo','Costa Rica','Croatia','Cuba','Cyprus','Czechia','Denmark','Djibouti','Dominica','Dominican Republic','Ecuador','Egypt','El Salvador','Equatorial Guinea','Eritrea','Estonia','Eswatini','Ethiopia','Fiji','Finland','France','Gabon','Gambia','Georgia','Germany','Ghana','Greece','Grenada','Guatemala','Guinea','Guinea-Bissau','Guyana','Haiti','Honduras','Hungary','Iceland','India','Indonesia','Iran','Iraq','Ireland','Israel','Italy','Jamaica','Japan','Jordan','Kazakhstan','Kenya','Kiribati','Kuwait','Kyrgyzstan','Laos','Latvia','Lebanon','Lesotho','Liberia','Libya','Liechtenstein','Lithuania','Luxembourg','Madagascar','Malawi','Malaysia','Maldives','Mali','Malta','Marshall Islands','Mauritania','Mauritius','Mexico','Micronesia','Moldova','Monaco','Mongolia','Montenegro','Morocco','Mozambique','Myanmar','Namibia','Nauru','Nepal','Netherlands','New Zealand','Nicaragua','Niger','Nigeria','North Korea','North Macedonia','Norway','Oman','Pakistan','Palau','Panama','Papua New Guinea','Paraguay','Peru','Philippines','Poland','Portugal','Qatar','Romania','Russia','Rwanda','Saint Kitts and Nevis','Saint Lucia','Saint Vincent and the Grenadines','Samoa','San Marino','Sao Tome and Principe','Saudi Arabia','Senegal','Serbia','Seychelles','Sierra Leone','Singapore','Slovakia','Slovenia','Solomon Islands','Somalia','South Africa','South Korea','South Sudan','Spain','Sri Lanka','Sudan','Suriname','Sweden','Switzerland','Syria','Taiwan','Tajikistan','Tanzania','Thailand','Timor-Leste','Togo','Tonga','Trinidad and Tobago','Tunisia','Turkey','Turkmenistan','Tuvalu','Uganda','Ukraine','United Arab Emirates','United Kingdom','United States','Uruguay','Uzbekistan','Vanuatu','Venezuela','Vietnam','Yemen','Zambia','Zimbabwe']
 
     const planWaterTargets = {
@@ -1248,43 +1423,380 @@
       if(page === 'body') renderBody()
     }
 
+    function normalizeIngredientName(raw) {
+      return String(raw || '')
+        .toLowerCase()
+        .replace(/[.]/g, '')
+        .replace(/\b(i have|have|got|with|and|plus|leftover|leftovers|i|my|fridge|kitchen)\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+    }
+
+    function canonicalIngredient(name) {
+      const normalized = normalizeIngredientName(name)
+      return INGREDIENT_ALIASES[normalized] || normalized
+    }
+
+    function parseIngredientText(text) {
+      return String(text || '')
+        .split(/[\n,;]+/)
+        .map(item => canonicalIngredient(item))
+        .filter(Boolean)
+        .filter((item, index, arr) => arr.indexOf(item) === index)
+    }
+
+    function ingredientData(name) {
+      return INGREDIENT_DB[canonicalIngredient(name)] || {
+        category:'Pantry Items', kcal:45, p:1.5, c:7, f:1.2, fiber:1.4, sugar:1.2, sodium:35,
+        vitA:8, vitC:3, vitD:0, calcium:16, iron:0.4, magnesium:9, potassium:60, allergens:[], defaultGram:70
+      }
+    }
+
     function getAiContext() {
       const today = new Date().toDateString()
       const todayEntries = app.dailyLog.filter(item => item.date === today)
       const todayCalories = todayEntries.reduce((sum, item) => sum + item.cals, 0)
       const todayProtein = todayEntries.reduce((sum, item) => sum + (item.protein || 0), 0)
+      const todayCarbs = todayEntries.reduce((sum, item) => sum + (item.carbs || 0), 0)
+      const todayFat = todayEntries.reduce((sum, item) => sum + (item.fat || 0), 0)
       const target = getTargetCalories()
+      const plan = getPlanDetail()
+      const proteinTarget = app.user.proteinTarget || plan.protein
+      const carbsTarget = app.user.carbsTarget || plan.carbs
+      const fatTarget = app.user.fatTarget || plan.fat
       const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
       const latestWeight = latest ? latest.weight : '—'
-      const plan = getPlanDetail()
+      const restrictionAllergens = (app.user.dietaryRestrictions || []).flatMap(item => RESTRICTION_TO_ALLERGEN[item] || [])
+      const allergyProfile = [...(app.user.allergies || []), ...restrictionAllergens]
       return {
         todayCalories,
         todayProtein,
+        todayCarbs,
+        todayFat,
         target,
-        latestWeight,
         plan,
+        latestWeight,
         streak: app.user.streak,
         level: app.user.level,
         goal: getGoalLabel(),
         goalId: app.user.goal || 'lose-weight',
-        proteinTarget: app.user.proteinTarget || plan.protein,
+        proteinTarget,
+        carbsTarget,
+        fatTarget,
+        remainingCalories: Math.max(0, target - todayCalories),
+        remainingProtein: Math.max(0, proteinTarget - todayProtein),
+        remainingCarbs: Math.max(0, carbsTarget - todayCarbs),
+        remainingFat: Math.max(0, fatTarget - todayFat),
         activity: app.user.activity || 'Sedentary',
         diet: app.user.diet || 'Omnivore',
-        allergies: app.user.allergies || []
+        allergies: app.user.allergies || [],
+        dietaryRestrictions: app.user.dietaryRestrictions || [],
+        avoidIngredients: app.user.avoidIngredients || [],
+        aiMemory: app.user.aiMemory || {likes:[], dislikes:[], preferredStyles:[], reminders:[], budget:null, maxTime:null, learnedFromRatings:[]},
+        allergyProfile
       }
     }
 
-    function getMealSuggestion(context) {
-      const goalId = context.goalId || 'lose-weight'
-      const suggestions = {
-        'lose-weight': ['Grilled Chicken', 'Quinoa Salad', 'Greek Salad'],
-        'maintain-weight': ['Salmon', 'Tofu Bowl', 'Turkey Balls'],
-        'gain-weight': ['Protein Shake', 'Avocado Toast', 'Brown Rice'],
-        'gain-muscle': ['Salmon', 'Stir-fry', 'Protein Shake'],
-        'stay-fit': ['Grilled Fish', 'Lentil Soup', 'Sweet Potato']
+    function aggregateNutrition(ingredientNames, servings = 2) {
+      const totals = ingredientNames.reduce((sum, ingredient) => {
+        const data = ingredientData(ingredient)
+        const grams = data.defaultGram || 100
+        const ratio = grams / 100
+        sum.kcal += data.kcal * ratio
+        sum.p += data.p * ratio
+        sum.c += data.c * ratio
+        sum.f += data.f * ratio
+        sum.fiber += data.fiber * ratio
+        sum.sugar += data.sugar * ratio
+        sum.sodium += data.sodium * ratio
+        sum.vitA += data.vitA * ratio
+        sum.vitC += data.vitC * ratio
+        sum.vitD += data.vitD * ratio
+        sum.calcium += data.calcium * ratio
+        sum.iron += data.iron * ratio
+        sum.magnesium += data.magnesium * ratio
+        sum.potassium += data.potassium * ratio
+        return sum
+      }, {kcal:0,p:0,c:0,f:0,fiber:0,sugar:0,sodium:0,vitA:0,vitC:0,vitD:0,calcium:0,iron:0,magnesium:0,potassium:0})
+
+      return {
+        total: Object.fromEntries(Object.entries(totals).map(([k,v]) => [k, Number(v.toFixed(1))])),
+        perServing: Object.fromEntries(Object.entries(totals).map(([k,v]) => [k, Number((v / servings).toFixed(1))]))
       }
-      const pool = suggestions[goalId] || suggestions['lose-weight']
-      return pool[Math.floor(Math.random() * pool.length)]
+    }
+
+    function detectAllergensFromIngredients(ingredientNames) {
+      const found = new Set()
+      ingredientNames.forEach(name => {
+        const data = ingredientData(name)
+        ;(data.allergens || []).forEach(allergen => found.add(allergen))
+      })
+      return Array.from(found)
+    }
+
+    function buildSafetyBadge(allergens, context) {
+      const avoid = new Set((context.allergyProfile || []).map(item => item.toLowerCase()))
+      const conflicts = allergens.filter(item => avoid.has(item.toLowerCase()))
+      if(conflicts.length) {
+        return {level:'danger', label:'Not Recommended (Contains Allergens)', details:conflicts}
+      }
+      if(allergens.length) {
+        return {level:'caution', label:'Contains an Ingredient You Avoid', details:allergens}
+      }
+      return {level:'safe', label:'Safe for You', details:[]}
+    }
+
+    function listOptionalUpgrades(missingCore, usedIngredients) {
+      const upgrades = []
+      missingCore.slice(0, 2).forEach(item => {
+        upgrades.push(`Adding ${item} would improve flavor or texture.`)
+      })
+      usedIngredients.forEach(item => {
+        const subs = SMART_SUBSTITUTIONS[item]
+        if(subs && subs.length) upgrades.push(`${item} -> ${subs.join(' / ')}`)
+      })
+      return upgrades.slice(0, 4)
+    }
+
+    function buildRecipeSteps(recipe, usedIngredients) {
+      const protein = usedIngredients.find(item => ingredientData(item).category === 'Proteins')
+      const carb = usedIngredients.find(item => ['Grains'].includes(ingredientData(item).category))
+      const vegetables = usedIngredients.filter(item => ingredientData(item).category === 'Vegetables')
+      return [
+        `Prep ingredients: chop aromatic items and portion all listed ingredients for ${recipe.servings} servings.`,
+        protein ? `Cook ${protein} first in a hot pan until fully done and lightly browned.` : 'Start by heating the pan and building flavor with aromatics.',
+        carb ? `Cook ${carb} according to package instructions while building the main pan.` : 'Build the base with your available ingredients in one pan.',
+        vegetables.length ? `Add ${vegetables.join(', ')} and cook until tender-crisp.` : 'Layer in the remaining ingredients and adjust moisture.',
+        `Combine everything, season to taste, and simmer 2-3 minutes so flavors blend.`,
+        `Serve warm. Portion equally into ${recipe.servings} servings.`
+      ]
+    }
+
+    function filterIngredientsForProfile(ingredients, context) {
+      const avoidWords = new Set([...(context.avoidIngredients || []), ...(context.aiMemory?.dislikes || [])].map(item => canonicalIngredient(item)))
+      return ingredients.filter(item => !avoidWords.has(canonicalIngredient(item)))
+    }
+
+    function generateFridgeRecipes(rawIngredients, context) {
+      const parsed = filterIngredientsForProfile(parseIngredientText(rawIngredients), context)
+      if(parsed.length < 2) return {recipes:[], parsed}
+
+      const candidates = RECIPE_TEMPLATES.map(template => {
+        const usedCore = template.core.filter(item => parsed.includes(item))
+        const usedOptional = template.optional.filter(item => parsed.includes(item))
+        const missingCore = template.core.filter(item => !parsed.includes(item))
+        const usedIngredients = [...usedCore, ...usedOptional]
+        if(usedIngredients.length < 3 || usedCore.length < 1) return null
+
+        const nutrition = aggregateNutrition(usedIngredients, template.servings)
+        const allergens = detectAllergensFromIngredients(usedIngredients)
+        const safety = buildSafetyBadge(allergens, context)
+        const macroFit = 100 - (
+          Math.abs(context.remainingCalories - nutrition.perServing.kcal) * 0.04 +
+          Math.abs(context.remainingProtein - nutrition.perServing.p) * 1.4 +
+          Math.abs(context.remainingCarbs - nutrition.perServing.c) * 0.5 +
+          Math.abs(context.remainingFat - nutrition.perServing.f) * 0.8
+        )
+
+        return {
+          id: `${template.id}-${usedIngredients.join('-')}`,
+          name: template.name,
+          shortDescription: `Built from your fridge items to support your ${context.goal.toLowerCase()} goal.`,
+          difficulty: template.difficulty,
+          cookingTime: `${template.minutes} min`,
+          servings: template.servings,
+          category: template.category,
+          ingredients: usedIngredients,
+          steps: buildRecipeSteps(template, usedIngredients),
+          tips: [`Use high heat for better texture.`, `Taste before serving and adjust seasoning.`],
+          optionalImprovements: listOptionalUpgrades(missingCore, usedIngredients),
+          substitutions: usedIngredients.flatMap(item => (SMART_SUBSTITUTIONS[item] || []).map(sub => `${item} -> ${sub}`)).slice(0, 5),
+          storage: 'Store in an airtight container for up to 2 days in the fridge. Reheat once thoroughly.',
+          nutrition,
+          allergens,
+          safety,
+          missingCore,
+          score: Number(macroFit.toFixed(1)),
+          stars: '★★★★★'
+        }
+      }).filter(Boolean)
+
+      const sorted = candidates.sort((a, b) => b.score - a.score)
+      const recipes = sorted.slice(0, 3)
+      return {recipes, parsed}
+    }
+
+    function renderFridgeRecipes(recipes, parsedIngredients, context) {
+      const meta = qs('fridgeMeta')
+      const out = qs('fridgeRecipes')
+      if(!meta || !out) return
+      if(!recipes.length) {
+        meta.innerHTML = `<div class="allergen-alert">Add at least 3 useful ingredients to generate practical recipes.</div>`
+        out.innerHTML = ''
+        return
+      }
+
+      meta.innerHTML = `
+        <div class="stat"><span class="muted">Detected ingredients</span><span>${parsedIngredients.join(', ')}</span></div>
+        <div class="stat"><span class="muted">Remaining today</span><span>${context.remainingCalories} kcal • P ${context.remainingProtein}g • C ${context.remainingCarbs}g • F ${context.remainingFat}g</span></div>
+      `
+
+      out.innerHTML = recipes.map((recipe, index) => {
+        const total = recipe.nutrition.total
+        const serving = recipe.nutrition.perServing
+        const rating = app.user.recipeRatings?.[recipe.id] || 0
+        const allergenText = recipe.allergens.length ? `Contains: ${recipe.allergens.join(', ')}` : 'No major allergens detected.'
+        const substitutionLine = recipe.substitutions.length ? recipe.substitutions.join(' • ') : 'No substitutions needed.'
+        const improvements = recipe.optionalImprovements.length ? recipe.optionalImprovements.join(' • ') : 'No additional ingredients needed.'
+        return `
+          <div class="recipe-card">
+            <div class="recipe-title-row">
+              <div>
+                <div class="tiny">Option ${index + 1}</div>
+                <strong>${recipe.name}</strong>
+                <div class="stars">${recipe.stars}</div>
+              </div>
+              <span class="safety-badge ${recipe.safety.level}">${recipe.safety.level === 'safe' ? '🟢' : recipe.safety.level === 'caution' ? '🟡' : '🔴'} ${recipe.safety.label}</span>
+            </div>
+            <div class="tiny">${recipe.shortDescription}</div>
+            <div class="split-two">
+              <div class="list-block"><strong>Difficulty</strong><div class="tiny">${recipe.difficulty}</div></div>
+              <div class="list-block"><strong>Cooking time</strong><div class="tiny">${recipe.cookingTime}</div></div>
+              <div class="list-block"><strong>Servings</strong><div class="tiny">${recipe.servings}</div></div>
+              <div class="list-block"><strong>Category</strong><div class="tiny">${recipe.category}</div></div>
+            </div>
+            <div class="list-block"><strong>Complete ingredient list</strong><div class="tiny" style="margin-top:6px">${recipe.ingredients.join(', ')}</div></div>
+            <div class="list-block"><strong>Step-by-step</strong><div class="recipe-steps">${recipe.steps.map((step, idx) => `<div>${idx + 1}. ${step}</div>`).join('')}</div></div>
+            <div class="list-block"><strong>Cooking tips</strong><div class="tiny" style="margin-top:6px">${recipe.tips.join(' • ')}</div></div>
+            <div class="list-block"><strong>Optional improvements</strong><div class="tiny" style="margin-top:6px">${improvements}</div></div>
+            <div class="list-block"><strong>Optional substitutions</strong><div class="tiny" style="margin-top:6px">${substitutionLine}</div></div>
+            <div class="list-block"><strong>Storage</strong><div class="tiny" style="margin-top:6px">${recipe.storage}</div></div>
+            <div class="nutrition-card">
+              <strong>Nutrition Analysis</strong>
+              <div class="nutrition-row"><span>Total calories</span><span>${total.kcal} kcal</span></div>
+              <div class="nutrition-row"><span>Total protein</span><span>${total.p} g</span></div>
+              <div class="nutrition-row"><span>Total carbs</span><span>${total.c} g</span></div>
+              <div class="nutrition-row"><span>Total fat</span><span>${total.f} g</span></div>
+              <div class="nutrition-row"><span>Fiber / Sugar / Sodium</span><span>${total.fiber} g / ${total.sugar} g / ${total.sodium} mg</span></div>
+              <div class="nutrition-row"><span>Per serving</span><span>${serving.kcal} kcal • P ${serving.p}g • C ${serving.c}g • F ${serving.f}g</span></div>
+              <div class="nutrition-row"><span>Micros</span><span>A ${total.vitA} mcg • C ${total.vitC} mg • D ${total.vitD} mcg • Ca ${total.calcium} mg • Fe ${total.iron} mg • Mg ${total.magnesium} mg • K ${total.potassium} mg</span></div>
+            </div>
+            <div class="allergen-alert">⚠️ ${allergenText}</div>
+            <div class="rating-row"><span class="tiny">Rate recipe:</span>${[1,2,3,4,5].map(star => `<button class="rating-btn" onclick="rateRecipe('${recipe.id}', ${star})">${star}★</button>`).join('')}<span class="tiny">Current: ${rating || 'Not rated'}</span></div>
+          </div>
+        `
+      }).join('')
+
+      app.ui.lastGeneratedRecipes = recipes
+    }
+
+    function runFridgeGenerator(inputOverride = null) {
+      const input = inputOverride || qs('fridgeInput')?.value || ''
+      const context = getAiContext()
+      const result = generateFridgeRecipes(input, context)
+      renderFridgeRecipes(result.recipes, result.parsed, context)
+      if(result.recipes.length) {
+        qs('aiResponse').innerHTML = `I generated ${result.recipes.length} practical recipe options using your current ingredients. Each one includes full steps, allergen safety, substitutions, and macro-aware nutrition analysis.`
+      }
+    }
+
+    function clearFridgeResults() {
+      if(qs('fridgeInput')) qs('fridgeInput').value = ''
+      if(qs('fridgeMeta')) qs('fridgeMeta').innerHTML = ''
+      if(qs('fridgeRecipes')) qs('fridgeRecipes').innerHTML = ''
+      app.ui.lastGeneratedRecipes = []
+    }
+
+    function rateRecipe(recipeId, rating) {
+      if(!app.user.recipeRatings) app.user.recipeRatings = {}
+      app.user.recipeRatings[recipeId] = rating
+      if(!app.user.aiMemory) app.user.aiMemory = {likes:[], dislikes:[], preferredStyles:[], reminders:[], budget:null, maxTime:null, learnedFromRatings:[]}
+      app.user.aiMemory.learnedFromRatings = app.user.aiMemory.learnedFromRatings || []
+      app.user.aiMemory.learnedFromRatings.push({recipeId, rating, date:new Date().toISOString()})
+      save()
+      const currentInput = qs('fridgeInput')?.value || ''
+      if(currentInput.trim()) runFridgeGenerator(currentInput)
+    }
+
+    function buildSmartGroceryList() {
+      const listEl = qs('aiGroceryList')
+      if(!listEl) return
+      const planItems = getPlanDetail().shoppingList || []
+      const recipeItems = (app.ui.lastGeneratedRecipes || []).flatMap(recipe => recipe.ingredients)
+      const allItems = [...new Set([...planItems.map(canonicalIngredient), ...recipeItems.map(canonicalIngredient)])]
+      if(!allItems.length) {
+        listEl.innerHTML = '<div class="tiny">Generate recipes first to build a personalized grocery list.</div>'
+        return
+      }
+      const grouped = {}
+      allItems.forEach(item => {
+        const category = ingredientData(item).category || 'Pantry Items'
+        if(!grouped[category]) grouped[category] = []
+        grouped[category].push(item)
+      })
+
+      listEl.innerHTML = Object.entries(grouped).map(([category, items]) => `
+        <div class="grocery-category">
+          <strong>${category}</strong>
+          ${items.map(item => {
+            const checked = Boolean(app.user.groceryChecks?.[item])
+            return `<label class="grocery-item"><span>${item}</span><input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleGroceryItem('${item}', this.checked)" /></label>`
+          }).join('')}
+        </div>
+      `).join('')
+    }
+
+    function toggleGroceryItem(item, checked) {
+      if(!app.user.groceryChecks) app.user.groceryChecks = {}
+      app.user.groceryChecks[item] = checked
+      save()
+    }
+
+    function generateWeeklyPlan() {
+      const budget = Number(qs('weeklyBudget')?.value || 0)
+      const maxTime = Number(qs('weeklyMaxTime')?.value || 25)
+      if(budget > 0) app.user.aiMemory.budget = budget
+      if(maxTime > 0) app.user.aiMemory.maxTime = maxTime
+      save()
+      const output = qs('weeklyPlannerOut')
+      if(!output) return
+      const goal = getGoalLabel()
+      const breakfast = ['Greek yogurt bowl','Egg and spinach toast','Oats with fruit']
+      const lunch = ['Chicken rice bowl','Mediterranean tuna salad','Lentil power bowl']
+      const dinner = ['Garlic salmon pasta','Vegetable tofu stir-fry','Lean turkey skillet']
+      const snacks = ['Protein shake','Fruit and nuts','Cottage cheese bowl']
+      const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun']
+      output.innerHTML = days.map((day, idx) => `${day}: ${breakfast[idx % breakfast.length]} | ${lunch[idx % lunch.length]} | ${dinner[idx % dinner.length]} | ${snacks[idx % snacks.length]}`).join('<br>')
+      output.innerHTML += `<br><br>Goal: ${goal}. Budget target: ${budget ? '$' + budget : 'Not set'}/week. Max meal time: ${maxTime} min.`
+    }
+
+    function analyzeFoodPhoto() {
+      const file = qs('mealPhotoInput')?.files?.[0]
+      const out = qs('photoAnalysisOut')
+      if(!out) return
+      if(!file) {
+        out.textContent = 'Upload a meal photo first. In this front-end demo, analysis is simulated and can be connected to a vision API backend.'
+        return
+      }
+      const context = getAiContext()
+      out.innerHTML = `Detected (estimated): mixed protein + vegetables + grain. Estimated portion: medium. Calories: 520 kcal. Macros: P 34g / C 48g / F 20g. Nutrition score: 78/100. Fit for your ${context.goal.toLowerCase()} goal: moderate fit. Improvement: increase vegetables and reduce added oil if your calorie target is tight.`
+    }
+
+    function generateLeftoverMealIdeas() {
+      const input = qs('leftoverInput')?.value || ''
+      const out = qs('leftoverOut')
+      if(!out) return
+      const ingredients = parseIngredientText(input)
+      if(ingredients.length < 2) {
+        out.textContent = 'Add at least two leftover ingredients.'
+        return
+      }
+      const ideas = [
+        `Quick skillet: saute ${ingredients.join(', ')} with spices for a one-pan meal.`,
+        `Soup-style bowl: simmer ${ingredients.join(', ')} with water or stock and blend part of it for texture.`,
+        `High-protein wrap/bowl: combine ${ingredients.join(', ')} and add fresh greens if available.`
+      ]
+      out.innerHTML = ideas.join('<br>')
     }
 
     function renderChat() {
@@ -1293,113 +1805,169 @@
       if(!chatHistory) return
       chatHistory.innerHTML = history.length
         ? history.map(msg => `<div class="chat-bubble ${msg.role === 'user' ? 'user' : 'assistant'}">${msg.text}</div>`).join('')
-        : `<div class="tiny">Merhaba! Bugün neyi değiştirmek istersin?</div>`
+        : `<div class="tiny">Your AI coach is ready. Try: "I have salmon, pasta, garlic and spinach".</div>`
       chatHistory.scrollTop = chatHistory.scrollHeight
+    }
+
+    function extractConversationMemory(prompt) {
+      const text = (prompt || '').toLowerCase()
+      if(!app.user.aiMemory) app.user.aiMemory = {likes:[], dislikes:[], preferredStyles:[], reminders:[], budget:null, maxTime:null, learnedFromRatings:[]}
+      const memory = app.user.aiMemory
+
+      const dislikeMatch = text.match(/(?:don't like|do not like|hate) ([a-z\s]+)/)
+      if(dislikeMatch?.[1]) memory.dislikes = [...new Set([...(memory.dislikes || []), canonicalIngredient(dislikeMatch[1].trim())])]
+
+      const likeMatch = text.match(/(?:i like|i love|prefer) ([a-z\s]+)/)
+      if(likeMatch?.[1]) memory.likes = [...new Set([...(memory.likes || []), canonicalIngredient(likeMatch[1].trim())])]
+
+      const budgetMatch = text.match(/\$\s?(\d+)/)
+      if(budgetMatch?.[1]) memory.budget = Number(budgetMatch[1])
+
+      const minMatch = text.match(/under\s?(\d+)\s?min/)
+      if(minMatch?.[1]) memory.maxTime = Number(minMatch[1])
+
+      if(text.includes('allergic to')) {
+        const allergyGuess = text.split('allergic to')[1]?.split(/[.,]/)[0] || ''
+        const parsedAllergy = allergyGuess.split(/and|,/).map(item => item.trim()).filter(Boolean)
+        app.user.allergies = [...new Set([...(app.user.allergies || []), ...parsedAllergy])]
+      }
+    }
+
+    function getMealSuggestion(context) {
+      const suggestions = {
+        'lose-weight': ['Greek Salad + Chicken', 'Tofu and vegetable stir-fry', 'Light salmon bowl'],
+        'maintain-weight': ['Balanced turkey bowl', 'Mediterranean fish plate', 'Quinoa and chickpea salad'],
+        'gain-weight': ['Avocado tuna pasta', 'Chicken rice bowl + yogurt', 'Nut and oat smoothie'],
+        'gain-muscle': ['High-protein salmon pasta', 'Turkey rice power bowl', 'Chicken potato recovery plate'],
+        'stay-fit': ['Lentil soup + toast', 'Vegetable omelet bowl', 'Tuna spinach salad']
+      }
+      const pool = suggestions[context.goalId] || suggestions['stay-fit']
+      return pool[Math.floor(Math.random() * pool.length)]
+    }
+
+    function buildCoachReply(prompt, context) {
+      const normalized = String(prompt || '').toLowerCase()
+      const memory = context.aiMemory || {}
+      const disliked = (memory.dislikes || []).join(', ')
+      const turnIndex = app.ui.aiConversation.filter(msg => msg.role === 'user').length
+      const suggestion = getMealSuggestion(context)
+      const variants = [
+        `You are currently at ${context.todayCalories}/${context.target} kcal, with ${context.remainingCalories} kcal left. Protein remaining is ${context.remainingProtein} g.`,
+        `Today you consumed ${context.todayProtein}g protein and still have ${context.remainingProtein}g to reach your target.`,
+        `Your current plan is ${context.plan.title}, and your profile suggests ${context.activity.toLowerCase()} activity.`
+      ]
+      let response = `${variants[(turnIndex - 1) % variants.length]} `
+      let tips = []
+      let actions = []
+
+      if(normalized.includes('fridge') || normalized.includes('i have') || normalized.includes('leftover') || normalized.includes('ingredients')) {
+        const fridgeText = qs('fridgeInput')?.value || prompt
+        runFridgeGenerator(fridgeText)
+        response += `I generated practical recipe options from your available ingredients and aligned them with your remaining macros.`
+        tips = ['Choose the option with the best protein-to-calorie ratio.', 'Use optional upgrades only if available.', 'Check the safety badge before cooking.']
+        actions = ['Generate recipes', 'Build grocery list', 'Log selected meal']
+      } else if(normalized.includes('why am i not losing') || normalized.includes('not losing weight')) {
+        response += `The most common blockers are hidden calories, low protein consistency, and inconsistent weekend intake. Keep protein high, stay inside your weekly calorie average, and track liquids/snacks. For today, a meal like ${suggestion} fits your goal.`
+        tips = ['Track all snacks and drinks for 7 days.', 'Hit protein first in each main meal.', 'Keep steps and sleep consistent.']
+        actions = ['Open calorie tracking', 'Review meal plan', 'Set a weekly check-in']
+      } else if(normalized.includes('before workout') || normalized.includes('pre workout')) {
+        response += `For pre-workout (60-120 min), choose moderate carbs + lean protein, low fat. Example: rice + tuna or yogurt + oats if tolerated.`
+        tips = ['Avoid heavy fats right before training.', 'Hydrate with water and electrolytes.', 'Aim 20-30g protein pre workout.']
+        actions = ['Track pre-workout meal', 'Set workout reminder', 'Ask post-workout follow-up']
+      } else if(normalized.includes('after workout') || normalized.includes('post workout')) {
+        response += `For post-workout, prioritize protein (25-40g) and carbs to recover glycogen. You still need ${context.remainingProtein}g protein today, so a high-protein plate is ideal.`
+        tips = ['Eat within 1-2 hours after training.', 'Include both protein and carbs.', 'Keep hydration steady.']
+        actions = ['Generate high-protein recipe', 'Log post-workout meal', 'Review daily targets']
+      } else if(normalized.includes('cheap') || normalized.includes('budget')) {
+        response += `Budget-friendly strategy: center meals around eggs, lentils, chickpeas, rice, and seasonal vegetables. Based on your profile, this can still meet protein and calorie targets.`
+        tips = ['Batch cook proteins.', 'Repeat 2-3 core meals weekly.', 'Use frozen vegetables to reduce cost.']
+        actions = ['Set weekly budget', 'Generate weekly planner', 'Build grocery list']
+      } else if(normalized.includes('healthy') || normalized.includes('is this meal healthy')) {
+        response += `A healthy meal for your goal should balance protein, fiber, and portion size. For your remaining macros, keep meals around ${Math.round(context.remainingCalories / 2)} kcal with at least ${Math.max(20, Math.round(context.remainingProtein / 2))}g protein.`
+        tips = ['Anchor each meal with protein.', 'Add 1-2 high-fiber vegetables.', 'Use fats with measured portions.']
+        actions = ['Generate macro-fit recipe', 'Log a meal', 'Review day summary']
+      } else {
+        response += `Best next step: choose one meal that fits your remaining macros and log it. Suggested meal: ${suggestion}.`
+        tips = ['Keep meals simple and repeatable.', 'Use your profile targets as guardrails.', 'Aim for consistency, not perfection.']
+        actions = ['Generate recipe ideas', 'Open tracking', 'Open plan']
+      }
+
+      if(disliked) {
+        response += ` I will avoid these ingredients in recommendations: ${disliked}.`
+      }
+
+      return {response, tips, actions}
+    }
+
+    function renderAiSignalsAndActions(context, actions = null) {
+      qs('aiSignals').innerHTML = `
+        <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
+        <div class="stat"><span class="muted">Daily target</span><span>${context.target} kcal</span></div>
+        <div class="stat"><span class="muted">Consumed</span><span>${context.todayCalories} kcal</span></div>
+        <div class="stat"><span class="muted">Remaining</span><span>${context.remainingCalories} kcal</span></div>
+        <div class="stat"><span class="muted">Protein remaining</span><span>${context.remainingProtein} g</span></div>
+        <div class="stat"><span class="muted">Carbs remaining</span><span>${context.remainingCarbs} g</span></div>
+        <div class="stat"><span class="muted">Fat remaining</span><span>${context.remainingFat} g</span></div>
+        <div class="stat"><span class="muted">Allergy profile</span><span>${(context.allergyProfile || []).length ? context.allergyProfile.join(', ') : 'No major allergens configured'}</span></div>
+      `
+      const defaultActions = actions || ['Review your meal plan', 'Track your next meal', 'Generate fridge recipes']
+      qs('aiActions').innerHTML = defaultActions.map(action => {
+        const goPage = action.toLowerCase().includes('plan') ? 'plan' : action.toLowerCase().includes('track') || action.toLowerCase().includes('meal') ? 'tracking' : 'ai'
+        return `<div class="challenge-item"><span>${action}</span><button class="btn secondary" onclick="document.querySelector('[data-page=${goPage}]').click()">Go</button></div>`
+      }).join('')
     }
 
     function quickAsk(topic) {
       const prompts = {
-        protein: 'Bugün protein hedefime nasıl ulaşırım?',
-        workout: 'Bugün hangi tür antrenman odaklı yaklaşım daha mantıklı?',
-        weight: 'Kilo hedefim için öğünlerimi nasıl ayarlamalıyım?',
-        habit: 'Günlük ritmimi nasıl daha iyi hale getirebilirim?'
+        protein: 'How can I hit my protein target with my remaining calories?',
+        workout: 'What should I eat before and after workout today?',
+        weight: 'Why might I not be progressing toward my weight goal?',
+        habit: 'Motivate me and give one practical habit for today.',
+        fridge: 'I have pasta, salmon, olive oil, garlic, tomatoes, spinach, and onions.',
+        budget: 'Can you make a cheaper plan under $40 per week?'
       }
-      qs('aiPrompt').value = prompts[topic] || ''
-      askAI(prompts[topic])
+      const selected = prompts[topic] || ''
+      if(qs('aiPrompt')) qs('aiPrompt').value = selected
+      askAI(selected)
     }
 
     function askAI(promptOverride) {
-      const context = getAiContext()
-      const prompt = (promptOverride || qs('aiPrompt').value || '').trim()
+      const prompt = (promptOverride || qs('aiPrompt')?.value || '').trim()
       if(!prompt) return
+      const context = getAiContext()
+
+      extractConversationMemory(prompt)
 
       app.ui.aiConversation.push({role:'user', text:prompt})
       saveAiConversation()
       renderChat()
-      qs('aiPrompt').value = ''
+      if(qs('aiPrompt')) qs('aiPrompt').value = ''
 
-      let response = ''
-      let tips = []
-      let actions = []
-
-      const normalized = prompt.toLowerCase()
-      const turnIndex = app.ui.aiConversation.filter(msg => msg.role === 'user').length
-      const mealSuggestion = getMealSuggestion(context)
-      const calorieGap = Math.max(0, context.target - context.todayCalories)
-      const remainingProtein = Math.max(0, context.proteinTarget - context.todayProtein)
-
-      if(normalized.includes('merhaba') || normalized.includes('selam') || normalized.includes('hi') || normalized.includes('hello')) {
-        const greetingVariants = [
-          `Merhaba! Bugün ${context.goal} hedefin için en iyi adım, ${mealSuggestion} gibi dengeli bir seçenek ile öğünlerini biraz daha netleştirmek.`,
-          `Merhaba! Şu an ${context.todayCalories}/${context.target} kcal seviyesindesin; bu yüzden bugün küçük ama istikrarlı bir adım çok değerli olacak.`,
-          `Merhaba! ${context.streak} günlük streak’in var; bu, bugün sadece bir öğün kaydetmekle bile momentumunu koruyabileceğin anlamına geliyor.`
-        ]
-        response = greetingVariants[(turnIndex - 1) % greetingVariants.length]
-        tips = ['Bugünü kısa bir planla başlat', 'Bir öğünü kaydet', 'Suyunu takip et']
-        actions = ['Öğünlerini güncelle', 'Plan sayfasını aç', 'Haftalık hedeflerini kontrol et']
-      } else if(normalized.includes('protein') || normalized.includes('besin') || normalized.includes('protein hedef')) {
-        response = `Şu anki girişine göre ${context.todayProtein}g protein tüketmişsin. Hedefin olan ${context.proteinTarget}g’e ulaşmak için yaklaşık ${remainingProtein}g daha eklemen iyi olur. ${mealSuggestion} gibi bir seçenek bugün seni çok rahatlatır.`
-        tips = ['Proteinli atıştırmalık ekle', 'Öğle yemeğini protein odaklı yap', 'Her öğünde 25–35g protein hedefle']
-        actions = ['Bir proteinli öğün ekle', 'Akşam yemeğini güncelle', 'Su tüketimini koru']
-      } else if(normalized.includes('workout') || normalized.includes('antrenman') || normalized.includes('egzersiz') || normalized.includes('spor')) {
-        response = `${context.streak} günlük streak’in ve ${context.goal} hedefin var. Bugün 25–30 dakikalık bir antrenman, hafif mobilite ve kısa bir yürüyüşle çok dengeli bir tempo yakalayabilirsin.`
-        tips = ['20–30 dk kuvvet çalış', 'Akşam yürüyüşü ekle', 'İyileşmeyi hafif tut']
-        actions = ['Challenge sayfasını aç', 'Antrenmanı kaydet', 'Proteinli bir öğün seç']
-      } else if(normalized.includes('weight') || normalized.includes('kilo') || normalized.includes('zayıf') || normalized.includes('vermek') || normalized.includes('almak')) {
-        response = `Şu anki planın ${context.plan.title} ve son kayıtlı kilon ${context.latestWeight} kg. Bugün kalori hedefine yakın kalmak, protein tüketimini yüksek tutmak ve öğünleri düzenli tutmak en mantıklı yaklaşım olacak.`
-        tips = ['Porsiyonları dengeli tut', 'Sebze ve protein odaklı seç', 'Geç saat atıştırmalıklarını azalt']
-        actions = ['Meal planini gözden geçir', 'Bugünün öğünlerini logla', 'Vücut analizini kontrol et']
-      } else if(normalized.includes('yorgun') || normalized.includes('enerji') || normalized.includes('bitkin') || normalized.includes('uyku') || normalized.includes('uykum')) {
-        response = `Bugün kendini yorgun hissediyorsan, en iyi yaklaşım hafif ama düzenli bir gün. ${context.todayCalories}/${context.target} kcal seviyesinde kalmak, bol su ve dengeli bir öğünle çok daha iyi hissedebilirsin.`
-        tips = ['Sakin bir yürüyüş yap', 'Aç kalmadan düzenli ye', 'Erken yatma hedefi koy']
-        actions = ['Su hedefini kontrol et', 'Hafif bir öğün seç', 'Yarın için plan oluştur']
-      } else if(normalized.includes('ne ye') || normalized.includes('ne yem') || normalized.includes('öner') || normalized.includes('menu') || normalized.includes('bugün ne') || normalized.includes('yemek')) {
-        response = `Bugün için sana ${mealSuggestion} öneriyorum. Bu seçenek ${context.goal} hedefinle uyumlu ve ${context.diet} beslenme tarzına göre de rahat uygulanabilir.`
-        tips = ['Öğünleri küçük parçalara ayır', 'Protein ve lif ekle', 'Tatlı ihtiyacını meyveyle karşıla']
-        actions = ['Bu öğünü kaydet', 'Plan sayfasını aç', 'Günün kalan kısmını takip et']
-      } else if(normalized.includes('ben') || normalized.includes('kişisel') || normalized.includes('sorum') || normalized.includes('neden') || normalized.includes('nasıl') || normalized.includes('hakkımda')) {
-        response = `Şu anki verilerine göre senin en güçlü tarafın ${context.streak} günlük streak’in ve ${context.goal} hedefin. ${context.activity} seviyesinde hareket eden bir profilin var; bu yüzden küçük ama düzenli adımlar seni en iyi şekilde ilerletir.`
-        tips = ['İstikrarlı kal', 'Hedefini görünür tut', 'Her öğünü planlı yap']
-        actions = ['Bugünkü hedefini güncelle', 'Bir challenge başlat', 'Öğün planını kontrol et']
-      } else {
-        response = `Bugünkü genel görünümün güçlü. ${context.todayCalories}/${context.target} kcal seviyesinde, protein hedefin ise ${context.todayProtein}/${context.proteinTarget}g. ${calorieGap > 0 ? `Kalan ${calorieGap} kcal'lik kısmı dengeli bir atıştırmalıkla kapatabilirsin.` : 'Bugün hedefe çok yaklaştın; sadece düzeni koru.'}`
-        tips = ['Gün sonunu planlı kapat', 'Protein ve lif dengesini koru', 'Birkaç dakika hareket et']
-        actions = ['Bir öğün ekle', 'Planı aç', 'Günün ilerleyişini kontrol et']
-      }
+      const {response, tips, actions} = buildCoachReply(prompt, context)
 
       setTimeout(() => {
         app.ui.aiConversation.push({role:'assistant', text:response})
         saveAiConversation()
         renderChat()
         qs('aiResponse').innerHTML = response
-        qs('aiQuickTips').innerHTML = tips.map(tip => `<div class="stat"><span class="muted">Tip</span><span>${tip}</span></div>`).join('')
-        qs('aiSignals').innerHTML = `
-          <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
-          <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
-          <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
-          <div class="stat"><span class="muted">Streak</span><span>${context.streak} days</span></div>
-        `
-        qs('aiActions').innerHTML = actions.map(action => `<div class="challenge-item"><span>${action}</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Go</button></div>`).join('')
-      }, 450)
+        qs('aiQuickTips').innerHTML = tips.map(tip => `<div class="stat"><span class="muted">Coach tip</span><span>${tip}</span></div>`).join('')
+        renderAiSignalsAndActions(getAiContext(), actions)
+      }, 300)
     }
 
     function renderAI() {
       const context = getAiContext()
       renderChat()
-      qs('aiSignals').innerHTML = `
-        <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
-        <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
-        <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
-        <div class="stat"><span class="muted">Latest weight</span><span>${context.latestWeight} kg</span></div>
-      `
-      qs('aiActions').innerHTML = `
-        <div class="challenge-item"><span>Review your meal plan</span><button class="btn secondary" onclick="document.querySelector('[data-page=plan]').click()">Open</button></div>
-        <div class="challenge-item"><span>Track today's meals</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Track</button></div>
-        <div class="challenge-item"><span>Complete a challenge</span><button class="btn secondary" onclick="document.querySelector('[data-page=challenges]').click()">Start</button></div>
-      `
+      renderAiSignalsAndActions(context)
       if(!app.ui.aiConversation.length) {
-        qs('aiResponse').innerHTML = 'Merhaba! Sana bugün nasıl yardımcı olayım?'
+        qs('aiResponse').innerHTML = 'Ask anything about progress, macros, training meals, or fridge ingredients. I will personalize the answer to your profile.'
       }
+      if(qs('weeklyBudget')) qs('weeklyBudget').value = app.user.aiMemory?.budget || ''
+      if(qs('weeklyMaxTime')) qs('weeklyMaxTime').value = app.user.aiMemory?.maxTime || ''
+      if(qs('fridgeMeta') && !qs('fridgeMeta').innerHTML.trim()) {
+        qs('fridgeMeta').innerHTML = '<div class="tiny">Generate at least one recipe set to unlock grocery and rating learning.</div>'
+      }
+      buildSmartGroceryList()
     }
 
     function checkStreak() {
@@ -1482,9 +2050,21 @@
     function renderMeals() {
       let html = ''
       meals.forEach(m => {
-        html += `<div class="meal-card"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-size:28px">${m.icon}</div><strong>${m.name}</strong><div class="muted">${m.cal} cal</div></div><div style="font-size:12px;text-align:right"><div>P: ${m.p}g</div><div>C: ${m.c}g</div><div>F: ${m.f}g</div></div></div></div>`
+        const allergens = inferMealAllergens(m)
+        const safety = buildSafetyBadge(allergens, getAiContext())
+        html += `<div class="meal-card"><div style="display:flex;justify-content:space-between;gap:12px"><div><div style="font-size:28px">${m.icon}</div><strong>${m.name}</strong><div class="muted">${m.cal} cal</div></div><div style="font-size:12px;text-align:right"><div>P: ${m.p}g</div><div>C: ${m.c}g</div><div>F: ${m.f}g</div></div></div><div class="tiny" style="margin-top:8px"><span class="safety-badge ${safety.level}">${safety.level === 'safe' ? '🟢' : safety.level === 'caution' ? '🟡' : '🔴'} ${safety.label}</span></div><div class="tiny" style="margin-top:6px">Allergen Information: ${allergens.length ? allergens.join(', ') : 'No major allergens detected.'}</div></div>`
       })
       qs('mealList').innerHTML = html
+    }
+
+    function inferMealAllergens(meal) {
+      const name = String(meal?.name || '').toLowerCase()
+      const allergens = []
+      if(name.includes('salmon') || name.includes('fish') || name.includes('tuna')) allergens.push('Fish')
+      if(name.includes('egg')) allergens.push('Eggs')
+      if(name.includes('shake') || name.includes('greek') || name.includes('yogurt')) allergens.push('Milk / Dairy')
+      if(name.includes('toast') || name.includes('brown rice') || name.includes('quinoa') || name.includes('pasta')) allergens.push('Gluten / Wheat')
+      return [...new Set(allergens)]
     }
 
     function setPlan(id) {
@@ -1716,6 +2296,7 @@
       qs('profActivity').value = app.user.activity || 'Not Very Active'
       qs('profDiet').value = app.user.diet || 'Omnivore'
       qs('profAllergies').value = (app.user.allergies || []).join(', ')
+      qs('profAvoidIngredients').value = (app.user.avoidIngredients || []).join(', ')
       populateCountryDropdowns()
       qs('profCountry').value = app.user.country || ''
       const plan = getPlanDetail(app.user.goal)
@@ -1730,6 +2311,9 @@
       qs('reminderMeal').checked = app.user.reminders?.meal ?? true
       qs('reminderWorkout').checked = app.user.reminders?.workout ?? false
       qs('reminderSleep').checked = app.user.reminders?.sleep ?? false
+      document.querySelectorAll('.restriction-check').forEach(checkbox => {
+        checkbox.checked = (app.user.dietaryRestrictions || []).includes(checkbox.value)
+      })
       qs('profActivitySummary').innerHTML = app.user.activity || 'Not Very Active'
       qs('profDietSummary').innerHTML = app.user.diet || 'Omnivore'
       renderAchieve()
@@ -1742,12 +2326,14 @@
       app.user.activity = qs('profActivity').value
       app.user.diet = qs('profDiet').value
       app.user.allergies = qs('profAllergies').value.split(',').map(item => item.trim()).filter(Boolean)
+      app.user.avoidIngredients = qs('profAvoidIngredients').value.split(',').map(item => canonicalIngredient(item.trim())).filter(Boolean)
       app.user.country = qs('profCountry').value
       app.user.workoutGoal = parseInt(qs('profWorkoutGoal').value) || 3
       app.user.goal = qs('profGoalSelect').value
       app.user.mealPlanning = qs('profMealPlanning').value
       app.user.weeklyMealPlan = qs('profWeeklyMealPlan').value
       app.user.habits = qs('profHabits').value.split(',').map(item => item.trim()).filter(Boolean)
+      app.user.dietaryRestrictions = Array.from(document.querySelectorAll('.restriction-check:checked')).map(checkbox => checkbox.value)
       app.user.goals = [mapPlanGoalToPrimaryGoal(app.user.goal)]
       app.user.reminders = {
         water: qs('reminderWater').checked,
@@ -1773,6 +2359,7 @@
       app.bodyMetrics = []
       app.dailyLog = []
       app.ui.aiConversation = []
+      app.ui.lastGeneratedRecipes = []
       saveUsers()
       showAuthScreen()
       toggleAuthMode('signin')
