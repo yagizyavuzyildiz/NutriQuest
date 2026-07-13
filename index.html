@@ -78,12 +78,14 @@
     .profile-form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
     .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
     .ai-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
-    .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8}
-    .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding-right:4px;max-height:320px;overflow:auto}
-    .chat-bubble {padding:12px 14px;border-radius:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);color:#e6eef6;line-height:1.5}
-    .chat-bubble.user {margin-left:auto;background:rgba(110,231,183,0.14);border-color:rgba(110,231,183,0.22)}
+    .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
+    .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding:10px;max-height:320px;overflow:auto;border-radius:14px;background:rgba(2,8,12,0.72);border:1px solid rgba(255,255,255,0.06)}
+    .chat-bubble {padding:12px 14px;border-radius:14px;background:rgba(6,12,18,0.9);border:1px solid rgba(255,255,255,0.08);color:#e6eef6;line-height:1.5;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)}
+    .chat-bubble.user {margin-left:auto;background:linear-gradient(135deg,rgba(110,231,183,0.16),rgba(56,189,248,0.12));border-color:rgba(110,231,183,0.22);color:#f3fff9}
+    .chat-bubble.assistant {background:rgba(5,10,15,0.92)}
     .chat-input-row {display:flex;gap:10px;align-items:flex-end}
-    .chat-input-row textarea {min-height:90px;resize:vertical;flex:1}
+    .chat-input-row textarea {min-height:90px;resize:vertical;flex:1;background:rgba(2,8,12,0.8);color:#f7fbff;border:1px solid rgba(110,231,183,0.2);border-radius:12px;padding:12px;box-shadow:inset 0 1px 2px rgba(0,0,0,0.25)}
+    .chat-input-row textarea::placeholder {color:rgba(220,230,240,0.55)}
     .ai-chip-row {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
     .ai-chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:#e6eef6;font-size:13px}
     textarea {min-height:120px;resize:vertical}
@@ -564,22 +566,52 @@
       const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
       const latestWeight = latest ? latest.weight : '—'
       const plan = getPlanDetail()
-      return {todayCalories, todayProtein, target, latestWeight, plan, streak: app.user.streak, level: app.user.level, goal: getGoalLabel(), proteinTarget: app.user.proteinTarget || plan.protein}
+      return {
+        todayCalories,
+        todayProtein,
+        target,
+        latestWeight,
+        plan,
+        streak: app.user.streak,
+        level: app.user.level,
+        goal: getGoalLabel(),
+        goalId: app.user.goal || 'lose-weight',
+        proteinTarget: app.user.proteinTarget || plan.protein,
+        activity: app.user.activity || 'Sedentary',
+        diet: app.user.diet || 'Omnivore',
+        allergies: app.user.allergies || []
+      }
+    }
+
+    function getMealSuggestion(context) {
+      const goalId = context.goalId || 'lose-weight'
+      const suggestions = {
+        'lose-weight': ['Grilled Chicken', 'Quinoa Salad', 'Greek Salad'],
+        'maintain-weight': ['Salmon', 'Tofu Bowl', 'Turkey Balls'],
+        'gain-weight': ['Protein Shake', 'Avocado Toast', 'Brown Rice'],
+        'gain-muscle': ['Salmon', 'Stir-fry', 'Protein Shake'],
+        'stay-fit': ['Grilled Fish', 'Lentil Soup', 'Sweet Potato']
+      }
+      const pool = suggestions[goalId] || suggestions['lose-weight']
+      return pool[Math.floor(Math.random() * pool.length)]
     }
 
     function renderChat() {
       const history = app.ui.aiConversation || []
-      qs('aiChatHistory').innerHTML = history.length
-        ? history.map(msg => `<div class="chat-bubble ${msg.role === 'user' ? 'user' : ''}">${msg.text}</div>`).join('')
-        : `<div class="tiny">Start with a question like “What should I focus on today?”</div>`
+      const chatHistory = qs('aiChatHistory')
+      if(!chatHistory) return
+      chatHistory.innerHTML = history.length
+        ? history.map(msg => `<div class="chat-bubble ${msg.role === 'user' ? 'user' : 'assistant'}">${msg.text}</div>`).join('')
+        : `<div class="tiny">Merhaba! Bugün neyi değiştirmek istersin?</div>`
+      chatHistory.scrollTop = chatHistory.scrollHeight
     }
 
     function quickAsk(topic) {
       const prompts = {
-        protein: 'How can I hit my protein target today?',
-        workout: 'What is the best workout focus for today?',
-        weight: 'How should I adjust my meals for my weight goal?',
-        habit: 'How can I improve my daily consistency?'
+        protein: 'Bugün protein hedefime nasıl ulaşırım?',
+        workout: 'Bugün hangi tür antrenman odaklı yaklaşım daha mantıklı?',
+        weight: 'Kilo hedefim için öğünlerimi nasıl ayarlamalıyım?',
+        habit: 'Günlük ritmimi nasıl daha iyi hale getirebilirim?'
       }
       qs('aiPrompt').value = prompts[topic] || ''
       askAI(prompts[topic])
@@ -600,28 +632,48 @@
       let actions = []
 
       const normalized = prompt.toLowerCase()
-      if(normalized.includes('protein') || normalized.includes('besin') || normalized.includes('protein hedef')) {
-        const remaining = Math.max(0, context.proteinTarget - context.todayProtein)
-        response = `I checked your current intake and you’re at ${context.todayProtein}g protein so far. You’re about ${remaining}g away from your target, so the smartest move is to add one protein-forward snack or make dinner more protein-heavy.`
-        tips = ['Add a high-protein snack', 'Keep lunch protein-forward', 'Aim for 25–35g protein per meal']
-        actions = ['Log one more protein-rich meal', 'Choose grilled chicken or tofu for dinner', 'Drink water and keep the meal balanced']
-      } else if(normalized.includes('workout') || normalized.includes('antrenman') || normalized.includes('egzersiz')) {
-        response = `Your streak is ${context.streak} days and your goal is ${context.goal}. A strong choice today is a 25–30 minute session with mobility, a short strength block, and a brisk walk to keep recovery easy.`
-        tips = ['Do 20–30 min strength work', 'Add a 10 min walk after dinner', 'Keep recovery simple and consistent']
-        actions = ['Open your challenge page', 'Log your workout after finishing', 'Use a protein-rich post-workout meal']
-      } else if(normalized.includes('weight') || normalized.includes('kilo') || normalized.includes('zayıf') || normalized.includes('vermek')) {
-        response = `Your current plan is ${context.plan.title}, and your latest recorded weight is ${context.latestWeight} kg. The best move is to stay close to your calorie target, keep protein high, and keep meals predictable rather than extreme.`
-        tips = ['Keep portions predictable', 'Prioritize vegetables and lean protein', 'Avoid late-night grazing']
-        actions = ['Review your meal plan', 'Track today’s meals', 'Check your body analysis trend']
-      } else if(normalized.includes('habit') || normalized.includes('alışkanlık') || normalized.includes('rut')) {
-        response = `Consistency is your strongest lever right now. Since your streak is ${context.streak} days, a small win like logging one meal or drinking a glass of water will build momentum fast.`
-        tips = ['Log one meal before dinner', 'Set a reminder for water', 'Keep your plan visible']
-        actions = ['Complete one daily challenge', 'Open the tracking page', 'Take a 5-minute reset walk']
+      const turnIndex = app.ui.aiConversation.filter(msg => msg.role === 'user').length
+      const mealSuggestion = getMealSuggestion(context)
+      const calorieGap = Math.max(0, context.target - context.todayCalories)
+      const remainingProtein = Math.max(0, context.proteinTarget - context.todayProtein)
+
+      if(normalized.includes('merhaba') || normalized.includes('selam') || normalized.includes('hi') || normalized.includes('hello')) {
+        const greetingVariants = [
+          `Merhaba! Bugün ${context.goal} hedefin için en iyi adım, ${mealSuggestion} gibi dengeli bir seçenek ile öğünlerini biraz daha netleştirmek.`,
+          `Merhaba! Şu an ${context.todayCalories}/${context.target} kcal seviyesindesin; bu yüzden bugün küçük ama istikrarlı bir adım çok değerli olacak.`,
+          `Merhaba! ${context.streak} günlük streak’in var; bu, bugün sadece bir öğün kaydetmekle bile momentumunu koruyabileceğin anlamına geliyor.`
+        ]
+        response = greetingVariants[(turnIndex - 1) % greetingVariants.length]
+        tips = ['Bugünü kısa bir planla başlat', 'Bir öğünü kaydet', 'Suyunu takip et']
+        actions = ['Öğünlerini güncelle', 'Plan sayfasını aç', 'Haftalık hedeflerini kontrol et']
+      } else if(normalized.includes('protein') || normalized.includes('besin') || normalized.includes('protein hedef')) {
+        response = `Şu anki girişine göre ${context.todayProtein}g protein tüketmişsin. Hedefin olan ${context.proteinTarget}g’e ulaşmak için yaklaşık ${remainingProtein}g daha eklemen iyi olur. ${mealSuggestion} gibi bir seçenek bugün seni çok rahatlatır.`
+        tips = ['Proteinli atıştırmalık ekle', 'Öğle yemeğini protein odaklı yap', 'Her öğünde 25–35g protein hedefle']
+        actions = ['Bir proteinli öğün ekle', 'Akşam yemeğini güncelle', 'Su tüketimini koru']
+      } else if(normalized.includes('workout') || normalized.includes('antrenman') || normalized.includes('egzersiz') || normalized.includes('spor')) {
+        response = `${context.streak} günlük streak’in ve ${context.goal} hedefin var. Bugün 25–30 dakikalık bir antrenman, hafif mobilite ve kısa bir yürüyüşle çok dengeli bir tempo yakalayabilirsin.`
+        tips = ['20–30 dk kuvvet çalış', 'Akşam yürüyüşü ekle', 'İyileşmeyi hafif tut']
+        actions = ['Challenge sayfasını aç', 'Antrenmanı kaydet', 'Proteinli bir öğün seç']
+      } else if(normalized.includes('weight') || normalized.includes('kilo') || normalized.includes('zayıf') || normalized.includes('vermek') || normalized.includes('almak')) {
+        response = `Şu anki planın ${context.plan.title} ve son kayıtlı kilon ${context.latestWeight} kg. Bugün kalori hedefine yakın kalmak, protein tüketimini yüksek tutmak ve öğünleri düzenli tutmak en mantıklı yaklaşım olacak.`
+        tips = ['Porsiyonları dengeli tut', 'Sebze ve protein odaklı seç', 'Geç saat atıştırmalıklarını azalt']
+        actions = ['Meal planini gözden geçir', 'Bugünün öğünlerini logla', 'Vücut analizini kontrol et']
+      } else if(normalized.includes('yorgun') || normalized.includes('enerji') || normalized.includes('bitkin') || normalized.includes('uyku') || normalized.includes('uykum')) {
+        response = `Bugün kendini yorgun hissediyorsan, en iyi yaklaşım hafif ama düzenli bir gün. ${context.todayCalories}/${context.target} kcal seviyesinde kalmak, bol su ve dengeli bir öğünle çok daha iyi hissedebilirsin.`
+        tips = ['Sakin bir yürüyüş yap', 'Aç kalmadan düzenli ye', 'Erken yatma hedefi koy']
+        actions = ['Su hedefini kontrol et', 'Hafif bir öğün seç', 'Yarın için plan oluştur']
+      } else if(normalized.includes('ne ye') || normalized.includes('ne yem') || normalized.includes('öner') || normalized.includes('menu') || normalized.includes('bugün ne') || normalized.includes('yemek')) {
+        response = `Bugün için sana ${mealSuggestion} öneriyorum. Bu seçenek ${context.goal} hedefinle uyumlu ve ${context.diet} beslenme tarzına göre de rahat uygulanabilir.`
+        tips = ['Öğünleri küçük parçalara ayır', 'Protein ve lif ekle', 'Tatlı ihtiyacını meyveyle karşıla']
+        actions = ['Bu öğünü kaydet', 'Plan sayfasını aç', 'Günün kalan kısmını takip et']
+      } else if(normalized.includes('ben') || normalized.includes('kişisel') || normalized.includes('sorum') || normalized.includes('neden') || normalized.includes('nasıl') || normalized.includes('hakkımda')) {
+        response = `Şu anki verilerine göre senin en güçlü tarafın ${context.streak} günlük streak’in ve ${context.goal} hedefin. ${context.activity} seviyesinde hareket eden bir profilin var; bu yüzden küçük ama düzenli adımlar seni en iyi şekilde ilerletir.`
+        tips = ['İstikrarlı kal', 'Hedefini görünür tut', 'Her öğünü planlı yap']
+        actions = ['Bugünkü hedefini güncelle', 'Bir challenge başlat', 'Öğün planını kontrol et']
       } else {
-        const calorieGap = Math.max(0, context.target - context.todayCalories)
-        response = `Today’s snapshot looks solid. You’ve logged ${context.todayCalories} kcal out of ${context.target} kcal, and your focus is ${context.goal}. The best next step is to close the ${calorieGap} kcal gap with one balanced meal or snack.`
-        tips = ['Stay close to your calorie target', 'Balance carbs and protein', 'Use a simple meal prep routine']
-        actions = ['Log your next meal', 'Review your plan', 'Check your AI tips again later']
+        response = `Bugünkü genel görünümün güçlü. ${context.todayCalories}/${context.target} kcal seviyesinde, protein hedefin ise ${context.todayProtein}/${context.proteinTarget}g. ${calorieGap > 0 ? `Kalan ${calorieGap} kcal'lik kısmı dengeli bir atıştırmalıkla kapatabilirsin.` : 'Bugün hedefe çok yaklaştın; sadece düzeni koru.'}`
+        tips = ['Gün sonunu planlı kapat', 'Protein ve lif dengesini koru', 'Birkaç dakika hareket et']
+        actions = ['Bir öğün ekle', 'Planı aç', 'Günün ilerleyişini kontrol et']
       }
 
       setTimeout(() => {
@@ -655,7 +707,7 @@
         <div class="challenge-item"><span>Complete a challenge</span><button class="btn secondary" onclick="document.querySelector('[data-page=challenges]').click()">Start</button></div>
       `
       if(!app.ui.aiConversation.length) {
-        qs('aiResponse').innerHTML = 'Your coach is ready. Ask a question to get a focused recommendation.'
+        qs('aiResponse').innerHTML = 'Merhaba! Sana bugün nasıl yardımcı olayım?'
       }
     }
 
