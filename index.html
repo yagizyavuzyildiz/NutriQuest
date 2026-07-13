@@ -77,6 +77,11 @@
     .achievement-filter-btn.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.28)}
     .profile-form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
     .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
+    .ai-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8}
+    .ai-chip-row {display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .ai-chip {padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:#e6eef6;font-size:13px}
+    textarea {min-height:120px;resize:vertical}
     .tiny {font-size:12px;color:var(--muted)}
     footer {opacity:0.4;font-size:12px;margin-top:24px;text-align:center}
   </style>
@@ -91,11 +96,12 @@
         <a class="nav-link" data-page="plan">📋 Meal Plan</a>
         <a class="nav-link" data-page="challenges">⚡ Challenges</a>
         <a class="nav-link" data-page="achievements">🏆 Achievements</a>
+        <a class="nav-link" data-page="ai">🤖 NutriQuest AI</a>
         <a class="nav-link" data-page="tracking">📅 Calorie Tracking</a>
         <a class="nav-link" data-page="profile">👤 Profile</a>
         <a class="nav-link" data-page="body">📈 Body Analysis</a>
       </nav>
-      <footer style="margin-top:auto">v0.3 Premium</footer>
+      <footer style="margin-top:auto">v0.4 AI</footer>
     </aside>
     <main class="content">
       <!-- Dashboard -->
@@ -219,6 +225,42 @@
           <button class="achievement-filter-btn" data-filter="Hidden">Hidden</button>
         </div>
         <div id="achievementsList"></div>
+      </div>
+
+      <!-- NutriQuest AI -->
+      <div id="ai" class="page hidden">
+        <div class="header">
+          <div><div class="title">NutriQuest AI</div><div class="muted">Your personal coach for meals, habits, and recovery</div></div>
+        </div>
+        <div class="ai-grid">
+          <div class="card">
+            <div class="pill">Ask your coach</div>
+            <textarea id="aiPrompt" placeholder="Örn: Bugün protein hedefime nasıl yaklaşırım? veya bugün ne yemeliyim?"></textarea>
+            <div class="ai-chip-row">
+              <button class="ai-chip" onclick="quickAsk('protein')">Protein focus</button>
+              <button class="ai-chip" onclick="quickAsk('workout')">Workout focus</button>
+              <button class="ai-chip" onclick="quickAsk('weight')">Weight plan</button>
+              <button class="ai-chip" onclick="quickAsk('habit')">Habit boost</button>
+            </div>
+            <button class="btn" style="margin-top:12px" onclick="askAI()">Get recommendation</button>
+            <div class="muted small" style="margin-top:10px">AI suggestions use your current goal, daily intake, streak, and body data.</div>
+          </div>
+          <div class="card">
+            <div class="metric-title">AI response</div>
+            <div id="aiResponse" class="ai-bubble" style="margin-top:12px">Your coach is ready. Ask a question to get a focused recommendation.</div>
+            <div id="aiQuickTips" style="margin-top:12px;display:grid;gap:8px"></div>
+          </div>
+        </div>
+        <div class="grid" style="margin-top:16px">
+          <div class="card">
+            <div class="metric-title">Current signals</div>
+            <div id="aiSignals" style="margin-top:10px;display:grid;gap:8px"></div>
+          </div>
+          <div class="card">
+            <div class="metric-title">Suggested next actions</div>
+            <div id="aiActions" style="margin-top:10px;display:grid;gap:8px"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Calorie Tracking -->
@@ -488,9 +530,93 @@
       if(page === 'plan') renderPlan()
       if(page === 'challenges') renderChallenges()
       if(page === 'achievements') renderAchieve()
+      if(page === 'ai') renderAI()
       if(page === 'profile') renderProfile()
       if(page === 'tracking') renderTracking()
       if(page === 'body') renderBody()
+    }
+
+    function getAiContext() {
+      const today = new Date().toDateString()
+      const todayEntries = app.dailyLog.filter(item => item.date === today)
+      const todayCalories = todayEntries.reduce((sum, item) => sum + item.cals, 0)
+      const todayProtein = todayEntries.reduce((sum, item) => sum + (item.protein || 0), 0)
+      const target = getTargetCalories()
+      const latest = app.bodyMetrics[app.bodyMetrics.length - 1]
+      const latestWeight = latest ? latest.weight : '—'
+      const plan = getPlanDetail()
+      return {todayCalories, todayProtein, target, latestWeight, plan, streak: app.user.streak, level: app.user.level, goal: getGoalLabel(), proteinTarget: app.user.proteinTarget || plan.protein}
+    }
+
+    function quickAsk(topic) {
+      const prompts = {
+        protein: 'How can I hit my protein target today?',
+        workout: 'What is the best workout focus for today?',
+        weight: 'How should I adjust my meals for my weight goal?',
+        habit: 'How can I improve my daily consistency?'
+      }
+      qs('aiPrompt').value = prompts[topic] || ''
+      askAI(prompts[topic])
+    }
+
+    function askAI(promptOverride) {
+      const context = getAiContext()
+      const prompt = (promptOverride || qs('aiPrompt').value || '').toLowerCase()
+      let response = ''
+      let tips = []
+      let actions = []
+
+      if(prompt.includes('protein') || prompt.includes('besin') || prompt.includes('protein hedef')) {
+        const remaining = Math.max(0, context.proteinTarget - context.todayProtein)
+        response = `Your protein intake is ${context.todayProtein}g today. You are ${remaining}g away from your target of ${context.proteinTarget}g. A simple move is to add one protein-rich snack such as Greek yogurt, eggs, or a shake.`
+        tips = ['Add a high-protein snack', 'Keep lunch protein-forward', 'Aim for 25–35g protein per meal']
+        actions = ['Log one more protein-rich meal', 'Choose grilled chicken or tofu for dinner', 'Drink water and keep the meal balanced']
+      } else if(prompt.includes('workout') || prompt.includes('antrenman') || prompt.includes('egzersiz')) {
+        response = `Your current streak is ${context.streak} days and your goal is ${context.goal}. A focused workout today would be a 25–30 minute session with mobility, a short strength block, and a brisk walk.`
+        tips = ['Do 20–30 min strength work', 'Add a 10 min walk after dinner', 'Keep recovery simple and consistent']
+        actions = ['Open your challenge page', 'Log your workout after finishing', 'Use a protein-rich post-workout meal']
+      } else if(prompt.includes('weight') || prompt.includes('kilo') || prompt.includes('zayıf') || prompt.includes('vermek')) {
+        response = `Your current plan is ${context.plan.title}. To support your target, stay close to your daily calorie target of ${context.target} kcal and keep protein high. Your latest recorded weight is ${context.latestWeight} kg.`
+        tips = ['Keep portions predictable', 'Prioritize vegetables and lean protein', 'Avoid late-night grazing']
+        actions = ['Review your meal plan', 'Track today’s meals', 'Check your body analysis trend']
+      } else if(prompt.includes('habit') || prompt.includes('alışkanlık') || prompt.includes('rut')) {
+        response = `Consistency is your strongest lever right now. Since your streak is ${context.streak} days, a small win like logging one meal or drinking a glass of water now will build momentum.`
+        tips = ['Log one meal before dinner', 'Set a reminder for water', 'Keep your plan visible']
+        actions = ['Complete one daily challenge', 'Open the tracking page', 'Take a 5-minute reset walk']
+      } else {
+        const calorieGap = Math.max(0, context.target - context.todayCalories)
+        response = `Today’s snapshot looks promising. You have logged ${context.todayCalories} kcal out of ${context.target} kcal, and your current focus is ${context.goal}. The best next step is to close the ${calorieGap} kcal gap with a balanced meal or snack.`
+        tips = ['Stay close to your calorie target', 'Balance carbs and protein', 'Use a simple meal prep routine']
+        actions = ['Log your next meal', 'Review your plan', 'Check your AI tips again later']
+      }
+
+      qs('aiResponse').innerHTML = response
+      qs('aiQuickTips').innerHTML = tips.map(tip => `<div class="stat"><span class="muted">Tip</span><span>${tip}</span></div>`).join('')
+      qs('aiSignals').innerHTML = `
+        <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
+        <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
+        <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
+        <div class="stat"><span class="muted">Streak</span><span>${context.streak} days</span></div>
+      `
+      qs('aiActions').innerHTML = actions.map(action => `<div class="challenge-item"><span>${action}</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Go</button></div>`).join('')
+    }
+
+    function renderAI() {
+      const context = getAiContext()
+      qs('aiSignals').innerHTML = `
+        <div class="stat"><span class="muted">Goal</span><span>${context.goal}</span></div>
+        <div class="stat"><span class="muted">Calories today</span><span>${context.todayCalories}/${context.target} kcal</span></div>
+        <div class="stat"><span class="muted">Protein today</span><span>${context.todayProtein}/${context.proteinTarget} g</span></div>
+        <div class="stat"><span class="muted">Latest weight</span><span>${context.latestWeight} kg</span></div>
+      `
+      qs('aiActions').innerHTML = `
+        <div class="challenge-item"><span>Review your meal plan</span><button class="btn secondary" onclick="document.querySelector('[data-page=plan]').click()">Open</button></div>
+        <div class="challenge-item"><span>Track today's meals</span><button class="btn secondary" onclick="document.querySelector('[data-page=tracking]').click()">Track</button></div>
+        <div class="challenge-item"><span>Complete a challenge</span><button class="btn secondary" onclick="document.querySelector('[data-page=challenges]').click()">Start</button></div>
+      `
+      if(!qs('aiResponse').innerText || qs('aiResponse').innerText.includes('ready')) {
+        askAI('What should I focus on today?')
+      }
     }
 
     function checkStreak() {
