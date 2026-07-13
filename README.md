@@ -17,11 +17,15 @@ The AI stack is implemented in `index.html` and designed to be backend-ready:
 - Timeout via `AbortController`
 - Retry + exponential backoff via `callWithRetries(...)`
 - Fallback provider (`heuristic`) when cloud call fails
+- Circuit breaker and automatic cool-down on repeated provider failures
+- Request rate limiting to keep interaction stable under burst traffic
 
 4. Prompt quality and safety
 - `buildSystemPrompt(...)` applies role, language style, safety, and uncertainty behavior.
 - Prompt-injection checks via `detectPromptInjection(...)`
 - Outbound redaction for PII/secrets via `redactSensitive(...)`
+- Abusive/jailbreak-style prompt detection with safe refusal fallback
+- Mandatory premium response layout normalization for consistent output quality
 
 5. Context & memory
 - Token/size-bounded history window via `buildHistoryWindow(...)`
@@ -38,13 +42,27 @@ The AI stack is implemented in `index.html` and designed to be backend-ready:
   - latency, success/error, retry/fallback counts
   - empty answer rate
   - thumbs up/down feedback
+- Recent request log (`aiRequestLog`) for runtime diagnostics
+- Export metrics as JSON from the AI panel for release-gate validation
 - UI cards: runtime status + observability summary
+
+8. Premium chat controls
+- Stop in-flight generation (`cancelAiRequest`)
+- Retry last user prompt (`retryLastAiPrompt`)
+- Streaming-aware incremental rendering in chat UI
+- Pending-state guard to prevent overlapping requests
 
 ## Environment
 
 Use `.env.example` as reference for backend/API integration.
 
 Important: provider API keys must stay server-side.
+
+### Runtime keys added for premium quality
+
+- Generation: temperature, top_p, frequency/presence penalty, max_output_tokens
+- Context sizing: max prompt length, history turns/chars, max RAG chunks
+- Reliability/guardrails: rate limit, abuse cooldown, circuit threshold/cooldown
 
 ## Local Run
 
@@ -63,3 +81,13 @@ This repo is currently static (`index.html`).
 ## Suggested Next Step
 
 Move AI runtime code into separate modules (`ai/runtime.ts`, `ai/guardrails.ts`, `ai/rag.ts`) once the project adopts a multi-file build setup.
+
+## Release Gate (Recommended)
+
+Use these minimum thresholds before shipping cloud-backed mode broadly:
+
+- p95 latency <= 2.5s
+- fallback ratio <= 8%
+- empty response rate <= 1%
+- thumbs-up ratio >= 75%
+- hallucination rate (manual 30-case audit) <= 5%
