@@ -737,6 +737,7 @@
     </main>
   </div>
 
+  <script src="utils/nutrition.js"></script>
   <script>
     const STORAGE_KEYS = {users:'nq_users',activeUser:'nq_active_user',legacyUser:'nq_user'}
     const app = {
@@ -900,6 +901,7 @@
         : []
       app.dailyCompleted = []
       app.weeklyProgress = {}
+      applyPlanTargetsToUser()
     }
 
     function showAuthScreen() {
@@ -1023,34 +1025,9 @@
 
     function recalculateTargets() {
       if(!app.user) return
-      const age = Number(app.user.age || 18)
-      const sex = app.user.sex || 'Female'
-      const height = Number(app.user.height || 170)
-      const weight = Number(app.user.weight || 70)
-      const activity = app.user.activity || 'Not Very Active'
       const goals = Array.isArray(app.user.goals) ? app.user.goals : []
-      const factor = {'Not Very Active':1.2,Sedentary:1.2,'Lightly Active':1.375,'Moderately Active':1.375,Active:1.55,'Very Active':1.725}[activity] || 1.2
-      const base = sex === 'Male' ? (10 * weight + 6.25 * height - 5 * age + 5) : (10 * weight + 6.25 * height - 5 * age - 161)
-      let calories = Math.round(base * factor)
-      if(goals.includes('Lose Weight')) calories -= 300
-      if(goals.includes('Gain Weight')) calories += 250
-      if(goals.includes('Gain Muscle')) calories += 200
-      if(goals.includes('Plan Meals') || goals.includes('Track Calories')) calories -= 40
-      calories = Math.max(1500, Math.min(3200, calories))
-      const protein = goals.includes('Gain Muscle') ? Math.round(weight * 1.8) : goals.includes('Lose Weight') ? Math.round(weight * 1.6) : Math.round(weight * 1.4)
-      const carbs = Math.round((calories * 0.4) / 4)
-      const fat = Math.round((calories * 0.3) / 9)
-      app.user.dailyCalories = calories
-      app.user.proteinTarget = protein
-      app.user.carbsTarget = carbs
-      app.user.fatTarget = fat
       app.user.goal = pickGoalPlan(goals)
-      app.user.weeklyTargets = [
-        {label:'Calories', target: calories},
-        {label:'Protein', target: protein},
-        {label:'Carbs', target: carbs},
-        {label:'Fat', target: fat}
-      ]
+      applyPlanTargetsToUser()
       save()
     }
 
@@ -1255,6 +1232,7 @@
 
     function initializeAppView() {
       if(!app.user) return
+      applyPlanTargetsToUser()
       initializeAiRuntime()
       populateCountryDropdowns()
       checkStreak()
@@ -1335,7 +1313,10 @@
       'maintain-weight':'Maintain Weight',
       'gain-weight':'Gain Weight',
       'gain-muscle':'Gain Muscle',
-      'stay-fit':'Stay Fit'
+      'stay-fit':'Stay Fit',
+      'high-protein':'High Protein',
+      'mediterranean':'Mediterranean',
+      'vegetarian':'Vegetarian'
     }
 
     const COMMON_ALLERGENS = ['Milk / Dairy','Eggs','Gluten / Wheat','Peanuts','Tree Nuts','Soy','Fish','Shellfish','Sesame','Mustard','Celery','Sulphites','Oats']
@@ -1436,6 +1417,55 @@
       plan.waterTarget = planWaterTargets[plan.id] || 2.7
     })
 
+    function getNutritionEngine() {
+      return window.NutritionUtils || null
+    }
+
+    function getProfileForNutrition() {
+      return {
+        age: Number(app.user?.age || 0),
+        gender: app.user?.sex || app.user?.gender || 'Female',
+        heightCm: Number(app.user?.height || 0),
+        weightKg: Number(app.user?.weight || 0),
+        activityLevel: app.user?.activity || 'Not Very Active',
+        goalId: app.user?.goal || 'maintain-weight',
+        dietType: app.user?.diet || 'Omnivore'
+      }
+    }
+
+    function getDynamicPlanTargets(goalId = app.user?.goal) {
+      const selectedGoal = goalId || 'maintain-weight'
+      const fallbackPlan = getPlanDetail(selectedGoal)
+      const engine = getNutritionEngine()
+      if(!engine || !app.user) {
+        const kcalFromMacros = Math.round((fallbackPlan.protein * 4) + (fallbackPlan.carbs * 4) + (fallbackPlan.fat * 9))
+        return {
+          calories: fallbackPlan.calories,
+          protein: fallbackPlan.protein,
+          carbs: fallbackPlan.carbs,
+          fat: fallbackPlan.fat,
+          waterTarget: fallbackPlan.waterTarget,
+          kcalFromMacros,
+          calorieDelta: fallbackPlan.calories - kcalFromMacros,
+          bmr: 0,
+          tdee: 0
+        }
+      }
+
+      const dynamic = engine.calculatePlanNutrition(getProfileForNutrition(), selectedGoal)
+      return {
+        calories: dynamic.calories,
+        protein: dynamic.protein,
+        carbs: dynamic.carbs,
+        fat: dynamic.fat,
+        waterTarget: dynamic.waterTarget,
+        kcalFromMacros: dynamic.kcalFromMacros,
+        calorieDelta: dynamic.calorieDelta,
+        bmr: dynamic.bmr,
+        tdee: dynamic.tdee
+      }
+    }
+
     function qs(id) { return document.getElementById(id) }
 
     function renderCountryOptions(selectedCountry) {
@@ -1468,18 +1498,18 @@
 
     function applyPlanTargetsToUser() {
       if(!app.user) return
-      const plan = getPlanDetail(app.user.goal)
-      app.user.dailyCalories = plan.calories
-      app.user.proteinTarget = plan.protein
-      app.user.carbsTarget = plan.carbs
-      app.user.fatTarget = plan.fat
-      app.user.waterTarget = plan.waterTarget
+      const targets = getDynamicPlanTargets(app.user.goal)
+      app.user.dailyCalories = targets.calories
+      app.user.proteinTarget = targets.protein
+      app.user.carbsTarget = targets.carbs
+      app.user.fatTarget = targets.fat
+      app.user.waterTarget = targets.waterTarget
       app.user.weeklyTargets = [
-        {label:'Calories', target: plan.calories},
-        {label:'Protein', target: plan.protein},
-        {label:'Carbs', target: plan.carbs},
-        {label:'Fat', target: plan.fat},
-        {label:'Water', target: plan.waterTarget}
+        {label:'Calories', target: targets.calories},
+        {label:'Protein', target: targets.protein},
+        {label:'Carbs', target: targets.carbs},
+        {label:'Fat', target: targets.fat},
+        {label:'Water', target: targets.waterTarget}
       ]
     }
 
@@ -3344,13 +3374,19 @@
 
     function renderPlan() {
       const selected = getPlanDetail()
-      qs('planSummary').innerHTML = `${selected.title} • ${selected.calories} kcal • ${selected.protein}g protein • ${selected.carbs}g carbs • ${selected.fat}g fat • ${selected.waterTarget}L water`
+      const selectedTargets = getDynamicPlanTargets(selected.id)
+      const planTargetsById = {}
+      mealPlans.forEach(plan => {
+        planTargetsById[plan.id] = getDynamicPlanTargets(plan.id)
+      })
+      qs('planSummary').innerHTML = `${selected.title} • ${selectedTargets.calories} kcal • ${selectedTargets.protein}g protein • ${selectedTargets.carbs}g carbs • ${selectedTargets.fat}g fat • ${selectedTargets.waterTarget}L water`
       qs('planNutritionSummary').innerHTML = `
-        <div class="stat"><span class="muted">Calories</span><span>${selected.calories} kcal</span></div>
-        <div class="stat"><span class="muted">Protein</span><span>${selected.protein}g</span></div>
-        <div class="stat"><span class="muted">Carbs</span><span>${selected.carbs}g</span></div>
-        <div class="stat"><span class="muted">Fat</span><span>${selected.fat}g</span></div>
-        <div class="stat"><span class="muted">Daily Water</span><span>${selected.waterTarget}L</span></div>
+        <div class="stat"><span class="muted">Calories</span><span>${selectedTargets.calories} kcal</span></div>
+        <div class="stat"><span class="muted">Protein</span><span>${selectedTargets.protein}g</span></div>
+        <div class="stat"><span class="muted">Carbs</span><span>${selectedTargets.carbs}g</span></div>
+        <div class="stat"><span class="muted">Fat</span><span>${selectedTargets.fat}g</span></div>
+        <div class="stat"><span class="muted">Macro kcal check</span><span>${selectedTargets.kcalFromMacros} kcal (${selectedTargets.calorieDelta >= 0 ? '+' : ''}${selectedTargets.calorieDelta})</span></div>
+        <div class="stat"><span class="muted">Daily Water</span><span>${selectedTargets.waterTarget}L</span></div>
       `
       qs('planDetail').innerHTML = `
         <div class="plan-meta"><strong>${selected.title}</strong><span>${selected.badge}</span></div>
@@ -3375,16 +3411,18 @@
         </div>
         <div><strong>Shopping list</strong><div class="tiny" style="margin-top:6px">${selected.shoppingList.join(' • ')}</div></div>
       `
-      qs('planCards').innerHTML = mealPlans.map(plan => `
+      qs('planCards').innerHTML = mealPlans.map(plan => {
+        const targets = planTargetsById[plan.id]
+        return `
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
           <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.badge}</span></div>
           <div style="font-size:14px;color:#d7fbea">${plan.subtitle}</div>
-          <div class="muted">${plan.calories} kcal • ${plan.protein}g protein • ${plan.carbs}g carbs • ${plan.fat}g fat</div>
+          <div class="muted">${targets.calories} kcal • ${targets.protein}g protein • ${targets.carbs}g carbs • ${targets.fat}g fat</div>
           <div><strong>Meals</strong><div class="tiny" style="margin-top:4px">${plan.meals.join(' • ')}</div></div>
           <div><strong>Tips</strong><div class="tiny" style="margin-top:4px">${plan.tips.join(' • ')}</div></div>
           <button class="btn secondary" onclick="setPlan('${plan.id}')">Choose</button>
         </div>
-      `).join('')
+      `}).join('')
     }
 
     function chooseMealPlan() {
@@ -3563,9 +3601,9 @@
       qs('profAvoidIngredients').value = (app.user.avoidIngredients || []).join(', ')
       populateCountryDropdowns()
       qs('profCountry').value = app.user.country || ''
-      const plan = getPlanDetail(app.user.goal)
-      qs('profWaterTarget').value = (app.user.waterTarget || plan.waterTarget || 2.7)
-      qs('profProteinTarget').value = (app.user.proteinTarget || plan.protein || 140)
+      const targets = getDynamicPlanTargets(app.user.goal)
+      qs('profWaterTarget').value = (app.user.waterTarget || targets.waterTarget || 2.7)
+      qs('profProteinTarget').value = (app.user.proteinTarget || targets.protein || 140)
       qs('profWorkoutGoal').value = app.user.workoutGoal || ''
       qs('profGoalSelect').value = app.user.goal || 'lose-weight'
       qs('profMealPlanning').value = app.user.mealPlanning || 'Occasionally'
@@ -3910,9 +3948,9 @@
 
       const progressItems = [
         {label:'Calories', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + item.cals, 0) / getTargetCalories()) * 100))},
-        {label:'Protein', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.protein || 0), 0) / getPlanDetail().protein) * 100))},
-        {label:'Carbs', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.carbs || 0), 0) / getPlanDetail().carbs) * 100))},
-        {label:'Fat', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.fat || 0), 0) / getPlanDetail().fat) * 100))}
+        {label:'Protein', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.protein || 0), 0) / Math.max(1, app.user.proteinTarget || 1)) * 100))},
+        {label:'Carbs', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.carbs || 0), 0) / Math.max(1, app.user.carbsTarget || 1)) * 100))},
+        {label:'Fat', value: Math.min(100, Math.round((app.dailyLog.reduce((sum, item) => sum + (item.fat || 0), 0) / Math.max(1, app.user.fatTarget || 1)) * 100))}
       ]
       qs('weeklyProgressBars').innerHTML = progressItems.map(item => `
         <div>
