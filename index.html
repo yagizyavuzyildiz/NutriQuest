@@ -148,6 +148,11 @@
     .criteria-list {display:grid;gap:8px}
     .criteria-item {display:grid;gap:6px}
     .criteria-label {display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#d8e8f3}
+    .criteria-label-left {display:inline-flex;align-items:center;gap:6px}
+    .criteria-score-comment {font-size:12px;color:#bdd6e8;line-height:1.35}
+    .criteria-info {width:16px;height:16px;border-radius:999px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:1px solid rgba(56,189,248,0.5);background:rgba(56,189,248,0.15);color:#c9f0ff;cursor:help;position:relative}
+    .criteria-info .hint-tip {position:absolute;left:50%;bottom:125%;transform:translateX(-50%);min-width:220px;max-width:300px;padding:8px 10px;border-radius:10px;background:rgba(2,8,12,0.95);border:1px solid rgba(110,231,183,0.25);color:#dffcf0;font-size:11px;line-height:1.4;opacity:0;visibility:hidden;transition:all .15s ease;z-index:30;box-shadow:0 12px 30px rgba(0,0,0,0.3)}
+    .criteria-info:hover .hint-tip, .criteria-info.active .hint-tip {opacity:1;visibility:visible;bottom:140%}
     .criteria-bar {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
     .criteria-bar > div {height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#38bdf8);width:0%}
     .score-ring-wrap {display:flex;align-items:center;gap:14px;flex-wrap:wrap}
@@ -455,7 +460,7 @@
             <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button id="fridgeGenerateBtn" class="btn" onclick="runFridgeGenerator()">Generate Recipes</button>
               <button id="fridgeRetryBtn" class="btn secondary" onclick="retryFridgeGenerator()" disabled>Retry</button>
-              <button class="btn secondary" onclick="clearFridgeResults()">Clear</button>
+              <button id="fridgeClearBtn" class="btn secondary" onclick="clearFridgeResults()">Clear</button>
             </div>
           </div>
           <textarea id="fridgeInput" placeholder="I have pasta, salmon, olive oil, garlic, tomatoes, paprika, black pepper, spinach, and onions." style="margin-top:10px;min-height:92px"></textarea>
@@ -477,8 +482,11 @@
             <div class="photo-drop">
               <input id="mealPhotoInput" type="file" accept="image/*" />
             </div>
-            <button id="photoAnalyzeBtn" class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
-            <button id="photoRetryBtn" class="btn secondary" onclick="retryPhotoAnalysis()" disabled>Retry</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="photoAnalyzeBtn" class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
+              <button id="photoRetryBtn" class="btn secondary" onclick="retryPhotoAnalysis()" disabled>Retry</button>
+              <button id="photoClearBtn" class="btn secondary" onclick="clearPhotoAnalysis()" disabled>Clear</button>
+            </div>
             <div id="photoAnalysisOut" class="tiny"></div>
           </div>
         </div>
@@ -790,7 +798,7 @@
         aiPending: false,
         aiAbortController: null,
         fridgeRequest: {requestId: 0, controller: null, loading: false, failSafeTimer: null, lastInput: '', lastError: ''},
-        photoRequest: {requestId: 0, controller: null, loading: false, failSafeTimer: null, lastError: ''},
+        photoRequest: {requestId: 0, controller: null, loading: false, failSafeTimer: null, lastError: '', hasResult: false},
         lastUserPrompt: '',
         circuitState: {open:false, failures:0, openedAt:0, coolDownMs:45000},
         rateWindow: []
@@ -1902,6 +1910,12 @@
           ? 'For recipe requests, always include: Recipe Name, Why this fits your goal, Ingredients, Step-by-step Instructions, Cooking Time, Estimated Nutrition, Swaps / Alternatives, Storage Tips, Nutrition Report.'
           : 'For recipe requests, always include: Recipe Name, Why this fits your goal, Ingredients, Step-by-step Instructions, Cooking Time, Estimated Nutrition, Swaps / Alternatives, Storage Tips, Nutrition Report.',
         language === 'tr'
+          ? '[TURKCE TARIF YAZIM SABLONU - ZORUNLU] Kullanici Turkce yazdiysa cikti tamamen Turkce olacak. Sira zorunlu: 1) Tarif Adi 2) Bu Tarif Neden Hedefine Uygun? 3) Malzemeler (Elindeki/Opsiyonel) 4) Adim Adim Pisme Plani 5) Teknik Notlar 6) Yaygin Hatalar ve Cozumleri 7) Tam Beslenme Paneli (Tahmini) 8) Alternatif Ogunler (en az 2) 9) Saklama ve Ertesi Gun Tuketim Onerisi 10) Son Koc Onerisi. Her adimda miktar+isi+yontem+sure belirt. Miktar eksikse varsayilan porsiyon varsayimini acikca yaz. Makrolar gercekci aralikta olacak; tavuk/makarna/patates gibi girdilerde asiri dusuk kalori verme. Ana tarif + en az 2 alternatif uret.'
+          : 'For recipe requests, provide practical cooking steps with quantity, heat, method, and time; include realistic macro estimates and at least 2 alternatives beyond the main recipe.',
+        language === 'tr'
+          ? 'Photo analysis raporunda kriter adlarini Turkce kullan: Makro Dengesi, Malzeme Kalitesi, Islenme Duzeyi, Hedef Uyumu, Porsiyon Kontrolu.'
+          : 'For photo analysis in Turkish, output criteria names in Turkish.',
+        language === 'tr'
           ? 'Small talk: samimi ve kisa cevap ver, sonra kullaniciyi malzeme + hedef paylaşmaya yönlendir.'
           : 'Small talk: answer warmly and briefly, then ask for ingredients plus goal.',
         profileLine
@@ -2283,12 +2297,80 @@
       return INGREDIENT_ALIASES[normalized] || normalized
     }
 
+    function parseIngredientEntries(text) {
+      const units = {
+        kg: 1000,
+        g: 1,
+        gr: 1,
+        gram: 1,
+        adet: 'piece',
+        ad: 'piece',
+        pcs: 'piece',
+        piece: 'piece',
+        cup: 200,
+        'su bardagi': 200,
+        'su bardağı': 200,
+        bardak: 200,
+        tbsp: 15,
+        tablespoon: 15,
+        'yemek kasigi': 15,
+        'yemek kaşığı': 15,
+        tsp: 5,
+        teaspoon: 5,
+        'cay kasigi': 5,
+        'çay kaşığı': 5,
+        ml: 1,
+        l: 1000
+      }
+
+      const chunks = String(text || '').split(/[\n,;]+/).map(chunk => chunk.trim()).filter(Boolean)
+      const merged = {}
+
+      chunks.forEach(chunk => {
+        const clean = chunk.replace(/\s+/g, ' ')
+        const match = clean.match(/^(\d+(?:[\.,]\d+)?)\s*([a-zA-ZçğıöşüÇĞİÖŞÜ\s]+)?\s+(.+)$/)
+        let quantity = null
+        let unit = ''
+        let ingredientRaw = clean
+
+        if(match) {
+          quantity = Number(String(match[1]).replace(',', '.'))
+          unit = normalizeIngredientName(match[2] || '')
+          ingredientRaw = match[3]
+        }
+
+        const name = canonicalIngredient(ingredientRaw)
+        if(!name) return
+        const data = ingredientData(name)
+        let grams = Number(data.defaultGram || 100)
+        let usedDefault = true
+
+        if(Number.isFinite(quantity) && quantity > 0) {
+          const multiplier = units[unit]
+          if(multiplier === 'piece') grams = Number((data.defaultGram || 100) * quantity)
+          else if(Number.isFinite(multiplier)) grams = Number(multiplier * quantity)
+          else grams = quantity
+          usedDefault = false
+        }
+
+        if(!merged[name]) merged[name] = {name, grams:0, usedDefault}
+        merged[name].grams += grams
+        merged[name].usedDefault = merged[name].usedDefault && usedDefault
+      })
+
+      return Object.values(merged)
+    }
+
     function parseIngredientText(text) {
-      return String(text || '')
-        .split(/[\n,;]+/)
-        .map(item => canonicalIngredient(item))
-        .filter(Boolean)
-        .filter((item, index, arr) => arr.indexOf(item) === index)
+      return parseIngredientEntries(text).map(item => item.name)
+    }
+
+    function buildIngredientQuantityMap(text) {
+      const map = {}
+      parseIngredientEntries(text).forEach(entry => {
+        map[canonicalIngredient(entry.name)] = {grams: entry.grams, usedDefault: entry.usedDefault}
+      })
+      return map
     }
 
     function extractIngredientCandidates(text) {
@@ -2411,10 +2493,11 @@
       }
     }
 
-    function aggregateNutrition(ingredientNames, servings = 2) {
+    function aggregateNutrition(ingredientNames, servings = 2, quantityMap = null) {
       const totals = ingredientNames.reduce((sum, ingredient) => {
         const data = ingredientData(ingredient)
-        const grams = data.defaultGram || 100
+        const qty = quantityMap?.[canonicalIngredient(ingredient)]
+        const grams = Number(qty?.grams || data.defaultGram || 100)
         const ratio = grams / 100
         sum.kcal += data.kcal * ratio
         sum.p += data.p * ratio
@@ -2472,10 +2555,45 @@
       return upgrades.slice(0, 4)
     }
 
-    function buildRecipeSteps(recipe, usedIngredients) {
+    function detectCookingPreference(rawInput) {
+      const text = String(rawInput || '').toLowerCase()
+      if(/firin|fırın|oven|bake/.test(text)) return 'oven'
+      if(/airfryer|air fryer/.test(text)) return 'airfryer'
+      if(/hasla|haşla|boil/.test(text)) return 'boil'
+      return 'pan'
+    }
+
+    function buildRecipeSteps(recipe, usedIngredients, options = {}) {
+      const language = options.language || 'en'
+      const quantityMap = options.quantityMap || {}
+      const method = options.method || 'pan'
       const protein = usedIngredients.find(item => ingredientData(item).category === 'Proteins')
       const carb = usedIngredients.find(item => ['Grains'].includes(ingredientData(item).category))
       const vegetables = usedIngredients.filter(item => ingredientData(item).category === 'Vegetables')
+      const qtyLine = item => {
+        const grams = Math.round(quantityMap?.[canonicalIngredient(item)]?.grams || ingredientData(item).defaultGram || 100)
+        return `${grams} g ${item}`
+      }
+
+      if(language === 'tr') {
+        const oilText = usedIngredients.includes('olive oil') ? '1 yemek kaşığı zeytinyağı' : '1 yemek kaşığı yağ'
+        const methodText = method === 'oven'
+          ? 'fırın'
+          : method === 'airfryer'
+            ? 'airfryer'
+            : method === 'boil'
+              ? 'haşlama'
+              : 'tava'
+        return [
+          `Hazırlık: ${usedIngredients.map(qtyLine).join(', ')}. Malzemeleri yıkayıp doğra. (${methodText} odaklı plan)`,
+          `${method === 'oven' ? 'Fırını 200°C' : 'Tavayı orta-yüksek ateş'} 1-2 dakika ısıt. ${oilText} ekle ve aromatikleri 3-4 dakika çevir.`,
+          protein ? `${qtyLine(protein)} kullanıyorsan orta-yüksek ateşte 6-8 dakika mühürle; iç sıcaklık güvenli seviyeye gelince çıkar.` : 'Protein yoksa sebze tabanını orta ateşte 5 dakika sotele.',
+          carb ? `${qtyLine(carb)} için ${method === 'boil' ? 'haşlama' : 'paket'} talimatını uygula; genelde 8-12 dakika sürer.` : 'Karbonhidrat kaynağı yoksa sebze ve protein dengesine odaklan.',
+          vegetables.length ? `${vegetables.map(qtyLine).join(', ')} ekleyip orta ateşte 4-6 dakika, diri kalacak şekilde pişir.` : 'Kalan malzemeleri 2-3 dakika birleştirip lezzeti dengede tut.',
+          `Tüm malzemeyi birleştir, tuz-karabiber ayarı yap, düşük ateşte 2 dakika dinlendir ve ${recipe.servings || 2} porsiyona böl.`
+        ]
+      }
+
       return [
         `Prep ingredients: chop aromatic items and portion all listed ingredients for ${recipe.servings} servings.`,
         protein ? `Cook ${protein} first in a hot pan until fully done and lightly browned.` : 'Start by heating the pan and building flavor with aromatics.',
@@ -2658,7 +2776,16 @@
       return {status, reasons, changes}
     }
 
-    function buildTechniqueNotes(recipe) {
+    function buildTechniqueNotes(recipe, language = 'en', method = 'pan') {
+      if(language === 'tr') {
+        if(method === 'oven') {
+          return ['Fırını önceden ısıtmadan pişirmeye başlama; doku ve süre bozulur.', 'Et/sebze tepsisini tek kat yay, üst üste koyma.']
+        }
+        if(method === 'airfryer') {
+          return ['Sepeti aşırı doldurma; sıcak hava dolaşımı azalır.', 'Pişirme ortasında sepeti çalkalayarak eşit kızarma sağla.']
+        }
+        return ['Tavayı malzemeden önce ısıt; bu sayede dış yüzey daha iyi renk alır.', 'Pişirme sonunda 1-2 dakika dinlendirerek su kaybını azalt.']
+      }
       const category = String(recipe?.category || '').toLowerCase()
       if(category.includes('dinner')) {
         return ['Use a hot pan or oven preheat for better caramelization.', 'Finish with a brief rest so juices settle.']
@@ -2669,7 +2796,14 @@
       return ['Use medium heat to avoid scorching aromatics.', 'Taste and adjust seasoning at the end.']
     }
 
-    function buildCommonMistakes(recipe) {
+    function buildCommonMistakes(recipe, language = 'en') {
+      if(language === 'tr') {
+        const ingredients = (recipe?.ingredients || []).map(canonicalIngredient)
+        const mistakes = ['Tavayı çok doldurmak malzemenin suyunu salmasına ve kızarmanın düşmesine neden olur.', 'Tuzu en sonda fazla eklemek lezzeti dengesiz yapar; pişirme boyunca kontrollü ilerle.']
+        if(ingredients.includes('pasta') || ingredients.includes('rice')) mistakes.push('Makarna/pirinci fazla haşlamak dokuyu bozup yemeği hamurlaştırır; süreyi 1-2 dakika erken kontrol et.')
+        if(ingredients.includes('salmon') || ingredients.includes('chicken')) mistakes.push('Proteini çok erken kesmek su kaybını artırır; ocaktan aldıktan sonra 1-2 dakika dinlendir.')
+        return mistakes.slice(0, 3)
+      }
       const ingredients = (recipe?.ingredients || []).map(canonicalIngredient)
       const mistakes = ['Overcrowding the pan reduces browning.', 'Under-seasoning early makes the final dish flat.']
       if(ingredients.includes('pasta') || ingredients.includes('rice')) mistakes.push('Overcooking grains makes the texture heavy.')
@@ -2677,31 +2811,58 @@
       return mistakes.slice(0, 3)
     }
 
-    function buildAlternativeMeals(recipe, language, parsedIngredients) {
+    function buildAlternativeMeals(recipe, language, parsedIngredients, quantityMap = {}) {
       const baseIngredients = recipe?.ingredients?.length ? recipe.ingredients : parsedIngredients
       const baseMacros = recipe?.nutrition?.perServing || {kcal:0, p:0, c:0, f:0}
-      const languageStrings = getReportStrings(language)
-      const alternatives = recipe ? [
-        {
-          name: `${recipe.name} - ${language === 'tr' ? 'Fırın Versiyonu' : 'Baked Version'}`,
-          macroSummary: `${baseMacros.kcal} kcal • P ${baseMacros.p}g • C ${baseMacros.c}g • F ${baseMacros.f}g`
-        },
-        {
-          name: `${recipe.name} - ${language === 'tr' ? 'Tava Versiyonu' : 'Pan Version'}`,
-          macroSummary: `${Math.max(1, baseMacros.kcal - 35)} kcal • P ${Math.max(1, baseMacros.p)}g • C ${Math.max(1, baseMacros.c - 4)}g • F ${Math.max(1, baseMacros.f - 2)}g`
-        },
-        {
-          name: `${recipe.name} - ${language === 'tr' ? 'Tek Kap Versiyonu' : 'One-Pot Version'}`,
-          macroSummary: `${Math.max(1, baseMacros.kcal + 20)} kcal • P ${Math.max(1, baseMacros.p)}g • C ${Math.max(1, baseMacros.c + 3)}g • F ${Math.max(1, baseMacros.f)}g`
+      const makeAlt = (name, reason, ingredientList, minutes, difficulty, method) => {
+        return {
+          name,
+          reason,
+          ingredients: ingredientList,
+          steps: buildRecipeSteps({servings: 2}, ingredientList, {language, quantityMap, method}),
+          duration: language === 'tr' ? `${minutes} dk` : `${minutes} min`,
+          difficulty,
+          macroSummary: `${Math.round(baseMacros.kcal)} kcal • P ${Math.round(baseMacros.p)}g • C ${Math.round(baseMacros.c)}g • F ${Math.round(baseMacros.f)}g`
         }
+      }
+
+      const alternatives = recipe ? [
+        makeAlt(
+          `${recipe.name} - ${language === 'tr' ? 'Fırın Versiyonu' : 'Baked Version'}`,
+          language === 'tr' ? 'Daha az başında durma gerektirir, meal-prep için uygundur.' : 'Requires less active cooking and works well for meal prep.',
+          baseIngredients,
+          28,
+          language === 'tr' ? 'Orta' : 'Medium',
+          'oven'
+        ),
+        makeAlt(
+          `${recipe.name} - ${language === 'tr' ? 'Tava Versiyonu' : 'Pan Version'}`,
+          language === 'tr' ? 'Hızlıdır ve yüksek ateşte daha yoğun lezzet sağlar.' : 'Fast and flavorful with high-heat browning.',
+          baseIngredients,
+          18,
+          language === 'tr' ? 'Kolay' : 'Easy',
+          'pan'
+        ),
+        makeAlt(
+          `${recipe.name} - ${language === 'tr' ? 'Tek Kap Versiyonu' : 'One-Pot Version'}`,
+          language === 'tr' ? 'Daha az ekipmanla pratik bir seçenek sunar.' : 'Practical option with fewer dishes to clean.',
+          baseIngredients,
+          20,
+          language === 'tr' ? 'Kolay' : 'Easy',
+          'boil'
+        )
       ] : []
 
       while(alternatives.length < 3) {
         const suffix = alternatives.length === 0 ? (language === 'tr' ? 'Hafif Salata' : 'Light Salad') : alternatives.length === 1 ? (language === 'tr' ? 'Kase Versiyonu' : 'Bowl Version') : (language === 'tr' ? 'Protein Odakli Versiyon' : 'Protein-Forward Version')
-        alternatives.push({
-          name: `${baseIngredients[0] || (language === 'tr' ? 'Karisik' : 'Mixed')} ${suffix}`,
-          macroSummary: `${baseMacros.kcal || 400} kcal • P ${baseMacros.p || 25}g • C ${baseMacros.c || 35}g • F ${baseMacros.f || 14}g`
-        })
+        alternatives.push(makeAlt(
+          `${baseIngredients[0] || (language === 'tr' ? 'Karisik' : 'Mixed')} ${suffix}`,
+          language === 'tr' ? 'Elindeki malzemeleri boşa harcamadan değerlendirmeye yardımcı olur.' : 'Helps you use current ingredients with minimal waste.',
+          baseIngredients,
+          22,
+          language === 'tr' ? 'Kolay' : 'Easy',
+          'pan'
+        ))
       }
 
       return alternatives.slice(0, 3)
@@ -2710,6 +2871,8 @@
     function buildRecipeReportData(rawInput, context, recipes, parsedIngredients) {
       const language = detectLanguageHint(rawInput)
       const strings = getReportStrings(language)
+      const quantityMap = buildIngredientQuantityMap(rawInput)
+      const preferredMethod = detectCookingPreference(rawInput)
       const topRecipe = recipes[0] || {
         name: language === 'tr' ? 'Karisik Hızlı Tabak' : 'Quick Mixed Bowl',
         difficulty: language === 'tr' ? 'Kolay' : 'Easy',
@@ -2717,14 +2880,14 @@
         servings: 2,
         category: language === 'tr' ? 'Ana Öğün' : 'Main Meal',
         ingredients: parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'],
-        steps: buildRecipeSteps({servings: 2}, parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic']),
+        steps: buildRecipeSteps({servings: 2}, parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'], {language, quantityMap, method: preferredMethod}),
         tips: [],
         optionalImprovements: [],
         substitutions: [],
         storage: language === 'tr'
           ? 'Hava geçirmez kapta 2 güne kadar sakla.'
           : 'Store in an airtight container for up to 2 days.',
-        nutrition: aggregateNutrition(parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'], 2),
+        nutrition: aggregateNutrition(parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'], 2, quantityMap),
         missingCore: [],
         score: 0
       }
@@ -2744,7 +2907,7 @@
       }
       const score = window.AIReportUtils ? window.AIReportUtils.calculateNutritionScore(scoreInput) : {macroBalance:0, ingredientQuality:0, processingLevel:0, goalAlignment:0, portionControl:0, total:0, verdict:'Needs Improvement'}
       const compatibility = detectDietCompatibility(context, topRecipe, topRecipe.ingredients, language)
-      const alternatives = buildAlternativeMeals(topRecipe, language, parsedIngredients)
+      const alternatives = buildAlternativeMeals(topRecipe, language, parsedIngredients, quantityMap)
       const costTier = estimateRecipeCostTier(topRecipe.ingredients)
       const mealPrepSuitability = topRecipe.steps.length >= 5 ? 'High' : 'Medium'
       const report = {
@@ -2752,7 +2915,7 @@
         type: 'recipeReport',
         title: strings.recipeTitle,
         summaryText: language === 'tr'
-          ? `NutriQuest Recipe Copilot raporu hazır. ${topRecipe.name} hedefinle uyumlu, ${compatibility.status.toLowerCase()} ve ${score.verdict.toLowerCase()} seviyesinde.`
+          ? `NutriQuest tarif raporu hazır. ${topRecipe.name} hedefinle ${compatibility.status.toLowerCase()} düzeyde uyumlu görünüyor; beslenme skoru ${localizeVerdict(score.verdict, 'tr').toLowerCase()} seviyesinde.`
           : `NutriQuest Recipe Copilot report is ready. ${topRecipe.name} is aligned to your goal, ${compatibility.status.toLowerCase()}, and scored as ${score.verdict.toLowerCase()}.`,
         overview: {
           recipeName: topRecipe.name,
@@ -2773,8 +2936,8 @@
         },
         cookingPlan: {
           steps: topRecipe.steps,
-          techniqueNotes: buildTechniqueNotes(topRecipe),
-          commonMistakes: buildCommonMistakes(topRecipe)
+          techniqueNotes: buildTechniqueNotes(topRecipe, language, preferredMethod),
+          commonMistakes: buildCommonMistakes(topRecipe, language)
         },
         nutritionPanel: {
           total: nutrition.total,
@@ -2790,6 +2953,11 @@
             ? 'Orta ateşte, çok kurutmadan ısıt. Gerekirse 1-2 yemek kaşığı su ekle.'
             : 'Reheat on medium heat without drying it out. Add 1-2 tablespoons of water if needed.'
         },
+        quantityAssumption: Object.values(quantityMap).some(item => item.usedDefault)
+          ? (language === 'tr'
+            ? 'Bazı malzemelerde miktar belirtilmediği için varsayılan porsiyon gramajı kullanıldı.'
+            : 'Default portion grams were used for ingredients without quantity values.')
+          : '',
         coachNotes: {
           fatLoss: language === 'tr'
             ? 'Yağ eklerini azalt, lif ve protein dengesini koru.'
@@ -2825,6 +2993,15 @@
         {keywords:['soup','stew'], name:'Hearty Soup', portion:'Small', calories: 360, macros:{protein:24, carbs:34, fat:12}, fiber:6, sugar:5, sodium:480, processedLevel:'low', ingredientsQuality:'good', verdict:'Good fit for your goal', tips:['Very useful on rest days.', 'Add whole grains if you need more calories.'], swaps:['Use low-sodium stock.', 'Add beans for more protein.']}
       ]
       const match = dishLibrary.find(item => item.keywords.some(keyword => fileName.includes(keyword))) || dishLibrary[seed % dishLibrary.length]
+      const localizedDishName = language === 'tr'
+        ? ({
+            'Grilled Chicken Salad':'Izgara Tavuklu Salata',
+            'Pasta Bowl':'Makarna Kasesi',
+            'Chicken Rice Bowl':'Tavuklu Pirinç Kasesi',
+            'Fast Food Combo':'Fast Food Tabağı',
+            'Hearty Soup':'Besleyici Çorba'
+          }[match.name] || match.name)
+        : match.name
       const clarityBoost = file?.size ? clampValue(40 + Math.log10(Math.max(1, file.size)) * 8, 42, 94) : 56
       const confidence = Math.round(clampValue(clarityBoost + (match.name.length % 7) * 2, 42, 97))
       const portionEstimate = match.portion
@@ -2848,12 +3025,14 @@
         type: 'photoAnalysisReport',
         title: strings.photoTitle,
         summaryText: language === 'tr'
-          ? `Görsel analiz raporu hazır. ${match.name} için güven seviyesi ${confidence}% ve skor ${score.total.toFixed(1)}/5.`
+          ? `Görsel analiz raporu hazır. ${localizedDishName} için güven seviyesi ${confidence}% olarak hesaplandı; genel beslenme skoru ${score.total.toFixed(1)}/5.`
           : `Visual analysis report ready. ${match.name} confidence is ${confidence}% with a score of ${score.total.toFixed(1)}/5.`,
         dishDetection: {
-          detectedDishName: match.name,
+          detectedDishName: localizedDishName,
           confidence,
-          portionSizeEstimate: portionEstimate
+          portionSizeEstimate: language === 'tr'
+            ? (portionEstimate === 'Large' ? 'Büyük' : portionEstimate === 'Medium' ? 'Orta' : 'Küçük')
+            : portionEstimate
         },
         nutritionEstimate: {
           calories: match.calories,
@@ -2866,10 +3045,10 @@
         nutritionScore: score,
         criteriaBreakdown: score,
         improvementSuggestions: language === 'tr'
-          ? ['Protein miktarını artır.', 'Sos veya yağlı ekleri azalt.', 'Yanına daha fazla sebze ekle.']
+          ? ['Proteini 15-20 g artırmak için yağsız protein ekle.', 'Sos ve ilave yağ miktarını 1-2 yemek kaşığı ile sınırla.', 'Lif dengesini yükseltmek için yanında salata veya haşlanmış sebze ekle.']
           : match.tips,
         smartSwaps: language === 'tr'
-          ? ['Crouton yerine tohum kullan.', 'Mayo bazlı sos yerine yoğurt sos dene.']
+          ? ['Kruton yerine çekirdek veya kavrulmuş nohut kullan.', 'Mayonez bazlı sos yerine yoğurt-temelli hafif sos tercih et.']
           : match.swaps,
         finalCoachRecommendation: recommendation,
         goalBadge: context.goal || 'Goal',
@@ -2879,9 +3058,30 @@
       }
     }
 
-    function renderScoreChip(verdict) {
-      const key = String(verdict || 'Needs Improvement').toLowerCase().replace(/\s+/g, '-')
-      return `<span class="score-chip ${key}">${verdict || 'Needs Improvement'}</span>`
+    function localizeVerdict(verdict, language = 'en') {
+      if(language !== 'tr') return verdict || 'Needs Improvement'
+      const map = {
+        Excellent: 'Mükemmel',
+        Good: 'İyi',
+        Fair: 'Geliştirilebilir',
+        'Needs Improvement': 'İyileştirme Gerekli'
+      }
+      return map[verdict] || verdict || 'İyileştirme Gerekli'
+    }
+
+    function verdictClassKey(verdict) {
+      const map = {
+        Excellent: 'excellent',
+        Good: 'good',
+        Fair: 'fair',
+        'Needs Improvement': 'needs-improvement'
+      }
+      return map[verdict] || 'needs-improvement'
+    }
+
+    function renderScoreChip(verdict, language = 'en') {
+      const key = verdictClassKey(verdict || 'Needs Improvement')
+      return `<span class="score-chip ${key}">${localizeVerdict(verdict, language)}</span>`
     }
 
     function renderReportSectionCard(title, body, note = '', icon = '▣') {
@@ -2984,10 +3184,15 @@
       const isFridge = moduleKey === 'fridge'
       const mainBtn = qs(isFridge ? 'fridgeGenerateBtn' : 'photoAnalyzeBtn')
       const retryBtn = qs(isFridge ? 'fridgeRetryBtn' : 'photoRetryBtn')
+      const clearBtn = qs(isFridge ? 'fridgeClearBtn' : 'photoClearBtn')
       if(mainBtn) mainBtn.disabled = Boolean(isLoading)
       if(retryBtn) retryBtn.disabled = Boolean(isLoading) || !canRetry
       const state = isFridge ? app.ui.fridgeRequest : app.ui.photoRequest
       if(state) state.loading = Boolean(isLoading)
+      if(clearBtn) {
+        const canClear = isFridge ? Boolean((qs('fridgeInput')?.value || '').trim() || qs('fridgeMeta')?.innerHTML?.trim()) : Boolean(app.ui.photoRequest?.hasResult)
+        clearBtn.disabled = Boolean(isLoading) || !canClear
+      }
     }
 
     function trackModuleRequest(moduleName, stage, meta = {}) {
@@ -3050,7 +3255,12 @@
     }
 
     function renderCompatibilityBadge(status) {
-      const key = String(status || '').toLowerCase().includes('not') ? 'incompatible' : String(status || '').toLowerCase().includes('partial') ? 'partial' : 'compatible'
+      const normalized = String(status || '').toLowerCase()
+      const key = normalized.includes('not') || normalized.includes('uyumsuz')
+        ? 'incompatible'
+        : normalized.includes('partial') || normalized.includes('kısmen') || normalized.includes('ismen')
+          ? 'partial'
+          : 'compatible'
       return `<span class="report-badge ${key}">${status}</span>`
     }
 
@@ -3070,27 +3280,48 @@
             </div>
           </div>
           <div style="display:grid;gap:8px;min-width:180px">
-            ${renderScoreChip(verdict)}
+            ${renderScoreChip(verdict, language)}
             <div class="tiny">${note}</div>
           </div>
         </div>
       `
     }
 
-    function renderCriteriaProgressList(breakdown) {
-      const items = [
-        ['Macro Balance', breakdown.macroBalance, 1.5],
-        ['Ingredient Quality', breakdown.ingredientQuality, 1.0],
-        ['Processing Level', breakdown.processingLevel, 0.8],
-        ['Goal Alignment', breakdown.goalAlignment, 1.2],
-        ['Portion Control', breakdown.portionControl, 0.5]
+    function renderCriteriaProgressList(breakdown, language = 'en') {
+      const tr = language === 'tr'
+      const items = tr ? [
+        ['Makro Dengesi', breakdown.macroBalance, 1.5, 'Protein/karbonhidrat/yağ dağılımının hedefinle uyumunu ölçer.'],
+        ['Malzeme Kalitesi', breakdown.ingredientQuality, 1.0, 'Malzemelerin besin değeri, tazelik ve işlenmişlik seviyesini değerlendirir.'],
+        ['İşlenme Düzeyi', breakdown.processingLevel, 0.8, 'Yemeğin ne kadar doğal veya ne kadar işlenmiş içerik barındırdığını gösterir.'],
+        ['Hedef Uyumu', breakdown.goalAlignment, 1.2, 'Öğünün, seçtiğin hedefe ne kadar uygun olduğunu gösterir.'],
+        ['Porsiyon Kontrolü', breakdown.portionControl, 0.5, 'Porsiyon büyüklüğünün günlük ihtiyaçlarınla dengeli olup olmadığını ölçer.']
+      ] : [
+        ['Macro Balance', breakdown.macroBalance, 1.5, 'Measures how well your macro split matches your target.'],
+        ['Ingredient Quality', breakdown.ingredientQuality, 1.0, 'Evaluates ingredient quality, freshness, and nutrient density.'],
+        ['Processing Level', breakdown.processingLevel, 0.8, 'Shows how natural versus processed the meal is.'],
+        ['Goal Alignment', breakdown.goalAlignment, 1.2, 'How strongly this meal supports your selected goal.'],
+        ['Portion Control', breakdown.portionControl, 0.5, 'Checks if portion size is balanced for your needs.']
       ]
+
+      const buildComment = (label, value, max) => {
+        const ratio = max > 0 ? value / max : 0
+        if(tr) {
+          if(ratio < 0.45) return `${label} düşük: küçük düzenlemelerle belirgin şekilde iyileştirilebilir.`
+          if(ratio < 0.75) return `${label} orta seviyede: bir sonraki öğünde optimize edilebilir.`
+          return `${label} güçlü: mevcut yaklaşımı koruyabilirsin.`
+        }
+        if(ratio < 0.45) return `${label} is low: improve it with targeted adjustments.`
+        if(ratio < 0.75) return `${label} is moderate: can be optimized in the next meal.`
+        return `${label} is strong: current approach is working well.`
+      }
+
       return `
         <div class="criteria-list">
-          ${items.map(([label, value, max]) => `
+          ${items.map(([label, value, max, info]) => `
             <div class="criteria-item">
-              <div class="criteria-label"><span>${label}</span><span>${Number(value).toFixed(2)} / ${max}</span></div>
+              <div class="criteria-label"><span class="criteria-label-left">${label}<span class="criteria-info hint-badge" tabindex="0" role="button" aria-label="${label} bilgi">i<span class="hint-tip">${info}</span></span></span><span>${Number(value).toFixed(2)} / ${max}</span></div>
               <div class="criteria-bar"><div style="width:${Math.round((Number(value) / max) * 100)}%"></div></div>
+              <div class="criteria-score-comment">${buildComment(label, Number(value), Number(max))}</div>
             </div>
           `).join('')}
         </div>
@@ -3239,6 +3470,7 @@
             `, sectionNotes.steps, '↳')}
             ${renderReportSectionCard(strings.nutrition, `
               ${renderMacroTable(report.nutritionPanel.total, report.nutritionPanel.perServing, report.language)}
+              ${report.quantityAssumption ? `<div class="tiny">${report.quantityAssumption} ${report.language === 'tr' ? 'Bu değerler kullanılan marka ve porsiyonlara göre değişebilir.' : 'Values may vary by brand and final portioning.'}</div>` : ''}
             `, sectionNotes.nutrition, '◫')}
             ${renderReportSectionCard(strings.compatibility, `
               <div class="report-badge-row">${renderCompatibilityBadge(report.dietCompatibility.status)}${report.dietCompatibility.reasons.length ? `<span class="report-badge partial">${report.dietCompatibility.reasons.length} reason(s)</span>` : ''}</div>
@@ -3249,13 +3481,22 @@
             `, sectionNotes.compatibility, '⚑')}
             ${renderReportSectionCard(strings.alternatives, `
               <div class="report-note-list">
-                ${(report.alternativeMeals || []).map(item => `<div class="macro-row"><span><strong>${item.name}</strong></span><span>${item.macroSummary}</span></div>`).join('')}
+                ${(report.alternativeMeals || []).map(item => `
+                  <div class="list-block">
+                    <div><strong>${item.name}</strong></div>
+                    <div class="tiny" style="margin-top:4px">${item.reason || ''}</div>
+                    <div class="tiny" style="margin-top:6px"><strong>${report.language === 'tr' ? 'Malzemeler' : 'Ingredients'}:</strong> ${(item.ingredients || []).join(', ')}</div>
+                    <div class="tiny" style="margin-top:6px"><strong>${report.language === 'tr' ? 'Süre / Zorluk' : 'Time / Difficulty'}:</strong> ${item.duration || '-'} • ${item.difficulty || '-'}</div>
+                    <div class="tiny" style="margin-top:6px"><strong>${report.language === 'tr' ? 'Makro Özeti' : 'Macro Summary'}:</strong> ${item.macroSummary}</div>
+                    <ol style="padding-left:18px;display:grid;gap:4px;margin-top:6px">${(item.steps || []).slice(0,5).map(step => `<li>${step}</li>`).join('')}</ol>
+                  </div>
+                `).join('')}
               </div>
             `, sectionNotes.alternatives, '◎')}
             ${renderReportSectionCard(strings.cost, `
               <div class="report-note-list">
-                <div><strong>${bodyLabels.cost}:</strong> ${report.costPracticality.estimatedCostTier}</div>
-                <div><strong>${bodyLabels.prep}:</strong> ${report.costPracticality.mealPrepSuitability}</div>
+                <div><strong>${bodyLabels.cost}:</strong> ${displayCostTier}</div>
+                <div><strong>${bodyLabels.prep}:</strong> ${displayPrepFit}</div>
                 <div><strong>${bodyLabels.storage}:</strong> ${report.costPracticality.storageGuide}</div>
                 <div><strong>${bodyLabels.reheat}:</strong> ${report.costPracticality.reheatingGuide}</div>
               </div>
@@ -3275,6 +3516,8 @@
     function renderPhotoAnalysisReport(report) {
       if(!report) return renderLoadingSkeleton('photo')
       const strings = getReportStrings(report.language)
+      const confidenceLabel = report.language === 'tr' ? 'Güven' : 'Confidence'
+      const scoreLabel = report.language === 'tr' ? 'Beslenme Skoru' : 'Nutrition Score'
       const labels = report.language === 'tr' ? {
         detectedDish:'Tespit edilen yemek adı',
         confidence:'Güven',
@@ -3304,9 +3547,9 @@
               </div>
             </div>
             <div class="report-badge-row">
-              <span class="report-badge good">Confidence ${report.dishDetection.confidence}%</span>
-              <span class="report-badge ${String(report.healthFitVerdict).toLowerCase().includes('not') ? 'incompatible' : String(report.healthFitVerdict).toLowerCase().includes('adjust') ? 'partial' : 'compatible'}">${report.badgeLabel}</span>
-              <span class="report-badge good">Nutrition Score ${report.nutritionScore.total.toFixed(1)} / 5</span>
+              <span class="report-badge good">${confidenceLabel} ${report.dishDetection.confidence}%</span>
+              <span class="report-badge ${String(report.healthFitVerdict).toLowerCase().includes('not') || String(report.healthFitVerdict).toLowerCase().includes('ideal degil') ? 'incompatible' : String(report.healthFitVerdict).toLowerCase().includes('adjust') || String(report.healthFitVerdict).toLowerCase().includes('ayarlama') ? 'partial' : 'compatible'}">${report.badgeLabel}</span>
+              <span class="report-badge good">${scoreLabel} ${report.nutritionScore.total.toFixed(1)} / 5</span>
             </div>
           </div>
           <div class="report-grid">
@@ -3324,7 +3567,7 @@
               ${renderNutritionScoreRing(report.nutritionScore, report.language)}
               <div class="tiny" style="margin-top:8px">${report.language === 'tr' ? 'Toplam skor; Makro Denge, Malzeme Kalitesi, İşleme Seviyesi, Hedef Uyumu ve Porsiyon Kontrolünün toplamıdır.' : 'Total is the sum of Macro Balance, Ingredient Quality, Processing Level, Goal Alignment, and Portion Control.'}</div>
             `, report.language === 'tr' ? 'Beş parçalı skor modeli' : 'Five-part scoring model', '◎')}
-            ${renderReportSectionCard(strings.criteria, renderCriteriaProgressList(report.criteriaBreakdown), report.language === 'tr' ? 'Her bar 5 puanlık modelin bir parçasını gösterir.' : 'Each bar maps to the 5-point score model.', '↳')}
+            ${renderReportSectionCard(strings.criteria, renderCriteriaProgressList(report.criteriaBreakdown, report.language), report.language === 'tr' ? 'Her bar 5 puanlık modelin bir parçasını gösterir.' : 'Each bar maps to the 5-point score model.', '↳')}
             ${renderReportSectionCard(strings.suggestions, `
               <div class="report-note-list">${(report.improvementSuggestions || []).map(item => `<div>• ${item}</div>`).join('')}</div>
             `, report.language === 'tr' ? 'Üç pratik geliştirme.' : 'Three practical improvements.', '✦')}
@@ -3350,6 +3593,9 @@
 
     function generateFridgeRecipes(rawIngredients, context) {
       const parsed = filterIngredientsForProfile(parseIngredientText(rawIngredients), context)
+      const quantityMap = buildIngredientQuantityMap(rawIngredients)
+      const language = detectLanguageHint(rawIngredients)
+      const preferredMethod = detectCookingPreference(rawIngredients)
       if(parsed.length < 2) return {recipes:[], parsed, report: buildRecipeReportData(rawIngredients, context, [], parsed)}
 
       const candidates = RECIPE_TEMPLATES.map(template => {
@@ -3359,7 +3605,7 @@
         const usedIngredients = [...usedCore, ...usedOptional]
         if(usedIngredients.length < 3 || usedCore.length < 1) return null
 
-        const nutrition = aggregateNutrition(usedIngredients, template.servings)
+        const nutrition = aggregateNutrition(usedIngredients, template.servings, quantityMap)
         const allergens = detectAllergensFromIngredients(usedIngredients)
         const safety = buildSafetyBadge(allergens, context)
         const macroFit = 100 - (
@@ -3374,11 +3620,11 @@
           name: template.name,
           shortDescription: `Built from your fridge items to support your ${context.goal.toLowerCase()} goal.`,
           difficulty: template.difficulty,
-          cookingTime: `${template.minutes} min`,
+          cookingTime: language === 'tr' ? `${template.minutes} dk` : `${template.minutes} min`,
           servings: template.servings,
           category: template.category,
           ingredients: usedIngredients,
-          steps: buildRecipeSteps(template, usedIngredients),
+          steps: buildRecipeSteps(template, usedIngredients, {language, quantityMap, method: preferredMethod}),
           tips: [`Use high heat for better texture.`, `Taste before serving and adjust seasoning.`],
           optionalImprovements: listOptionalUpgrades(missingCore, usedIngredients),
           substitutions: usedIngredients.flatMap(item => (SMART_SUBSTITUTIONS[item] || []).map(sub => `${item} -> ${sub}`)).slice(0, 5),
@@ -3394,7 +3640,7 @@
 
       const fallbackRecipe = candidates.length ? null : (() => {
         const fallbackIngredients = parsed.slice(0, 4)
-        const nutrition = aggregateNutrition(fallbackIngredients.length ? fallbackIngredients : ['olive oil', 'onion', 'garlic'], 2)
+        const nutrition = aggregateNutrition(fallbackIngredients.length ? fallbackIngredients : ['olive oil', 'onion', 'garlic'], 2, quantityMap)
         const allergens = detectAllergensFromIngredients(fallbackIngredients)
         const safety = buildSafetyBadge(allergens, context)
         return {
@@ -3403,12 +3649,12 @@
             ? `${fallbackIngredients[0] || 'Karisik'} ile Hızlı Tabak`
             : `${fallbackIngredients[0] || 'Mixed'} Quick Bowl`,
           shortDescription: `Built directly from your available ingredients to support your ${context.goal.toLowerCase()} goal.`,
-          difficulty: 'Easy',
-          cookingTime: '15-20 min',
+          difficulty: language === 'tr' ? 'Kolay' : 'Easy',
+          cookingTime: language === 'tr' ? '15-20 dk' : '15-20 min',
           servings: 2,
-          category: 'Main Meal',
+          category: language === 'tr' ? 'Ana Öğün' : 'Main Meal',
           ingredients: fallbackIngredients,
-          steps: buildRecipeSteps({servings: 2}, fallbackIngredients),
+          steps: buildRecipeSteps({servings: 2}, fallbackIngredients, {language, quantityMap, method: preferredMethod}),
           tips: ['Use the highest-heat pan-safe ingredient first.', 'Taste and adjust seasoning before serving.'],
           optionalImprovements: listOptionalUpgrades([], fallbackIngredients),
           substitutions: fallbackIngredients.flatMap(item => (SMART_SUBSTITUTIONS[item] || []).map(sub => `${item} -> ${sub}`)).slice(0, 5),
@@ -3433,6 +3679,9 @@
       if(!meta || !out) return
       if(report) {
         meta.innerHTML = renderRecipeReport(report)
+        out.innerHTML = ''
+        app.ui.lastGeneratedRecipes = recipes
+        return
       } else if(!recipes.length) {
         meta.innerHTML = `<div class="allergen-alert">Add a few ingredients to generate a practical recipe report.</div>`
         out.innerHTML = renderLoadingSkeleton('recipe')
@@ -3575,6 +3824,24 @@
       setModuleLoadingState('fridge', false, false)
     }
 
+    function clearPhotoAnalysis() {
+      const state = app.ui.photoRequest
+      if(state?.controller) state.controller.abort()
+      clearModuleFailSafeTimer('photo')
+      if(qs('mealPhotoInput')) qs('mealPhotoInput').value = ''
+      if(qs('photoAnalysisOut')) qs('photoAnalysisOut').innerHTML = ''
+      app.ui.photoRequest = {
+        ...(app.ui.photoRequest || {}),
+        requestId: Number(app.ui.photoRequest?.requestId || 0) + 1,
+        controller: null,
+        loading: false,
+        failSafeTimer: null,
+        lastError: '',
+        hasResult: false
+      }
+      setModuleLoadingState('photo', false, false)
+    }
+
     function rateRecipe(recipeId, rating) {
       if(!app.user.recipeRatings) app.user.recipeRatings = {}
       app.user.recipeRatings[recipeId] = rating
@@ -3634,6 +3901,7 @@
 
       const state = app.ui.photoRequest
       state.lastError = ''
+      state.hasResult = false
       if(state.controller) state.controller.abort()
       state.controller = new AbortController()
       state.requestId += 1
@@ -3658,6 +3926,7 @@
         onSuccess: data => {
           if(state.requestId !== requestId) return
           out.innerHTML = renderPhotoAnalysisReport(data.foodAnalysisReport)
+          state.hasResult = true
           trackModuleRequest('photo-analysis', 'finished', {requestId, latencyMs: Math.round(performance.now() - startedAt)})
         },
         onError: error => {
@@ -3666,6 +3935,7 @@
             ? (language === 'tr' ? 'Foto analiz süresi doldu. Görseli yeniden deneyin.' : 'Photo analysis timed out. Please retry with the image.')
             : (error?.message || (language === 'tr' ? 'Foto analiz sırasında hata oluştu.' : 'Photo analysis failed.'))
           state.lastError = message
+          state.hasResult = false
           out.innerHTML = renderRequestError('photo', message, language)
           trackModuleRequest('photo-analysis', 'error', {requestId, latencyMs: Math.round(performance.now() - startedAt), message})
         },
@@ -4382,6 +4652,8 @@
       initializeAiRuntime()
       const context = getAiContext()
       setAiPending(Boolean(app.ui.aiPending))
+      setModuleLoadingState('fridge', Boolean(app.ui.fridgeRequest?.loading), Boolean(app.ui.fridgeRequest?.lastInput))
+      setModuleLoadingState('photo', Boolean(app.ui.photoRequest?.loading), Boolean(app.ui.photoRequest?.hasResult || app.ui.photoRequest?.lastError))
       renderChat()
       renderAiSignalsAndActions(context)
       if(!app.ui.aiConversation.length) {
