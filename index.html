@@ -76,7 +76,15 @@
     .achievement-filter-btn {padding:8px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.04);color:#e6eef6;cursor:pointer}
     .achievement-filter-btn.active {background:rgba(110,231,183,0.16);border-color:rgba(110,231,183,0.28)}
     .profile-form-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .profile-field {display:flex;flex-direction:column}
+    .profile-field label {font-size:13px;font-weight:600;margin-bottom:6px;color:var(--muted)}
+    .profile-field textarea {min-height:90px}
+    .profile-group {margin-top:12px}
+    .profile-group {border:none;padding:0;min-inline-size:0}
+    .profile-group legend {font-size:13px;font-weight:600;margin-bottom:10px;color:var(--muted)}
     .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
+    .checkbox-row input[type='checkbox'] {width:auto}
+    .checkbox-row label {font-size:13px;font-weight:600;color:#e6eef6}
     .ai-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
     .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
     .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding:10px;max-height:320px;overflow:auto;border-radius:14px;background:rgba(2,8,12,0.72);border:1px solid rgba(255,255,255,0.06)}
@@ -535,85 +543,132 @@
           <div class="card">
             <strong>Health Profile</strong>
             <div class="profile-form-grid" style="margin-top:12px">
-              <input id="profAge" placeholder="Age" type="number" />
-              <input id="profHeight" placeholder="Height (cm)" type="number" />
-              <input id="profWeight" placeholder="Weight (kg)" type="number" />
-              <select id="profActivity">
-                <option value="Not Very Active">Not Very Active</option>
-                <option value="Sedentary">Sedentary</option>
-                <option value="Moderately Active">Moderately Active</option>
-                <option value="Active">Active</option>
-                <option value="Very Active">Very Active</option>
-              </select>
-              <select id="profDiet">
-                <option value="Omnivore">Omnivore</option>
-                <option value="Vegetarian">Vegetarian</option>
-                <option value="Vegan">Vegan</option>
-                <option value="Keto">Keto</option>
-                <option value="Low Carb">Low Carb</option>
-                <option value="Mediterranean">Mediterranean</option>
-              </select>
+              <div class="profile-field">
+                <label for="profAge">Age</label>
+                <input id="profAge" placeholder="Age" type="number" required aria-required="true" min="1" />
+              </div>
+              <div class="profile-field">
+                <label for="profHeight">Height (cm)</label>
+                <input id="profHeight" placeholder="Height (cm)" type="number" required aria-required="true" min="1" />
+              </div>
+              <div class="profile-field">
+                <label for="profWeight">Weight (kg)</label>
+                <input id="profWeight" placeholder="Weight (kg)" type="number" required aria-required="true" min="1" />
+              </div>
+              <div class="profile-field">
+                <label for="profActivity">Activity Level</label>
+                <select id="profActivity" required aria-required="true">
+                  <option value="Not Very Active">Not Very Active</option>
+                  <option value="Sedentary">Sedentary</option>
+                  <option value="Moderately Active">Moderately Active</option>
+                  <option value="Active">Active</option>
+                  <option value="Very Active">Very Active</option>
+                </select>
+              </div>
+              <div class="profile-field">
+                <label for="profDiet">Diet Type</label>
+                <select id="profDiet" required aria-required="true">
+                  <option value="Omnivore">Omnivore</option>
+                  <option value="Vegetarian">Vegetarian</option>
+                  <option value="Vegan">Vegan</option>
+                  <option value="Keto">Keto</option>
+                  <option value="Low Carb">Low Carb</option>
+                  <option value="Mediterranean">Mediterranean</option>
+                </select>
+              </div>
             </div>
             <div class="profile-form-grid" style="margin-top:12px">
-              <input id="profAllergies" placeholder="Allergies (comma separated)" />
-              <input id="profAvoidIngredients" placeholder="Disliked ingredients (comma separated)" />
-              <div class="field-group" style="margin-bottom:0">
-                <label>Country</label>
-                <input id="profCountrySearch" placeholder="Search country" oninput="filterCountryOptions(this.value, 'profCountry')" />
-                <select id="profCountry"></select>
+              <div class="profile-field">
+                <label for="profAllergies">Allergies</label>
+                <textarea id="profAllergies" placeholder="Allergies (comma separated)" aria-describedby="profAllergiesHint"></textarea>
+                <div id="profAllergiesHint" class="tiny">Use commas to list multiple allergies.</div>
               </div>
-              <input id="profWaterTarget" placeholder="Daily water target" type="number" readonly />
-              <input id="profProteinTarget" placeholder="Protein target (g)" type="number" readonly />
-              <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" />
+              <div class="profile-field">
+                <label for="profAvoidIngredients">Disliked Ingredients</label>
+                <textarea id="profAvoidIngredients" placeholder="Disliked ingredients (comma separated)" aria-describedby="profAvoidIngredientsHint"></textarea>
+                <div id="profAvoidIngredientsHint" class="tiny">Use commas to list ingredients to avoid.</div>
+              </div>
+              <div class="profile-field">
+                <label for="profCountrySearch">Country Search</label>
+                <input id="profCountrySearch" placeholder="Search country" oninput="filterCountryOptions(this.value, 'profCountry')" aria-controls="profCountry" />
+              </div>
+              <div class="profile-field">
+                <label for="profCountry">Country</label>
+                <select id="profCountry" required aria-required="true"></select>
+              </div>
+              <div class="profile-field">
+                <label for="profWaterTarget">Daily Water Target</label>
+                <input id="profWaterTarget" placeholder="Daily water target" type="number" readonly aria-readonly="true" />
+              </div>
+              <div class="profile-field">
+                <label for="profProteinTarget">Protein Target (g)</label>
+                <input id="profProteinTarget" placeholder="Protein target (g)" type="number" readonly aria-readonly="true" />
+              </div>
+              <div class="profile-field">
+                <label for="profWorkoutGoal">Workout Frequency / Week</label>
+                <input id="profWorkoutGoal" placeholder="Workout frequency / week" type="number" min="0" />
+              </div>
             </div>
-            <div class="field-group" style="margin-top:12px">
-              <label>Dietary Restrictions & Safety Preferences</label>
+            <fieldset class="profile-group" style="margin-top:12px" aria-labelledby="restrictionLegend">
+              <legend id="restrictionLegend">Dietary Restrictions & Safety Preferences</legend>
               <div class="profile-form-grid" id="restrictionGrid">
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Gluten-Free" />Gluten-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Dairy-Free" />Dairy-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Nut-Free" />Nut-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Egg-Free" />Egg-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Soy-Free" />Soy-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Shellfish-Free" />Shellfish-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Sesame-Free" />Sesame-Free</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Vegetarian" />Vegetarian</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Vegan" />Vegan</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Halal" />Halal</label>
-                <label class="checkbox-row"><input type="checkbox" class="restriction-check" value="Kosher" />Kosher</label>
+                <div class="checkbox-row"><input id="restrictionGlutenFree" type="checkbox" class="restriction-check" value="Gluten-Free" /><label for="restrictionGlutenFree">Gluten-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionDairyFree" type="checkbox" class="restriction-check" value="Dairy-Free" /><label for="restrictionDairyFree">Dairy-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionNutFree" type="checkbox" class="restriction-check" value="Nut-Free" /><label for="restrictionNutFree">Nut-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionEggFree" type="checkbox" class="restriction-check" value="Egg-Free" /><label for="restrictionEggFree">Egg-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionSoyFree" type="checkbox" class="restriction-check" value="Soy-Free" /><label for="restrictionSoyFree">Soy-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionShellfishFree" type="checkbox" class="restriction-check" value="Shellfish-Free" /><label for="restrictionShellfishFree">Shellfish-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionSesameFree" type="checkbox" class="restriction-check" value="Sesame-Free" /><label for="restrictionSesameFree">Sesame-Free</label></div>
+                <div class="checkbox-row"><input id="restrictionVegetarian" type="checkbox" class="restriction-check" value="Vegetarian" /><label for="restrictionVegetarian">Vegetarian</label></div>
+                <div class="checkbox-row"><input id="restrictionVegan" type="checkbox" class="restriction-check" value="Vegan" /><label for="restrictionVegan">Vegan</label></div>
+                <div class="checkbox-row"><input id="restrictionHalal" type="checkbox" class="restriction-check" value="Halal" /><label for="restrictionHalal">Halal</label></div>
+                <div class="checkbox-row"><input id="restrictionKosher" type="checkbox" class="restriction-check" value="Kosher" /><label for="restrictionKosher">Kosher</label></div>
+              </div>
+            </fieldset>
+            <div class="profile-form-grid" style="margin-top:12px">
+              <div class="profile-field">
+                <label for="profGoalSelect">Goal</label>
+                <select id="profGoalSelect" required aria-required="true">
+                  <option value="lose-weight">Lose Weight</option>
+                  <option value="maintain-weight">Maintain Weight</option>
+                  <option value="gain-weight">Gain Weight</option>
+                  <option value="gain-muscle">Gain Muscle</option>
+                  <option value="stay-fit">Stay Fit</option>
+                </select>
+              </div>
+              <div class="profile-field">
+                <label for="profMealPlanning">Meal Planning</label>
+                <select id="profMealPlanning">
+                  <option value="Never">Meal planning: Never</option>
+                  <option value="Rarely">Meal planning: Rarely</option>
+                  <option value="Occasionally">Meal planning: Occasionally</option>
+                  <option value="Frequently">Meal planning: Frequently</option>
+                  <option value="Always">Meal planning: Always</option>
+                </select>
+              </div>
+              <div class="profile-field">
+                <label for="profWeeklyMealPlan">Weekly Meal Plan Preference</label>
+                <select id="profWeeklyMealPlan">
+                  <option value="Yes, definitely">Weekly plan: Yes, definitely</option>
+                  <option value="Open to trying">Weekly plan: Open to trying</option>
+                  <option value="No thanks">Weekly plan: No thanks</option>
+                </select>
               </div>
             </div>
-            <div class="profile-form-grid" style="margin-top:12px">
-              <select id="profGoalSelect">
-                <option value="lose-weight">Lose Weight</option>
-                <option value="maintain-weight">Maintain Weight</option>
-                <option value="gain-weight">Gain Weight</option>
-                <option value="gain-muscle">Gain Muscle</option>
-                <option value="stay-fit">Stay Fit</option>
-              </select>
-              <select id="profMealPlanning">
-                <option value="Never">Meal planning: Never</option>
-                <option value="Rarely">Meal planning: Rarely</option>
-                <option value="Occasionally">Meal planning: Occasionally</option>
-                <option value="Frequently">Meal planning: Frequently</option>
-                <option value="Always">Meal planning: Always</option>
-              </select>
-              <select id="profWeeklyMealPlan">
-                <option value="Yes, definitely">Weekly plan: Yes, definitely</option>
-                <option value="Open to trying">Weekly plan: Open to trying</option>
-                <option value="No thanks">Weekly plan: No thanks</option>
-              </select>
+            <div class="profile-field" style="margin-top:12px">
+              <label for="profHabits">Healthy Habits</label>
+              <textarea id="profHabits" class="habits-editor" placeholder="Track calories, Eat more protein, Drink more water" style="min-height:90px" aria-describedby="profHabitsHint"></textarea>
+              <div id="profHabitsHint" class="tiny">You can enter multiple habits separated by commas.</div>
             </div>
-            <div class="field-group" style="margin-top:12px">
-              <label>Healthy Habits (comma separated)</label>
-              <textarea id="profHabits" class="habits-editor" placeholder="Track calories, Eat more protein, Drink more water" style="min-height:90px"></textarea>
-              <div class="tiny">You can enter multiple habits separated by commas.</div>
-            </div>
-            <div class="profile-form-grid" style="margin-top:12px">
-              <div class="checkbox-row"><input type="checkbox" id="reminderWater" /><label for="reminderWater">Water reminder</label></div>
-              <div class="checkbox-row"><input type="checkbox" id="reminderMeal" /><label for="reminderMeal">Meal reminder</label></div>
-              <div class="checkbox-row"><input type="checkbox" id="reminderWorkout" /><label for="reminderWorkout">Workout reminder</label></div>
-              <div class="checkbox-row"><input type="checkbox" id="reminderSleep" /><label for="reminderSleep">Sleep reminder</label></div>
-            </div>
+            <fieldset class="profile-group" aria-labelledby="reminderLegend">
+              <legend id="reminderLegend">Reminder Preferences</legend>
+              <div class="profile-form-grid" style="margin-top:0">
+                <div class="checkbox-row"><input type="checkbox" id="reminderWater" /><label for="reminderWater">Water reminder</label></div>
+                <div class="checkbox-row"><input type="checkbox" id="reminderMeal" /><label for="reminderMeal">Meal reminder</label></div>
+                <div class="checkbox-row"><input type="checkbox" id="reminderWorkout" /><label for="reminderWorkout">Workout reminder</label></div>
+                <div class="checkbox-row"><input type="checkbox" id="reminderSleep" /><label for="reminderSleep">Sleep reminder</label></div>
+              </div>
+            </fieldset>
             <button class="btn" style="margin-top:12px" onclick="saveProfile()">Save</button>
           </div>
           <div class="card">
