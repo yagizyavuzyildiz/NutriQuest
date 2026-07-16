@@ -127,6 +127,47 @@
     .rating-row {display:flex;gap:4px;align-items:center}
     .rating-btn {padding:4px 7px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.06);color:#f8fafc;cursor:pointer;font-size:12px}
     .recipe-steps {display:grid;gap:4px;font-size:13px;color:#ddf7eb}
+    .report-shell {display:grid;gap:12px}
+    .report-topline {display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+    .report-kicker {font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+    .report-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+    .report-section-card {padding:14px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:grid;gap:10px}
+    .report-section-card h4 {font-size:14px;letter-spacing:.02em}
+    .report-section-card .section-body {font-size:13px;line-height:1.55;color:#ddf7eb;display:grid;gap:8px}
+    .report-section-card .section-note {font-size:12px;color:var(--muted)}
+    .report-banner {padding:14px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.14),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.2);display:grid;gap:8px}
+    .report-badge-row {display:flex;gap:8px;flex-wrap:wrap}
+    .report-badge {display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05);color:#edf8f3}
+    .report-badge.compatible {background:rgba(74,222,128,0.14);border-color:rgba(74,222,128,0.35);color:#bbf7d0}
+    .report-badge.partial {background:rgba(245,158,11,0.14);border-color:rgba(245,158,11,0.35);color:#fde68a}
+    .report-badge.incompatible {background:rgba(248,113,113,0.14);border-color:rgba(248,113,113,0.35);color:#fecaca}
+    .report-badge.good {background:rgba(59,130,246,0.14);border-color:rgba(59,130,246,0.35);color:#bfdbfe}
+    .macro-table {display:grid;gap:8px}
+    .macro-row {display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.03);font-size:13px}
+    .macro-row strong {color:#f3fff9}
+    .criteria-list {display:grid;gap:8px}
+    .criteria-item {display:grid;gap:6px}
+    .criteria-label {display:flex;justify-content:space-between;gap:10px;font-size:12px;color:#d8e8f3}
+    .criteria-bar {height:8px;border-radius:999px;background:rgba(255,255,255,0.08);overflow:hidden}
+    .criteria-bar > div {height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),#38bdf8);width:0%}
+    .score-ring-wrap {display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .score-ring {width:112px;height:112px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--accent) var(--score-angle), rgba(255,255,255,0.08) 0deg);border:1px solid rgba(255,255,255,0.08)}
+    .score-ring::before {content:'';position:absolute;inset:10px;border-radius:50%;background:#07131b;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
+    .score-ring-inner {position:relative;z-index:1;display:grid;place-items:center;text-align:center;gap:2px}
+    .score-ring-inner strong {font-size:24px;line-height:1}
+    .score-ring-inner span {font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}
+    .score-chip {padding:6px 10px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.05)}
+    .score-chip.excellent {background:rgba(74,222,128,0.14);border-color:rgba(74,222,128,0.35);color:#bbf7d0}
+    .score-chip.good {background:rgba(110,231,183,0.14);border-color:rgba(110,231,183,0.3);color:#dcfff1}
+    .score-chip.fair {background:rgba(245,158,11,0.14);border-color:rgba(245,158,11,0.3);color:#fde68a}
+    .score-chip.needs-improvement {background:rgba(248,113,113,0.14);border-color:rgba(248,113,113,0.3);color:#fecaca}
+    .skeleton-card {padding:14px;border-radius:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);display:grid;gap:10px}
+    .skeleton-line {height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(255,255,255,0.06),rgba(255,255,255,0.15),rgba(255,255,255,0.06));background-size:200% 100%;animation:skeletonPulse 1.3s infinite linear}
+    .skeleton-line.short {width:48%}
+    .skeleton-line.medium {width:72%}
+    .skeleton-line.long {width:100%}
+    @keyframes skeletonPulse {0% {background-position:0% 0} 100% {background-position:200% 0}}
+    .report-note-list {display:grid;gap:6px;font-size:13px;color:#ddf7eb}
     .grocery-list {display:grid;gap:10px;margin-top:10px}
     .grocery-category {padding:10px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06)}
     .grocery-item {display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.06)}
@@ -438,12 +479,6 @@
             <button class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
             <div id="photoAnalysisOut" class="tiny"></div>
           </div>
-          <div class="premium-card">
-            <div class="metric-title">Leftover Meal Generator</div>
-            <textarea id="leftoverInput" placeholder="Example: cooked chicken, rice, broccoli" style="min-height:80px"></textarea>
-            <button class="btn secondary" onclick="generateLeftoverMealIdeas()">Generate Leftover Ideas</button>
-            <div id="leftoverOut" class="tiny"></div>
-          </div>
         </div>
       </div>
 
@@ -730,6 +765,7 @@
   </div>
 
   <script src="utils/nutrition.js"></script>
+  <script src="utils/aiReports.js"></script>
   <script>
     const STORAGE_KEYS = {users:'nq_users',activeUser:'nq_active_user',legacyUser:'nq_user'}
     const app = {
@@ -2305,87 +2341,10 @@
           }
     }
 
-    function buildRecipeCopilotReport(rawInput, context) {
-      const language = detectLanguageHint(rawInput)
-      const recipeLanguage = getRecipeLanguageText(language)
-      const parsed = filterIngredientsForProfile(extractIngredientCandidates(rawInput).length ? extractIngredientCandidates(rawInput) : parseIngredientText(rawInput), context)
-      const ranked = RECIPE_TEMPLATES.map(template => {
-        const usedCore = template.core.filter(item => parsed.includes(item))
-        const usedOptional = template.optional.filter(item => parsed.includes(item))
-        const usedIngredients = [...usedCore, ...usedOptional]
-        if(usedIngredients.length < 2) return null
-        const nutrition = aggregateNutrition(usedIngredients, template.servings)
-        const matchScore = usedCore.length * 4 + usedOptional.length * 1.5 + usedIngredients.length
-        return {
-          score: matchScore,
-          recipe: {
-            name: template.name,
-            difficulty: template.difficulty,
-            cookingTime: `${template.minutes} min`,
-            servings: template.servings,
-            category: template.category,
-            ingredients: usedIngredients,
-            steps: buildRecipeSteps(template, usedIngredients),
-            substitutions: usedIngredients.flatMap(item => (SMART_SUBSTITUTIONS[item] || []).map(sub => `${item} -> ${sub}`)).slice(0, 5),
-            storage: language === 'tr'
-              ? 'Hava gecirmez kapta buzdolabinda 2 güne kadar sakla.'
-              : 'Store in an airtight container in the fridge for up to 2 days.',
-            nutrition,
-            score: Number(matchScore.toFixed(1))
-          }
-        }
-      }).filter(Boolean).sort((a, b) => b.score - a.score)
-
-      const recipe = ranked[0]?.recipe || {
-        name: language === 'tr' ? 'Elindeki Malzemelerle Hızlı Tabak' : 'Quick Fridge-Friendly Plate',
-        difficulty: language === 'tr' ? 'Kolay' : 'Easy',
-        cookingTime: language === 'tr' ? '15-20 dk' : '15-20 min',
-        servings: 2,
-        category: language === 'tr' ? 'Ana Öğün' : 'Main Meal',
-        ingredients: parsed,
-        steps: buildRecipeSteps({servings: 2}, parsed),
-        substitutions: [],
-        optionalImprovements: [],
-        storage: language === 'tr'
-          ? 'Hava gecirmez kapta buzdolabinda 2 güne kadar sakla.'
-          : 'Store in an airtight container in the fridge for up to 2 days.',
-        nutrition: aggregateNutrition(parsed.length ? parsed : ['olive oil', 'onion', 'garlic'], 2),
-        score: 0
-      }
-
-      const ingredientsLine = recipe.ingredients.length
-        ? recipe.ingredients.map(item => `- ${item}`).join('\n')
-        : (language === 'tr' ? '- Malzeme algilanamadi; lütfen virgülle listele.' : '- No ingredients detected; please list them with commas.')
-
-      const stepsLine = recipe.steps.map((step, index) => `${index + 1}. ${step}`).join('\n')
-      const nutrition = recipe.nutrition.perServing || {kcal:0, p:0, c:0, f:0}
-      const swapLine = (recipe.substitutions && recipe.substitutions.length)
-        ? recipe.substitutions.map(item => `- ${item}`).join('\n')
-        : (language === 'tr' ? '- Gerekirse tavuk yerine tofu, pirinc yerine patates veya makarna kullan.' : '- Swap protein with tofu, rice with potatoes, or pasta with grains as needed.')
-      const fitLine = language === 'tr'
-        ? `Bu tarif, ${context.goal.toLowerCase()} hedefini destekler ve mevcut malzemeleri once kullanir.`
-        : `This recipe supports your ${context.goal.toLowerCase()} goal and prioritizes the ingredients you already have.`
-      const reportLine = language === 'tr'
-        ? `Porsiyon basi: ${nutrition.kcal} kcal | P ${nutrition.p}g | C ${nutrition.c}g | F ${nutrition.f}g. Malzemeler ve porsiyonlar hedefe gore ayarlanabilir.`
-        : `Per serving: ${nutrition.kcal} kcal | P ${nutrition.p}g | C ${nutrition.c}g | F ${nutrition.f}g. Ingredients and portions can be adjusted to match your target.`
-
-      return {
-        language,
-        recipe,
-        report: [
-          `${recipeLanguage.intro}`,
-          '',
-          `${recipeLanguage.sections.name}: ${recipe.name}`,
-          `${recipeLanguage.sections.fit}: ${fitLine}`,
-          `${recipeLanguage.sections.ingredients}:\n${ingredientsLine}`,
-          `${recipeLanguage.sections.steps}:\n${stepsLine}`,
-          `${recipeLanguage.sections.time}: ${recipe.cookingTime} • ${recipe.difficulty}`,
-          `${recipeLanguage.sections.nutrition}: ${nutrition.kcal} kcal | P ${nutrition.p}g | C ${nutrition.c}g | F ${nutrition.f}g`,
-          `${recipeLanguage.sections.swaps}:\n${swapLine}`,
-          `${recipeLanguage.sections.storage}: ${recipe.storage}`,
-          `${recipeLanguage.sections.report}:\n${reportLine}`
-        ].join('\n')
-      }
+    function buildRecipeCopilotReport(rawInput, context, recipes = null, parsed = null) {
+      const parsedIngredients = parsed || filterIngredientsForProfile(extractIngredientCandidates(rawInput).length ? extractIngredientCandidates(rawInput) : parseIngredientText(rawInput), context)
+      const candidateRecipes = recipes || generateFridgeRecipes(rawInput, context).recipes || []
+      return buildRecipeReportData(rawInput, context, candidateRecipes, parsedIngredients)
     }
 
     function ingredientData(name) {
@@ -2521,6 +2480,722 @@
       ]
     }
 
+    function clampValue(value, min, max) {
+      return Math.min(Math.max(value, min), max)
+    }
+
+    function getReportStrings(language) {
+      const tr = language === 'tr'
+      return tr ? {
+        recipeTitle:'Tarif Raporu',
+        photoTitle:'Yemek Analiz Raporu',
+        overview:'Tarif Özeti',
+        ingredientIntel:'Malzeme Analizi',
+        steps:'Adım Adım Pişirme Planı',
+        nutrition:'Tam Beslenme Paneli (tahmini)',
+        compatibility:'Diyet Uyumu',
+        alternatives:'Alternatif Öğünler',
+        cost:'Maliyet ve Pratiklik',
+        coach:'AI Koç Notları',
+        dishSummary:'Yemek Tespiti Özeti',
+        scoreTitle:'Beslenme Skoru',
+        criteria:'Kriter Dağılımı',
+        suggestions:'İyileştirme Önerileri',
+        swaps:'Akıllı Değişimler',
+        final:'Son Koç Önerisi',
+        compatible:'Uyumlu',
+        partial:'Kısmen uyumlu',
+        incompatible:'Uyumsuz',
+        goodFit:'Hedefin için iyi uyum',
+        needsAdjust:'Ayarlama gerekiyor',
+        betterAlt:'Daha iyi alternatif önerilir',
+        eatNow:'Şimdi ye',
+        adjustThenEat:'Önce ayarla sonra ye',
+        low:'Düşük', medium:'Orta', high:'Yüksek'
+      } : {
+        recipeTitle:'Recipe Report',
+        photoTitle:'Food Analysis Report',
+        overview:'Recipe Overview',
+        ingredientIntel:'Ingredient Intelligence',
+        steps:'Step-by-Step Cooking Plan',
+        nutrition:'Full Nutrition Panel (estimated)',
+        compatibility:'Diet Compatibility',
+        alternatives:'Alternative Meals',
+        cost:'Cost & Practicality',
+        coach:'AI Coach Notes',
+        dishSummary:'Dish Detection Summary',
+        scoreTitle:'Nutrition Score',
+        criteria:'Criteria Breakdown',
+        suggestions:'Improvement Suggestions',
+        swaps:'Smart Swaps',
+        final:'Final Coach Recommendation',
+        compatible:'Compatible',
+        partial:'Partially compatible',
+        incompatible:'Not compatible',
+        goodFit:'Good fit for your goal',
+        needsAdjust:'Needs adjustment',
+        betterAlt:'Better alternative recommended',
+        eatNow:'Eat now',
+        adjustThenEat:'Adjust then eat',
+        low:'Low', medium:'Medium', high:'High'
+      }
+    }
+
+    function scoreGoalId(goalId) {
+      const normalized = String(goalId || '').toLowerCase()
+      if(normalized.includes('lose')) return 'lose_weight'
+      if(normalized.includes('gain-muscle') || normalized.includes('muscle')) return 'gain_muscle'
+      if(normalized.includes('gain')) return 'gain_weight'
+      if(normalized.includes('maintain')) return 'maintain_weight'
+      return 'stay_fit'
+    }
+
+    function toScoreContext(context) {
+      return {
+        calories: 0,
+        macros: {protein:0, carbs:0, fat:0},
+        fiber: 0,
+        sugar: 0,
+        sodium: 0,
+        processedLevel: 'medium',
+        ingredientsQuality: 'fair',
+        portionGrams: 0,
+        userWeightKg: context?.weight || 70,
+        userGoal: scoreGoalId(context?.goalId || context?.goal || 'stay_fit')
+      }
+    }
+
+    function estimateRecipeCostTier(ingredients) {
+      const expensive = new Set(['salmon', 'cheese', 'avocado', 'olive oil', 'beef'])
+      const moderate = new Set(['chicken', 'turkey', 'tuna', 'greek yogurt', 'broccoli', 'mushroom'])
+      const hasExpensive = ingredients.some(item => expensive.has(canonicalIngredient(item)))
+      const hasModerate = ingredients.some(item => moderate.has(canonicalIngredient(item)))
+      if(hasExpensive && ingredients.length >= 5) return 'High'
+      if(hasExpensive || hasModerate) return 'Medium'
+      return 'Low'
+    }
+
+    function detectDietCompatibility(context, recipe, ingredients, language = 'en') {
+      const diet = String(context?.diet || '').toLowerCase()
+      const ingredientSet = new Set(ingredients.map(canonicalIngredient))
+      const containsAnimalProtein = ['chicken','turkey','salmon','tuna','egg','milk','cheese','greek yogurt'].some(item => ingredientSet.has(item))
+      const containsAnimal = containsAnimalProtein
+      const containsGrainHeavy = ['pasta','rice','bread','oats'].some(item => ingredientSet.has(item))
+      const containsHighFat = ['olive oil','cheese','avocado','salmon'].some(item => ingredientSet.has(item))
+      const reasons = []
+      const changes = []
+      const tr = language === 'tr'
+      let status = tr ? 'Uyumlu' : 'Compatible'
+
+      const text = tr ? {
+        vegan:'Tarif hayvansal içerik kullanıyor, ancak diyetin vegan.',
+        vegetarian:'Tarif et/balık içeriyor, bu yüzden vejetaryen bir değişim gerekiyor.',
+        keto:'Tarif tahıl ağırlıklı, bu durum keto ile çakışır.',
+        allergy:'Alerji çakışması tespit edildi: ',
+        fat:'Yağ yoğunluğu kesim odaklı bir hedef için biraz yüksek.',
+        generic:'Malzeme ve makro profili mevcut hedefle genel olarak uyumlu.',
+        noChange:'Belirgin bir değişiklik gerekmez.',
+        swapProtein:'Proteini tofu, nohut veya mercimek ile değiştir.',
+        swapVeg:'Eti veya balığı, izinliyse tofu, nohut ya da yumurta ile değiştir.',
+        swapKeto:'Makarna/pirinç/ekmek yerine karnabahar pilavı, kabak eriştesi veya ekstra sebze kullan.',
+        swapAllergy:'Pişirmeden önce alerji güvenli bir alternatif kullan.',
+        reduceOil:'Ek yağı azalt ve peyniri daha kontrollü kullan.'
+      } : {
+        vegan:'Recipe uses animal-based ingredients but your diet is vegan.',
+        vegetarian:'Recipe includes meat/fish items, so it needs a vegetarian swap.',
+        keto:'Recipe is grain-heavy, which conflicts with keto.',
+        allergy:'Allergy conflict detected: ',
+        fat:'Fat density is a little high for a cut-oriented goal.',
+        generic:'Ingredients and macro profile fit the current goal reasonably well.',
+        noChange:'No major changes needed.',
+        swapProtein:'Swap protein with tofu, chickpea, or lentil.',
+        swapVeg:'Replace meat or fish with tofu, chickpea, or egg if allowed.',
+        swapKeto:'Swap pasta/rice/bread for cauliflower rice, zucchini noodles, or extra vegetables.',
+        swapAllergy:'Use an allergy-safe substitute before cooking.',
+        reduceOil:'Reduce added oil and portion cheese more tightly.'
+      }
+
+      if(diet.includes('vegan') && containsAnimal) {
+        status = tr ? 'Uyumsuz' : 'Not compatible'
+        reasons.push(text.vegan)
+        changes.push(text.swapProtein)
+      } else if(diet.includes('vegetarian') && ['salmon','tuna','chicken','turkey'].some(item => ingredientSet.has(item))) {
+        status = tr ? 'Kısmen uyumlu' : 'Partially compatible'
+        reasons.push(text.vegetarian)
+        changes.push(text.swapVeg)
+      } else if(diet.includes('keto') && containsGrainHeavy) {
+        status = tr ? 'Kısmen uyumlu' : 'Partially compatible'
+        reasons.push(text.keto)
+        changes.push(text.swapKeto)
+      }
+
+      const allergyHits = (context?.allergyProfile || []).filter(item => ingredientSet.has(canonicalIngredient(item)))
+      if(allergyHits.length) {
+        status = tr ? 'Uyumsuz' : 'Not compatible'
+        reasons.push(`${text.allergy}${allergyHits.join(', ')}.`)
+        changes.push(text.swapAllergy)
+      }
+
+      if((status === 'Compatible' || status === 'Uyumlu') && containsHighFat && diet.includes('lose')) {
+        status = tr ? 'Kısmen uyumlu' : 'Partially compatible'
+        reasons.push(text.fat)
+        changes.push(text.reduceOil)
+      }
+
+      if(!reasons.length) {
+        reasons.push(text.generic)
+      }
+      if(!changes.length) {
+        changes.push(text.noChange)
+      }
+
+      return {status, reasons, changes}
+    }
+
+    function buildTechniqueNotes(recipe) {
+      const category = String(recipe?.category || '').toLowerCase()
+      if(category.includes('dinner')) {
+        return ['Use a hot pan or oven preheat for better caramelization.', 'Finish with a brief rest so juices settle.']
+      }
+      if(category.includes('lunch')) {
+        return ['Batch-cook grains first if needed.', 'Keep vegetables crisp for better texture.']
+      }
+      return ['Use medium heat to avoid scorching aromatics.', 'Taste and adjust seasoning at the end.']
+    }
+
+    function buildCommonMistakes(recipe) {
+      const ingredients = (recipe?.ingredients || []).map(canonicalIngredient)
+      const mistakes = ['Overcrowding the pan reduces browning.', 'Under-seasoning early makes the final dish flat.']
+      if(ingredients.includes('pasta') || ingredients.includes('rice')) mistakes.push('Overcooking grains makes the texture heavy.')
+      if(ingredients.includes('salmon') || ingredients.includes('chicken')) mistakes.push('Cutting protein too early can release juices.')
+      return mistakes.slice(0, 3)
+    }
+
+    function buildAlternativeMeals(recipe, language, parsedIngredients) {
+      const baseIngredients = recipe?.ingredients?.length ? recipe.ingredients : parsedIngredients
+      const baseMacros = recipe?.nutrition?.perServing || {kcal:0, p:0, c:0, f:0}
+      const languageStrings = getReportStrings(language)
+      const alternatives = recipe ? [
+        {
+          name: `${recipe.name} - ${language === 'tr' ? 'Fırın Versiyonu' : 'Baked Version'}`,
+          macroSummary: `${baseMacros.kcal} kcal • P ${baseMacros.p}g • C ${baseMacros.c}g • F ${baseMacros.f}g`
+        },
+        {
+          name: `${recipe.name} - ${language === 'tr' ? 'Tava Versiyonu' : 'Pan Version'}`,
+          macroSummary: `${Math.max(1, baseMacros.kcal - 35)} kcal • P ${Math.max(1, baseMacros.p)}g • C ${Math.max(1, baseMacros.c - 4)}g • F ${Math.max(1, baseMacros.f - 2)}g`
+        },
+        {
+          name: `${recipe.name} - ${language === 'tr' ? 'Tek Kap Versiyonu' : 'One-Pot Version'}`,
+          macroSummary: `${Math.max(1, baseMacros.kcal + 20)} kcal • P ${Math.max(1, baseMacros.p)}g • C ${Math.max(1, baseMacros.c + 3)}g • F ${Math.max(1, baseMacros.f)}g`
+        }
+      ] : []
+
+      while(alternatives.length < 3) {
+        const suffix = alternatives.length === 0 ? (language === 'tr' ? 'Hafif Salata' : 'Light Salad') : alternatives.length === 1 ? (language === 'tr' ? 'Kase Versiyonu' : 'Bowl Version') : (language === 'tr' ? 'Protein Odakli Versiyon' : 'Protein-Forward Version')
+        alternatives.push({
+          name: `${baseIngredients[0] || (language === 'tr' ? 'Karisik' : 'Mixed')} ${suffix}`,
+          macroSummary: `${baseMacros.kcal || 400} kcal • P ${baseMacros.p || 25}g • C ${baseMacros.c || 35}g • F ${baseMacros.f || 14}g`
+        })
+      }
+
+      return alternatives.slice(0, 3)
+    }
+
+    function buildRecipeReportData(rawInput, context, recipes, parsedIngredients) {
+      const language = detectLanguageHint(rawInput)
+      const strings = getReportStrings(language)
+      const topRecipe = recipes[0] || {
+        name: language === 'tr' ? 'Karisik Hızlı Tabak' : 'Quick Mixed Bowl',
+        difficulty: language === 'tr' ? 'Kolay' : 'Easy',
+        cookingTime: language === 'tr' ? '15-20 dk' : '15-20 min',
+        servings: 2,
+        category: language === 'tr' ? 'Ana Öğün' : 'Main Meal',
+        ingredients: parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'],
+        steps: buildRecipeSteps({servings: 2}, parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic']),
+        tips: [],
+        optionalImprovements: [],
+        substitutions: [],
+        storage: language === 'tr'
+          ? 'Hava geçirmez kapta 2 güne kadar sakla.'
+          : 'Store in an airtight container for up to 2 days.',
+        nutrition: aggregateNutrition(parsedIngredients.length ? parsedIngredients : ['olive oil', 'onion', 'garlic'], 2),
+        missingCore: [],
+        score: 0
+      }
+
+      const nutrition = topRecipe.nutrition || {total:{kcal:0,p:0,c:0,f:0,fiber:0,sugar:0,sodium:0}, perServing:{kcal:0,p:0,c:0,f:0,fiber:0,sugar:0,sodium:0}}
+      const scoreInput = {
+        calories: nutrition.perServing.kcal || 0,
+        macros: {protein: nutrition.perServing.p || 0, carbs: nutrition.perServing.c || 0, fat: nutrition.perServing.f || 0},
+        fiber: nutrition.perServing.fiber || 0,
+        sugar: nutrition.perServing.sugar || 0,
+        sodium: nutrition.perServing.sodium || 0,
+        processedLevel: topRecipe.category === 'Dinner' && topRecipe.ingredients.includes('olive oil') ? 'medium' : 'low',
+        ingredientsQuality: topRecipe.ingredients.length >= 4 ? 'good' : 'fair',
+        portionGrams: Math.max(250, topRecipe.ingredients.length * 160),
+        userWeightKg: context.weight || 70,
+        userGoal: scoreGoalId(context.goalId || context.goal || 'stay_fit')
+      }
+      const score = window.AIReportUtils ? window.AIReportUtils.calculateNutritionScore(scoreInput) : {macroBalance:0, ingredientQuality:0, processingLevel:0, goalAlignment:0, portionControl:0, total:0, verdict:'Needs Improvement'}
+      const compatibility = detectDietCompatibility(context, topRecipe, topRecipe.ingredients, language)
+      const alternatives = buildAlternativeMeals(topRecipe, language, parsedIngredients)
+      const costTier = estimateRecipeCostTier(topRecipe.ingredients)
+      const mealPrepSuitability = topRecipe.steps.length >= 5 ? 'High' : 'Medium'
+      const report = {
+        language,
+        type: 'recipeReport',
+        title: strings.recipeTitle,
+        summaryText: language === 'tr'
+          ? `NutriQuest Recipe Copilot raporu hazır. ${topRecipe.name} hedefinle uyumlu, ${compatibility.status.toLowerCase()} ve ${score.verdict.toLowerCase()} seviyesinde.`
+          : `NutriQuest Recipe Copilot report is ready. ${topRecipe.name} is aligned to your goal, ${compatibility.status.toLowerCase()}, and scored as ${score.verdict.toLowerCase()}.`,
+        overview: {
+          recipeName: topRecipe.name,
+          goalFitSummary: language === 'tr'
+            ? `Bu tarif, ${context.goal.toLowerCase()} hedefini desteklemek için mevcut malzemeleri önceliklendirir.`
+            : `This recipe prioritizes the ingredients you already have to support your ${context.goal.toLowerCase()} goal.`,
+          servingSize: `${topRecipe.servings} ${language === 'tr' ? 'porsiyon' : 'servings'}`,
+          prepTime: topRecipe.cookingTime,
+          cookTime: topRecipe.cookingTime,
+          totalTime: topRecipe.cookingTime,
+          difficulty: topRecipe.difficulty
+        },
+        ingredientIntelligence: {
+          availableIngredients: parsedIngredients.length ? parsedIngredients : topRecipe.ingredients,
+          optionalAdditions: topRecipe.optionalImprovements.length ? topRecipe.optionalImprovements : [language === 'tr' ? 'Tuz, limon veya taze yeşillik eklenebilir.' : 'Add salt, lemon, or fresh greens if available.'],
+          missingCriticalItems: topRecipe.missingCore && topRecipe.missingCore.length ? topRecipe.missingCore : [language === 'tr' ? 'Eksik kritik malzeme yok.' : 'No critical items missing.'],
+          substitutions: topRecipe.substitutions.length ? topRecipe.substitutions : [language === 'tr' ? 'Diyet uyumuna göre küçük swaplar yapılabilir.' : 'Small swaps can be used to match your diet.']
+        },
+        cookingPlan: {
+          steps: topRecipe.steps,
+          techniqueNotes: buildTechniqueNotes(topRecipe),
+          commonMistakes: buildCommonMistakes(topRecipe)
+        },
+        nutritionPanel: {
+          total: nutrition.total,
+          perServing: nutrition.perServing
+        },
+        dietCompatibility: compatibility,
+        alternativeMeals: alternatives,
+        costPracticality: {
+          estimatedCostTier: costTier,
+          mealPrepSuitability,
+          storageGuide: topRecipe.storage,
+          reheatingGuide: language === 'tr'
+            ? 'Orta ateşte, çok kurutmadan ısıt. Gerekirse 1-2 yemek kaşığı su ekle.'
+            : 'Reheat on medium heat without drying it out. Add 1-2 tablespoons of water if needed.'
+        },
+        coachNotes: {
+          fatLoss: language === 'tr'
+            ? 'Yağ eklerini azalt, lif ve protein dengesini koru.'
+            : 'If your goal is fat loss, reduce added fats and keep fiber plus protein strong.',
+          muscleGain: language === 'tr'
+            ? 'Porsiyonu biraz büyüt ve karbonhidratı antrenman çevresine koy.'
+            : 'If your goal is muscle gain, slightly increase the serving and place more carbs around training.',
+          nextBestAction: language === 'tr'
+            ? 'Sonraki en iyi adım: listedeki en kritik eksik malzemeyi tamamla ve tarifi bugün uygula.'
+            : 'Next best action: fill the most critical missing item and cook this recipe today.'
+        },
+        score,
+        scoreInput,
+        reportBadge: score.verdict,
+        badgeLabel: language === 'tr'
+          ? `Bu öğün ve hedefin: ${compatibility.status}`
+          : `This meal vs your goal: ${compatibility.status}`
+      }
+
+      return report
+    }
+
+    function buildPhotoAnalysisReportData(file, context) {
+      const language = detectLanguageHint(file?.name || context?.lastUserPrompt || '')
+      const strings = getReportStrings(language)
+      const fileName = String(file?.name || '').toLowerCase()
+      const seed = (file?.size || 0) + fileName.length
+      const dishLibrary = [
+        {keywords:['salad','greens','bowl'], name:'Grilled Chicken Salad', portion:'Medium', calories: 420, macros:{protein:36, carbs:22, fat:18}, fiber:8, sugar:6, sodium:390, processedLevel:'low', ingredientsQuality:'excellent', verdict:'Good fit for your goal', tips:['Add extra protein if you are training today.', 'Use a lighter dressing to keep calories controlled.'], swaps:['Swap croutons for seeds.', 'Use yogurt dressing instead of mayo.']},
+        {keywords:['pasta','noodle','spaghetti'], name:'Pasta Bowl', portion:'Large', calories: 680, macros:{protein:24, carbs:88, fat:22}, fiber:5, sugar:8, sodium:620, processedLevel:'medium', ingredientsQuality:'good', verdict:'Needs adjustment', tips:['Add a protein source to raise satiety.', 'Reduce heavy sauce portions.'], swaps:['Use whole-wheat pasta.', 'Add grilled chicken or tofu.']},
+        {keywords:['rice','bowl','chicken'], name:'Chicken Rice Bowl', portion:'Medium', calories: 590, macros:{protein:42, carbs:64, fat:16}, fiber:7, sugar:5, sodium:450, processedLevel:'low', ingredientsQuality:'good', verdict:'Good fit for your goal', tips:['Great base meal for training days.', 'Keep sauces moderate.'], swaps:['Swap white rice for brown rice.', 'Add mixed vegetables.']},
+        {keywords:['burger','fries','wrap'], name:'Fast Food Combo', portion:'Large', calories: 860, macros:{protein:28, carbs:84, fat:42}, fiber:4, sugar:12, sodium:980, processedLevel:'high', ingredientsQuality:'poor', verdict:'Needs adjustment', tips:['Reduce fries portion first.', 'Add a vegetable side.'], swaps:['Choose grilled protein.', 'Switch fries for salad.']},
+        {keywords:['soup','stew'], name:'Hearty Soup', portion:'Small', calories: 360, macros:{protein:24, carbs:34, fat:12}, fiber:6, sugar:5, sodium:480, processedLevel:'low', ingredientsQuality:'good', verdict:'Good fit for your goal', tips:['Very useful on rest days.', 'Add whole grains if you need more calories.'], swaps:['Use low-sodium stock.', 'Add beans for more protein.']}
+      ]
+      const match = dishLibrary.find(item => item.keywords.some(keyword => fileName.includes(keyword))) || dishLibrary[seed % dishLibrary.length]
+      const clarityBoost = file?.size ? clampValue(40 + Math.log10(Math.max(1, file.size)) * 8, 42, 94) : 56
+      const confidence = Math.round(clampValue(clarityBoost + (match.name.length % 7) * 2, 42, 97))
+      const portionEstimate = match.portion
+      const score = window.AIReportUtils ? window.AIReportUtils.calculateNutritionScore({
+        calories: match.calories,
+        macros: match.macros,
+        fiber: match.fiber,
+        sugar: match.sugar,
+        sodium: match.sodium,
+        processedLevel: match.processedLevel,
+        ingredientsQuality: match.ingredientsQuality,
+        portionGrams: match.portion === 'Large' ? 760 : match.portion === 'Medium' ? 540 : 340,
+        userWeightKg: context.weight || 70,
+        userGoal: scoreGoalId(context.goalId || context.goal || 'stay_fit')
+      }) : {macroBalance:0, ingredientQuality:0, processingLevel:0, goalAlignment:0, portionControl:0, total:0, verdict:'Needs Improvement'}
+
+      const goalVerdict = score.total >= 4.2 ? (language === 'tr' ? 'Hedefin için iyi uyum' : 'Good fit for your goal') : score.total >= 2.8 ? (language === 'tr' ? 'Ayarlama gerekiyor' : 'Needs adjustment') : (language === 'tr' ? 'Şimdilik ideal değil' : 'Not ideal now')
+      const recommendation = score.total >= 3.8 ? (language === 'tr' ? 'Şimdi yiyebilirsin' : 'Eat now') : score.total >= 3 ? (language === 'tr' ? 'Önce ayarla sonra ye' : 'Adjust then eat') : (language === 'tr' ? 'Daha iyi alternatif önerilir' : 'Better alternative recommended')
+      return {
+        language,
+        type: 'photoAnalysisReport',
+        title: strings.photoTitle,
+        summaryText: language === 'tr'
+          ? `Görsel analiz raporu hazır. ${match.name} için güven seviyesi ${confidence}% ve skor ${score.total.toFixed(1)}/5.`
+          : `Visual analysis report ready. ${match.name} confidence is ${confidence}% with a score of ${score.total.toFixed(1)}/5.`,
+        dishDetection: {
+          detectedDishName: match.name,
+          confidence,
+          portionSizeEstimate: portionEstimate
+        },
+        nutritionEstimate: {
+          calories: match.calories,
+          macros: match.macros,
+          fiber: match.fiber,
+          sugar: match.sugar,
+          sodium: match.sodium
+        },
+        healthFitVerdict: goalVerdict,
+        nutritionScore: score,
+        criteriaBreakdown: score,
+        improvementSuggestions: language === 'tr'
+          ? ['Protein miktarını artır.', 'Sos veya yağlı ekleri azalt.', 'Yanına daha fazla sebze ekle.']
+          : match.tips,
+        smartSwaps: language === 'tr'
+          ? ['Crouton yerine tohum kullan.', 'Mayo bazlı sos yerine yoğurt sos dene.']
+          : match.swaps,
+        finalCoachRecommendation: recommendation,
+        goalBadge: context.goal || 'Goal',
+        badgeLabel: language === 'tr'
+          ? `Bu öğün ve hedefin: ${goalVerdict}`
+          : `This meal vs your goal: ${goalVerdict}`
+      }
+    }
+
+    function renderScoreChip(verdict) {
+      const key = String(verdict || 'Needs Improvement').toLowerCase().replace(/\s+/g, '-')
+      return `<span class="score-chip ${key}">${verdict || 'Needs Improvement'}</span>`
+    }
+
+    function renderReportSectionCard(title, body, note = '', icon = '▣') {
+      return `
+        <article class="report-section-card">
+          <div class="report-kicker">${icon}</div>
+          <h4>${title}</h4>
+          <div class="section-body">${body}</div>
+          ${note ? `<div class="section-note">${note}</div>` : ''}
+        </article>
+      `
+    }
+
+    function renderMacroTable(total, perServing) {
+      return `
+        <div class="macro-table">
+          <div class="macro-row"><strong>${language === 'tr' ? 'Toplam Kalori' : 'Total Calories'}</strong><span>${total.kcal} kcal</span></div>
+          <div class="macro-row"><strong>${language === 'tr' ? 'Toplam Protein' : 'Total Protein'}</strong><span>${total.p} g</span></div>
+          <div class="macro-row"><strong>${language === 'tr' ? 'Toplam Karbonhidrat' : 'Total Carbs'}</strong><span>${total.c} g</span></div>
+          <div class="macro-row"><strong>${language === 'tr' ? 'Toplam Yağ' : 'Total Fat'}</strong><span>${total.f} g</span></div>
+          <div class="macro-row"><strong>${language === 'tr' ? 'Lif / Şeker / Sodyum' : 'Fiber / Sugar / Sodium'}</strong><span>${total.fiber} g / ${total.sugar} g / ${total.sodium} mg</span></div>
+          <div class="macro-row"><strong>${language === 'tr' ? 'Porsiyon Başına' : 'Per Serving'}</strong><span>${perServing.kcal} kcal • P ${perServing.p}g • C ${perServing.c}g • F ${perServing.f}g</span></div>
+        </div>
+      `
+    }
+
+    function renderCompatibilityBadge(status) {
+      const key = String(status || '').toLowerCase().includes('not') ? 'incompatible' : String(status || '').toLowerCase().includes('partial') ? 'partial' : 'compatible'
+      return `<span class="report-badge ${key}">${status}</span>`
+    }
+
+    function renderNutritionScoreRing(score, language = 'en') {
+      const total = Number(score?.total || 0)
+      const verdict = score?.verdict || 'Needs Improvement'
+      const angle = Math.round((total / 5) * 360)
+      const note = language === 'tr'
+        ? 'Makro dengesi, malzeme kalitesi, işleme seviyesi, hedef uyumu ve porsiyon kontrolü ayrı ayrı puanlanır.'
+        : 'Macro balance, ingredient quality, processing level, goal alignment, and portion control are scored independently.'
+      return `
+        <div class="score-ring-wrap">
+          <div class="score-ring" style="--score-angle:${angle}deg">
+            <div class="score-ring-inner">
+              <strong>${total.toFixed(1)}</strong>
+              <span>/ 5</span>
+            </div>
+          </div>
+          <div style="display:grid;gap:8px;min-width:180px">
+            ${renderScoreChip(verdict)}
+            <div class="tiny">${note}</div>
+          </div>
+        </div>
+      `
+    }
+
+    function renderCriteriaProgressList(breakdown) {
+      const items = [
+        ['Macro Balance', breakdown.macroBalance, 1.5],
+        ['Ingredient Quality', breakdown.ingredientQuality, 1.0],
+        ['Processing Level', breakdown.processingLevel, 0.8],
+        ['Goal Alignment', breakdown.goalAlignment, 1.2],
+        ['Portion Control', breakdown.portionControl, 0.5]
+      ]
+      return `
+        <div class="criteria-list">
+          ${items.map(([label, value, max]) => `
+            <div class="criteria-item">
+              <div class="criteria-label"><span>${label}</span><span>${Number(value).toFixed(2)} / ${max}</span></div>
+              <div class="criteria-bar"><div style="width:${Math.round((Number(value) / max) * 100)}%"></div></div>
+            </div>
+          `).join('')}
+        </div>
+      `
+    }
+
+    function renderLoadingSkeleton(type) {
+      const title = type === 'photo' ? 'Food Analysis Report' : 'Recipe Report'
+      return `
+        <div class="report-shell">
+          <div class="report-banner">
+            <div class="report-topline">
+              <div>
+                <div class="report-kicker">Loading</div>
+                <h3>${title}</h3>
+              </div>
+              <div class="score-ring-wrap">
+                <div class="score-ring"><div class="score-ring-inner"><strong>--</strong><span>Loading</span></div></div>
+              </div>
+            </div>
+            <div class="skeleton-line long"></div>
+            <div class="skeleton-line medium"></div>
+          </div>
+          <div class="report-grid">
+            <div class="skeleton-card"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div>
+            <div class="skeleton-card"><div class="skeleton-line short"></div><div class="skeleton-line long"></div><div class="skeleton-line medium"></div></div>
+            <div class="skeleton-card"><div class="skeleton-line medium"></div><div class="skeleton-line long"></div><div class="skeleton-line short"></div></div>
+          </div>
+        </div>
+      `
+    }
+
+    function renderRecipeReport(report) {
+      if(!report) return renderLoadingSkeleton('recipe')
+      const strings = getReportStrings(report.language)
+      const score = report.score || {total:0, verdict:'Needs Improvement'}
+      const recipeBadge = report.dietCompatibility?.status || strings.compatible
+      const displayCostTier = report.language === 'tr'
+        ? ({Low:'Düşük', Medium:'Orta', High:'Yüksek'}[report.costPracticality.estimatedCostTier] || report.costPracticality.estimatedCostTier)
+        : report.costPracticality.estimatedCostTier
+      const displayPrepFit = report.language === 'tr'
+        ? ({High:'Yüksek', Medium:'Orta', Low:'Düşük'}[report.costPracticality.mealPrepSuitability] || report.costPracticality.mealPrepSuitability)
+        : report.costPracticality.mealPrepSuitability
+      const bodyLabels = report.language === 'tr' ? {
+        goalFit:'Hedef uyum özeti',
+        serving:'Porsiyon sayısı',
+        timing:'Hazırlık / Pişirme / Toplam',
+        difficulty:'Zorluk',
+        available:'Mevcut malzemeler',
+        optional:'Opsiyonel ekler',
+        missing:'Eksik kritik malzemeler',
+        substitutions:'Değişimler',
+        techniques:'Teknik notları',
+        mistakes:'Yaygın hatalar ve çözümler',
+        why:'Neden',
+        changes:'Ne değişmeli',
+        cost:'Tahmini maliyet',
+        prep:'Meal prep uygunluğu',
+        storage:'Saklama',
+        reheat:'Isıtma',
+        fatLoss:'Hedefin yağ kaybı ise...',
+        muscleGain:'Hedefin kas kazanımı ise...',
+        next:'Sonraki en iyi adım:'
+      } : {
+        goalFit:'Goal fit summary',
+        serving:'Serving size',
+        timing:'Prep / Cook / Total',
+        difficulty:'Difficulty',
+        available:'Available ingredients',
+        optional:'Optional additions',
+        missing:'Missing critical items',
+        substitutions:'Substitutions',
+        techniques:'Technique notes',
+        mistakes:'Common mistakes & fixes',
+        why:'Why',
+        changes:'Changes',
+        cost:'Estimated cost tier',
+        prep:'Meal prep suitability',
+        storage:'Storage',
+        reheat:'Reheating',
+        fatLoss:'If your goal is fat loss...',
+        muscleGain:'If your goal is muscle gain...',
+        next:'Next best action:'
+      }
+      const sectionNotes = report.language === 'tr' ? {
+        overview:'Bir bakışta tarif özeti',
+        ingredient:'Diyet dostu değişimler önce gelir.',
+        steps:'Pratik uygulama rehberi',
+        nutrition:'Tahmini beslenme, marka ve porsiyona göre değişebilir.',
+        compatibility:'Hedefin için bağlamsal uyum',
+        alternatives:'Aynı malzemeleri ilginç tutmanın üç yolu',
+        cost:'Porsiyon, saklama ve ısıtma rehberi',
+        coach:'Koç optimizasyon notları'
+      } : {
+        overview:'Recipe snapshot at a glance',
+        ingredient:'Diet-friendly swaps are prioritized first.',
+        steps:'Practical execution guide',
+        nutrition:'Estimated nutrition can vary with exact brands and portions.',
+        compatibility:'Contextual fit for your goal',
+        alternatives:'Three ways to keep the same ingredient set interesting',
+        cost:'Portion, storage, and reheating guidance',
+        coach:'Coach optimization notes'
+      }
+      return `
+        <div class="report-shell">
+          <div class="report-banner">
+            <div class="report-topline">
+              <div>
+                <div class="report-kicker">${report.title}</div>
+                <h3>${report.overview.recipeName}</h3>
+                <div class="tiny" style="margin-top:6px">${report.summaryText}</div>
+              </div>
+              <div class="score-ring-wrap">
+                ${renderNutritionScoreRing(score, report.language)}
+              </div>
+            </div>
+            <div class="report-badge-row">
+              ${renderCompatibilityBadge(recipeBadge)}
+              <span class="report-badge good">${displayCostTier} ${report.language === 'tr' ? 'maliyet' : 'cost'}</span>
+              <span class="report-badge good">${displayPrepFit} ${report.language === 'tr' ? 'meal prep' : 'prep fit'}</span>
+            </div>
+          </div>
+          <div class="report-grid">
+            ${renderReportSectionCard(strings.overview, `
+              <div class="report-note-list">
+                <div><strong>${bodyLabels.goalFit}:</strong> ${report.overview.goalFitSummary}</div>
+                <div><strong>${bodyLabels.serving}:</strong> ${report.overview.servingSize}</div>
+                <div><strong>${bodyLabels.timing}:</strong> ${report.overview.prepTime} / ${report.overview.cookTime} / ${report.overview.totalTime}</div>
+                <div><strong>${bodyLabels.difficulty}:</strong> ${report.overview.difficulty}</div>
+              </div>
+            `, sectionNotes.overview, '★')}
+            ${renderReportSectionCard(strings.ingredientIntel, `
+              <div class="report-note-list">
+                <div><strong>${bodyLabels.available}:</strong> ${(report.ingredientIntelligence.availableIngredients || []).join(', ')}</div>
+                <div><strong>${bodyLabels.optional}:</strong> ${(report.ingredientIntelligence.optionalAdditions || []).join(' • ')}</div>
+                <div><strong>${bodyLabels.missing}:</strong> ${(report.ingredientIntelligence.missingCriticalItems || []).join(' • ')}</div>
+                <div><strong>${bodyLabels.substitutions}:</strong> ${(report.ingredientIntelligence.substitutions || []).join(' • ')}</div>
+              </div>
+            `, sectionNotes.ingredient, '◎')}
+            ${renderReportSectionCard(strings.steps, `
+              <div class="report-note-list">
+                <ol style="padding-left:18px;display:grid;gap:6px">${(report.cookingPlan.steps || []).map(step => `<li>${step}</li>`).join('')}</ol>
+                <div><strong>${bodyLabels.techniques}:</strong> ${(report.cookingPlan.techniqueNotes || []).join(' • ')}</div>
+                <div><strong>${bodyLabels.mistakes}:</strong> ${(report.cookingPlan.commonMistakes || []).join(' • ')}</div>
+              </div>
+            `, sectionNotes.steps, '↳')}
+            ${renderReportSectionCard(strings.nutrition, `
+              ${renderMacroTable(report.nutritionPanel.total, report.nutritionPanel.perServing, report.language)}
+            `, sectionNotes.nutrition, '◫')}
+            ${renderReportSectionCard(strings.compatibility, `
+              <div class="report-badge-row">${renderCompatibilityBadge(report.dietCompatibility.status)}${report.dietCompatibility.reasons.length ? `<span class="report-badge partial">${report.dietCompatibility.reasons.length} reason(s)</span>` : ''}</div>
+              <div class="report-note-list">
+                <div><strong>${bodyLabels.why}:</strong> ${(report.dietCompatibility.reasons || []).join(' ')}</div>
+                <div><strong>${bodyLabels.changes}:</strong> ${(report.dietCompatibility.changes || []).join(' • ')}</div>
+              </div>
+            `, sectionNotes.compatibility, '⚑')}
+            ${renderReportSectionCard(strings.alternatives, `
+              <div class="report-note-list">
+                ${(report.alternativeMeals || []).map(item => `<div class="macro-row"><span><strong>${item.name}</strong></span><span>${item.macroSummary}</span></div>`).join('')}
+              </div>
+            `, sectionNotes.alternatives, '◎')}
+            ${renderReportSectionCard(strings.cost, `
+              <div class="report-note-list">
+                <div><strong>${bodyLabels.cost}:</strong> ${report.costPracticality.estimatedCostTier}</div>
+                <div><strong>${bodyLabels.prep}:</strong> ${report.costPracticality.mealPrepSuitability}</div>
+                <div><strong>${bodyLabels.storage}:</strong> ${report.costPracticality.storageGuide}</div>
+                <div><strong>${bodyLabels.reheat}:</strong> ${report.costPracticality.reheatingGuide}</div>
+              </div>
+            `, sectionNotes.cost, '⌁')}
+            ${renderReportSectionCard(strings.coach, `
+              <div class="report-note-list">
+                <div><strong>${bodyLabels.fatLoss}</strong> ${report.coachNotes.fatLoss}</div>
+                <div><strong>${bodyLabels.muscleGain}</strong> ${report.coachNotes.muscleGain}</div>
+                <div><strong>${bodyLabels.next}</strong> ${report.coachNotes.nextBestAction}</div>
+              </div>
+            `, sectionNotes.coach, '✦')}
+          </div>
+        </div>
+      `
+    }
+
+    function renderPhotoAnalysisReport(report) {
+      if(!report) return renderLoadingSkeleton('photo')
+      const strings = getReportStrings(report.language)
+      const labels = report.language === 'tr' ? {
+        detectedDish:'Tespit edilen yemek adı',
+        confidence:'Güven',
+        portion:'Porsiyon tahmini',
+        total:'Toplam',
+        fit:'Hedef uyumu',
+        recommendation:'Son öneri'
+      } : {
+        detectedDish:'Detected dish name',
+        confidence:'Confidence',
+        portion:'Portion size estimate',
+        total:'Total',
+        fit:'This meal vs your goal',
+        recommendation:'Final coach recommendation'
+      }
+      return `
+        <div class="report-shell">
+          <div class="report-banner">
+            <div class="report-topline">
+              <div>
+                <div class="report-kicker">${report.title}</div>
+                <h3>${report.dishDetection.detectedDishName}</h3>
+                <div class="tiny" style="margin-top:6px">${report.summaryText}</div>
+              </div>
+              <div class="score-ring-wrap">
+                ${renderNutritionScoreRing(report.nutritionScore, report.language)}
+              </div>
+            </div>
+            <div class="report-badge-row">
+              <span class="report-badge good">Confidence ${report.dishDetection.confidence}%</span>
+              <span class="report-badge ${String(report.healthFitVerdict).toLowerCase().includes('not') ? 'incompatible' : String(report.healthFitVerdict).toLowerCase().includes('adjust') ? 'partial' : 'compatible'}">${report.badgeLabel}</span>
+              <span class="report-badge good">Nutrition Score ${report.nutritionScore.total.toFixed(1)} / 5</span>
+            </div>
+          </div>
+          <div class="report-grid">
+            ${renderReportSectionCard(strings.dishSummary, `
+              <div class="report-note-list">
+                <div><strong>${labels.detectedDish}:</strong> ${report.dishDetection.detectedDishName}</div>
+                <div><strong>${labels.confidence} (%):</strong> ${report.dishDetection.confidence}</div>
+                <div><strong>${labels.portion}:</strong> ${report.dishDetection.portionSizeEstimate}</div>
+              </div>
+            `, report.language === 'tr' ? 'Görselin büyük olasılıkla içerdiği öğe' : 'What the image most likely contains.', '◫')}
+            ${renderReportSectionCard(strings.nutrition, `
+              ${renderMacroTable({kcal: report.nutritionEstimate.calories, p: report.nutritionEstimate.macros.protein, c: report.nutritionEstimate.macros.carbs, f: report.nutritionEstimate.macros.fat, fiber: report.nutritionEstimate.fiber, sugar: report.nutritionEstimate.sugar, sodium: report.nutritionEstimate.sodium}, {kcal: report.nutritionEstimate.calories, p: report.nutritionEstimate.macros.protein, c: report.nutritionEstimate.macros.carbs, f: report.nutritionEstimate.macros.fat}, report.language)}
+            `, report.language === 'tr' ? 'Görsel ipuçları ve porsiyon boyutundan tahmin edilmiştir.' : 'Estimated from image cues and portion size.', '◫')}
+            ${renderReportSectionCard(strings.scoreTitle, `
+              ${renderNutritionScoreRing(report.nutritionScore, report.language)}
+              <div class="tiny" style="margin-top:8px">${report.language === 'tr' ? 'Toplam skor; Makro Denge, Malzeme Kalitesi, İşleme Seviyesi, Hedef Uyumu ve Porsiyon Kontrolünün toplamıdır.' : 'Total is the sum of Macro Balance, Ingredient Quality, Processing Level, Goal Alignment, and Portion Control.'}</div>
+            `, report.language === 'tr' ? 'Beş parçalı skor modeli' : 'Five-part scoring model', '◎')}
+            ${renderReportSectionCard(strings.criteria, renderCriteriaProgressList(report.criteriaBreakdown), report.language === 'tr' ? 'Her bar 5 puanlık modelin bir parçasını gösterir.' : 'Each bar maps to the 5-point score model.', '↳')}
+            ${renderReportSectionCard(strings.suggestions, `
+              <div class="report-note-list">${(report.improvementSuggestions || []).map(item => `<div>• ${item}</div>`).join('')}</div>
+            `, report.language === 'tr' ? 'Üç pratik geliştirme.' : 'Three practical improvements.', '✦')}
+            ${renderReportSectionCard(strings.swaps, `
+              <div class="report-note-list">${(report.smartSwaps || []).map(item => `<div>• ${item}</div>`).join('')}</div>
+            `, report.language === 'tr' ? 'Daha az tavizle daha iyi alternatifler.' : 'Better alternatives with less trade-off.', '◎')}
+            ${renderReportSectionCard(strings.compatibility, `
+              <div class="report-badge-row">${renderCompatibilityBadge(report.healthFitVerdict)}</div>
+              <div class="report-note-list">
+                <div><strong>${labels.recommendation}:</strong> ${report.finalCoachRecommendation}</div>
+                <div><strong>${labels.fit}:</strong> ${report.badgeLabel}</div>
+              </div>
+            `, report.language === 'tr' ? 'Hedefinle bağlamsal uyum.' : 'Contextual fit for your goal.', '⚑')}
+          </div>
+        </div>
+      `
+    }
+
     function filterIngredientsForProfile(ingredients, context) {
       const avoidWords = new Set([...(context.avoidIngredients || []), ...(context.aiMemory?.dislikes || [])].map(item => canonicalIngredient(item)))
       return ingredients.filter(item => !avoidWords.has(canonicalIngredient(item)))
@@ -2528,7 +3203,7 @@
 
     function generateFridgeRecipes(rawIngredients, context) {
       const parsed = filterIngredientsForProfile(parseIngredientText(rawIngredients), context)
-      if(parsed.length < 2) return {recipes:[], parsed, report: buildRecipeCopilotReport(rawIngredients, context).report}
+      if(parsed.length < 2) return {recipes:[], parsed, report: buildRecipeReportData(rawIngredients, context, [], parsed)}
 
       const candidates = RECIPE_TEMPLATES.map(template => {
         const usedCore = template.core.filter(item => parsed.includes(item))
@@ -2602,23 +3277,27 @@
 
       const sorted = (candidates.length ? candidates : [fallbackRecipe]).sort((a, b) => b.score - a.score)
       const recipes = sorted.slice(0, 3)
-      return {recipes, parsed, report: buildRecipeCopilotReport(rawIngredients, context).report}
+      return {recipes, parsed, report: buildRecipeReportData(rawIngredients, context, recipes, parsed)}
     }
 
-    function renderFridgeRecipes(recipes, parsedIngredients, context) {
+    function renderFridgeRecipes(recipes, parsedIngredients, context, report = null) {
       const meta = qs('fridgeMeta')
       const out = qs('fridgeRecipes')
       if(!meta || !out) return
-      if(!recipes.length) {
-        meta.innerHTML = `<div class="allergen-alert">Add at least 3 useful ingredients to generate practical recipes.</div>`
-        out.innerHTML = ''
+      if(report) {
+        meta.innerHTML = renderRecipeReport(report)
+      } else if(!recipes.length) {
+        meta.innerHTML = `<div class="allergen-alert">Add a few ingredients to generate a practical recipe report.</div>`
+        out.innerHTML = renderLoadingSkeleton('recipe')
         return
       }
 
-      meta.innerHTML = `
-        <div class="stat"><span class="muted">Detected ingredients</span><span>${parsedIngredients.join(', ')}</span></div>
-        <div class="stat"><span class="muted">Remaining today</span><span>${context.remainingCalories} kcal • P ${context.remainingProtein}g • C ${context.remainingCarbs}g • F ${context.remainingFat}g</span></div>
-      `
+      if(!report) {
+        meta.innerHTML = `
+          <div class="stat"><span class="muted">Detected ingredients</span><span>${parsedIngredients.join(', ')}</span></div>
+          <div class="stat"><span class="muted">Remaining today</span><span>${context.remainingCalories} kcal • P ${context.remainingProtein}g • C ${context.remainingCarbs}g • F ${context.remainingFat}g</span></div>
+        `
+      }
 
       out.innerHTML = recipes.map((recipe, index) => {
         const total = recipe.nutrition.total
@@ -2669,19 +3348,22 @@
       app.ui.lastGeneratedRecipes = recipes
     }
 
-    function runFridgeGenerator(inputOverride = null) {
+    async function runFridgeGenerator(inputOverride = null) {
       const input = inputOverride || qs('fridgeInput')?.value || ''
       const context = getAiContext()
       const language = detectLanguageHint(input)
+      if(qs('fridgeMeta')) qs('fridgeMeta').innerHTML = renderLoadingSkeleton('recipe')
+      if(qs('fridgeRecipes')) qs('fridgeRecipes').innerHTML = ''
+      await new Promise(resolve => requestAnimationFrame(resolve))
       const result = generateFridgeRecipes(input, context)
-      renderFridgeRecipes(result.recipes, result.parsed, context)
+      renderFridgeRecipes(result.recipes, result.parsed, context, result.report)
       if(qs('aiResponse') && result.report) {
-        qs('aiResponse').innerHTML = escapeHtml(result.report).replace(/\n/g, '<br>')
+        qs('aiResponse').innerHTML = escapeHtml(result.report.summaryText).replace(/\n/g, '<br>')
       }
       if(result.recipes.length) {
         qs('aiResponse').innerHTML += language === 'tr'
-          ? `<br><br>Mevcut malzemelerinle ${result.recipes.length} pratik tarif olusturdum. Her biri tam adimlar, alerjen guvenligi, alternatifler ve makro odakli besin analizi icerir.`
-          : `<br><br>I generated ${result.recipes.length} practical recipe options using your current ingredients. Each one includes full steps, allergen safety, substitutions, and macro-aware nutrition analysis.`
+          ? `<br><br>Mevcut malzemelerinle ${result.recipes.length} pratik tarif olusturdum. Detayli rapor kartlar halinde yukarıda.`
+          : `<br><br>I generated ${result.recipes.length} practical recipe options using your current ingredients. The detailed report is shown above in cards.`
       }
     }
 
@@ -2737,7 +3419,7 @@
       save()
     }
 
-    function analyzeFoodPhoto() {
+    async function analyzeFoodPhoto() {
       const file = qs('mealPhotoInput')?.files?.[0]
       const out = qs('photoAnalysisOut')
       if(!out) return
@@ -2746,24 +3428,10 @@
         return
       }
       const context = getAiContext()
-      out.innerHTML = `Detected (estimated): mixed protein + vegetables + grain. Estimated portion: medium. Calories: 520 kcal. Macros: P 34g / C 48g / F 20g. Nutrition score: 78/100. Fit for your ${context.goal.toLowerCase()} goal: moderate fit. Improvement: increase vegetables and reduce added oil if your calorie target is tight.`
-    }
-
-    function generateLeftoverMealIdeas() {
-      const input = qs('leftoverInput')?.value || ''
-      const out = qs('leftoverOut')
-      if(!out) return
-      const ingredients = parseIngredientText(input)
-      if(ingredients.length < 2) {
-        out.textContent = 'Add at least two leftover ingredients.'
-        return
-      }
-      const ideas = [
-        `Quick skillet: saute ${ingredients.join(', ')} with spices for a one-pan meal.`,
-        `Soup-style bowl: simmer ${ingredients.join(', ')} with water or stock and blend part of it for texture.`,
-        `High-protein wrap/bowl: combine ${ingredients.join(', ')} and add fresh greens if available.`
-      ]
-      out.innerHTML = ideas.join('<br>')
+      out.innerHTML = renderLoadingSkeleton('photo')
+      await new Promise(resolve => requestAnimationFrame(resolve))
+      const report = buildPhotoAnalysisReportData(file, context)
+      out.innerHTML = renderPhotoAnalysisReport(report)
     }
 
     function renderChat() {
@@ -3148,8 +3816,8 @@
       const language = detectLanguageHint(prompt)
       const startedAt = performance.now()
       if(isRecipeIntent(prompt)) {
-        const recipe = buildRecipeCopilotReport(prompt, context)
-        const answer = recipe.report
+        const recipeReport = buildRecipeCopilotReport(prompt, context)
+        const answer = recipeReport.summaryText
         updateAiMetrics({
           ok: true,
           usedFallback: true,
@@ -3165,6 +3833,7 @@
         renderAiRuntimeStatus('ok', language === 'tr' ? 'Recipe Copilot aktif' : 'Recipe Copilot active')
         return {
           answer,
+          report: recipeReport,
           tips: language === 'tr'
             ? ['Malzemeleri net listele.', 'Ayni dili koru.', 'Eksik malzeme varsa alternatif iste.']
             : ['List ingredients clearly.', 'Keep the same language.', 'Ask for swaps if something is missing.'],
@@ -3445,7 +4114,9 @@
         }
         saveAiConversation()
         renderChat()
-        qs('aiResponse').innerHTML = escapeHtml(assistantMessage.text).replace(/\n/g, '<br>')
+        qs('aiResponse').innerHTML = result.report && result.meta?.source === 'recipe-copilot'
+          ? renderRecipeReport(result.report)
+          : escapeHtml(assistantMessage.text).replace(/\n/g, '<br>')
         qs('aiQuickTips').innerHTML = (result.tips || []).map(tip => `<div class="stat"><span class="muted">Coach tip</span><span>${escapeHtml(tip)}</span></div>`).join('')
         renderAiSignalsAndActions(getAiContext(), result.actions)
         renderAiObservability()
