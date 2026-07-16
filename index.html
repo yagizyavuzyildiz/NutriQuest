@@ -2570,7 +2570,37 @@
         }
       }).filter(Boolean)
 
-      const sorted = candidates.sort((a, b) => b.score - a.score)
+      const fallbackRecipe = candidates.length ? null : (() => {
+        const fallbackIngredients = parsed.slice(0, 4)
+        const nutrition = aggregateNutrition(fallbackIngredients.length ? fallbackIngredients : ['olive oil', 'onion', 'garlic'], 2)
+        const allergens = detectAllergensFromIngredients(fallbackIngredients)
+        const safety = buildSafetyBadge(allergens, context)
+        return {
+          id: `fridge-fallback-${fallbackIngredients.join('-') || 'mixed'}`,
+          name: parsed.length && detectLanguageHint(rawIngredients) === 'tr'
+            ? `${fallbackIngredients[0] || 'Karisik'} ile Hızlı Tabak`
+            : `${fallbackIngredients[0] || 'Mixed'} Quick Bowl`,
+          shortDescription: `Built directly from your available ingredients to support your ${context.goal.toLowerCase()} goal.`,
+          difficulty: 'Easy',
+          cookingTime: '15-20 min',
+          servings: 2,
+          category: 'Main Meal',
+          ingredients: fallbackIngredients,
+          steps: buildRecipeSteps({servings: 2}, fallbackIngredients),
+          tips: ['Use the highest-heat pan-safe ingredient first.', 'Taste and adjust seasoning before serving.'],
+          optionalImprovements: listOptionalUpgrades([], fallbackIngredients),
+          substitutions: fallbackIngredients.flatMap(item => (SMART_SUBSTITUTIONS[item] || []).map(sub => `${item} -> ${sub}`)).slice(0, 5),
+          storage: 'Store in an airtight container for up to 2 days in the fridge. Reheat once thoroughly.',
+          nutrition,
+          allergens,
+          safety,
+          missingCore: [],
+          score: 0,
+          stars: '★★★★'
+        }
+      })()
+
+      const sorted = (candidates.length ? candidates : [fallbackRecipe]).sort((a, b) => b.score - a.score)
       const recipes = sorted.slice(0, 3)
       return {recipes, parsed, report: buildRecipeCopilotReport(rawIngredients, context).report}
     }
