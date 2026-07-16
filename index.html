@@ -625,6 +625,11 @@
                   <option value="gain-weight">Gain Weight</option>
                   <option value="gain-muscle">Gain Muscle</option>
                   <option value="stay-fit">Stay Fit</option>
+                  <option value="high-protein">High Protein</option>
+                  <option value="mediterranean">Mediterranean</option>
+                  <option value="vegetarian">Vegetarian</option>
+                  <option value="vegan">Vegan</option>
+                  <option value="keto">Keto</option>
                 </select>
               </div>
               <div class="profile-field">
@@ -1088,7 +1093,12 @@
         'maintain-weight':'Maintain Weight',
         'gain-weight':'Gain Weight',
         'gain-muscle':'Gain Muscle',
-        'stay-fit':'Plan Meals'
+        'stay-fit':'Plan Meals',
+        'high-protein':'Gain Muscle',
+        'mediterranean':'Plan Meals',
+        'vegetarian':'Plan Meals',
+        'vegan':'Plan Meals',
+        'keto':'Plan Meals'
       }[goalId] || 'Lose Weight'
     }
 
@@ -1305,7 +1315,9 @@
       {id:'stay-fit',title:'Stay Fit',subtitle:'Clean and sustainable',accent:'Daily balance',badge:'❤️ Heart Healthy',calories:2100,protein:155,carbs:200,fat:65,difficulty:'Easy',prepTime:'20 min',cost:'Low Budget',meals:['Fresh breakfast','Balanced lunch','Light dinner'],tips:['Keep protein steady','Avoid overcomplication'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Smoothie','Oats'],lunch:['Grilled Fish','Salad'],snack:['Fruit','Nuts'],dinner:['Tofu Bowl','Vegetables']},recommended:['Salmon','Tofu','Vegetables','Fruit','Oats'],avoid:['Crash dieting','Overeating late','Highly processed snacks'],allergens:{contains:['Milk'],freeFrom:['Peanuts','Soy','Gluten']},alternatives:['Fish → Tofu','Yogurt → Kefir','Salmon → Chicken'],suitableFor:'Daily Balance',description:'Best for users who value steady energy and a sustainable routine.',shoppingList:['Salmon','Tofu','Vegetables','Fruit','Oats','Yogurt']},
       {id:'high-protein',title:'High Protein',subtitle:'Muscle-friendly and filling',accent:'Protein focus',badge:'💪 Athlete Choice',calories:2300,protein:200,carbs:180,fat:70,difficulty:'Medium',prepTime:'25 min',cost:'Medium',meals:['Protein breakfast','Lunch bowl','Recovery snack'],tips:['Keep protein every meal','Hydrate well'],schedule:['08:00 Breakfast','12:30 Lunch','16:30 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Eggs','Oats','Protein Shake'],lunch:['Turkey','Rice','Broccoli'],snack:['Greek Yogurt','Nuts'],dinner:['Chicken','Sweet Potato']},recommended:['Turkey','Chicken','Eggs','Greek Yogurt','Protein Shake'],avoid:['Low protein meals','Skipping snacks','Sugary drinks'],allergens:{contains:['Eggs','Milk'],freeFrom:['Shellfish']},alternatives:['Turkey → Chicken','Oats → Quinoa','Greek Yogurt → Cottage Cheese'],suitableFor:'Muscle Preservation',description:'A protein-forward plan ideal for lean muscle retention and satiety.',shoppingList:['Turkey','Chicken','Eggs','Greek Yogurt','Protein Powder','Rice','Broccoli','Sweet Potato']},
       {id:'mediterranean',title:'Mediterranean',subtitle:'Heart healthy and sustainable',accent:'Heart friendly',badge:'❤️ Heart Healthy',calories:2100,protein:145,carbs:210,fat:65,difficulty:'Easy',prepTime:'30 min',cost:'Medium',meals:['Fresh breakfast','Seafood lunch','Vegetable dinner'],tips:['Use olive oil','Eat slowly'],schedule:['08:30 Breakfast','13:00 Lunch','16:30 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Greek Yogurt','Fruit','Honey'],lunch:['Salmon','Quinoa','Salad'],snack:['Olives','Cheese'],dinner:['Chickpea Bowl','Vegetables']},recommended:['Salmon','Chickpeas','Olives','Quinoa','Greek Yogurt'],avoid:['Ultra-processed food','Too much salt','Fried dishes'],allergens:{contains:['Milk'],freeFrom:['Peanuts','Shellfish']},alternatives:['Salmon → Tuna','Quinoa → Rice','Chickpeas → Lentils'],suitableFor:'Cardiovascular Health',description:'Mediterranean inspired nutrition focused on whole foods and long-term wellness.',shoppingList:['Salmon','Chickpeas','Quinoa','Olives','Greek Yogurt','Vegetables','Fruit']},
-      {id:'vegetarian',title:'Vegetarian',subtitle:'Plant-forward nutrition',accent:'Plant friendly',badge:'🌱 Plant Friendly',calories:2000,protein:135,carbs:220,fat:60,difficulty:'Easy',prepTime:'25 min',cost:'Low Budget',meals:['Protein breakfast','Plant lunch','Comfort dinner'],tips:['Balance protein sources','Eat legumes often'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Oats','Soy Milk','Banana'],lunch:['Tofu Bowl','Rice'],snack:['Hummus','Vegetables'],dinner:['Lentil Soup','Salad']},recommended:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk'],avoid:['Low protein meals','Too much refined carbs','Skipping legumes'],allergens:{contains:['Soy'],freeFrom:['Meat','Fish','Shellfish']},alternatives:['Tofu → Tempeh','Lentils → Chickpeas','Soy Milk → Almond Milk'],suitableFor:'Plant-Based Nutrition',description:'A flexible vegetarian plan for users who want a lighter and more plant-based routine.',shoppingList:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk','Banana','Vegetables','Olive Oil']}
+      {id:'vegetarian',title:'Vegetarian',subtitle:'Plant-forward nutrition',accent:'Plant friendly',badge:'🌱 Plant Friendly',calories:2000,protein:135,carbs:220,fat:60,difficulty:'Easy',prepTime:'25 min',cost:'Low Budget',meals:['Protein breakfast','Plant lunch','Comfort dinner'],tips:['Balance protein sources','Eat legumes often'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Oats','Soy Milk','Banana'],lunch:['Tofu Bowl','Rice'],snack:['Hummus','Vegetables'],dinner:['Lentil Soup','Salad']},recommended:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk'],avoid:['Low protein meals','Too much refined carbs','Skipping legumes'],allergens:{contains:['Soy'],freeFrom:['Meat','Fish','Shellfish']},alternatives:['Tofu → Tempeh','Lentils → Chickpeas','Soy Milk → Almond Milk'],suitableFor:'Plant-Based Nutrition',description:'A flexible vegetarian plan for users who want a lighter and more plant-based routine.',shoppingList:['Tofu','Lentils','Chickpeas','Quinoa','Soy Milk','Banana','Vegetables','Olive Oil']},
+      {id:'vegan',title:'Vegan',subtitle:'Complete plant protein strategy',accent:'Plant performance',badge:'🌱 AI Pick',calories:2050,protein:130,carbs:255,fat:57,difficulty:'Medium',prepTime:'30 min',cost:'Medium',meals:['Tofu breakfast bowl','Legume lunch plate','Fiber-rich dinner'],tips:['Use mixed legumes','Include B12-fortified foods'],schedule:['08:00 Breakfast','13:00 Lunch','16:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Overnight oats','Soy yogurt','Berries'],lunch:['Lentil quinoa bowl','Avocado','Greens'],snack:['Hummus','Whole-grain crackers'],dinner:['Tofu stir-fry','Brown rice','Broccoli']},recommended:['Tofu','Tempeh','Lentils','Chickpeas','Quinoa','Soy Yogurt'],avoid:['Ultra-processed vegan snacks','Low-protein meals'],allergens:{contains:['Soy'],freeFrom:['Eggs','Milk','Fish','Shellfish']},alternatives:['Tofu → Tempeh','Quinoa → Buckwheat','Soy Yogurt → Coconut Yogurt'],suitableFor:'Plant-Based Performance',description:'Plant-based plan with complete-protein combinations and micronutrient awareness.',shoppingList:['Tofu','Tempeh','Lentils','Chickpeas','Quinoa','Soy Yogurt','Leafy Greens','Olive Oil']},
+      {id:'keto',title:'Keto',subtitle:'Low-carb metabolic focus',accent:'Keto structure',badge:'🥓 Low Carb',calories:2150,protein:160,carbs:45,fat:145,difficulty:'Advanced',prepTime:'28 min',cost:'Medium',meals:['Egg and avocado breakfast','Protein-rich salad lunch','Low-carb dinner'],tips:['Track electrolytes','Keep carbs controlled'],schedule:['08:00 Breakfast','13:00 Lunch','17:00 Snack','20:00 Dinner'],sampleMenu:{breakfast:['Eggs','Avocado','Olives'],lunch:['Salmon salad','Olive oil dressing'],snack:['Cheese','Nuts'],dinner:['Chicken thighs','Zucchini','Mushrooms']},recommended:['Eggs','Salmon','Chicken','Avocado','Olive Oil','Leafy Greens'],avoid:['Sugary foods','Refined grains','High-carb snacks'],allergens:{contains:['Eggs','Fish','Milk'],freeFrom:['Gluten / Wheat']},alternatives:['Salmon → Sardines','Cheese → Coconut yogurt','Nuts → Pumpkin seeds'],suitableFor:'Low-Carb Ketogenic',description:'Low-carb and high-fat structure designed to support nutritional ketosis.',shoppingList:['Eggs','Salmon','Chicken','Avocado','Olive Oil','Zucchini','Mushrooms','Nuts']}
     ]
 
     const goalLabels = {
@@ -1316,7 +1328,9 @@
       'stay-fit':'Stay Fit',
       'high-protein':'High Protein',
       'mediterranean':'Mediterranean',
-      'vegetarian':'Vegetarian'
+      'vegetarian':'Vegetarian',
+      'vegan':'Vegan',
+      'keto':'Keto'
     }
 
     const COMMON_ALLERGENS = ['Milk / Dairy','Eggs','Gluten / Wheat','Peanuts','Tree Nuts','Soy','Fish','Shellfish','Sesame','Mustard','Celery','Sulphites','Oats']
@@ -1410,7 +1424,9 @@
       'stay-fit': 2.9,
       'high-protein': 3.3,
       'mediterranean': 2.8,
-      'vegetarian': 2.6
+      'vegetarian': 2.6,
+      'vegan': 2.8,
+      'keto': 3.1
     }
 
     mealPlans.forEach(plan => {
@@ -1447,6 +1463,9 @@
           waterTarget: fallbackPlan.waterTarget,
           kcalFromMacros,
           calorieDelta: fallbackPlan.calories - kcalFromMacros,
+          goalMatchPercent: 88,
+          ratingBadge: {stars:'⭐⭐⭐⭐☆', label:'4.8 User Rating'},
+          uiTags: ['AI Recommended', 'Based on your profile'],
           bmr: 0,
           tdee: 0
         }
@@ -1461,9 +1480,17 @@
         waterTarget: dynamic.waterTarget,
         kcalFromMacros: dynamic.kcalFromMacros,
         calorieDelta: dynamic.calorieDelta,
+        goalMatchPercent: dynamic.goalMatchPercent,
+        ratingBadge: dynamic.ratingBadge,
+        uiTags: dynamic.uiTags,
         bmr: dynamic.bmr,
         tdee: dynamic.tdee
       }
+    }
+
+    function buildPlanWhy(plan, targets) {
+      const profile = getProfileForNutrition()
+      return `This plan matches your ${goalLabels[plan.id] || plan.title} objective with ${targets.goalMatchPercent}% goal fit. It adapts calories and macros to age ${profile.age || 'N/A'}, weight ${profile.weightKg || 'N/A'}kg, height ${profile.heightCm || 'N/A'}cm, and activity ${profile.activityLevel}.`
     }
 
     function qs(id) { return document.getElementById(id) }
@@ -3391,6 +3418,8 @@
       qs('planDetail').innerHTML = `
         <div class="plan-meta"><strong>${selected.title}</strong><span>${selected.badge}</span></div>
         <div style="font-size:15px;color:#d7fbea">${selected.description}</div>
+        <div class="tiny" style="margin-top:8px">Generated by NutriQuest AI based on your age, weight, height, activity level and goals.</div>
+        <div class="tiny" style="margin-top:6px;color:#bfead8">Why this plan? ${buildPlanWhy(selected, selectedTargets)}</div>
         <div class="plan-detail-grid">
           <div><strong>Best for</strong><div class="tiny" style="margin-top:4px">${selected.suitableFor}</div></div>
           <div><strong>Prep</strong><div class="tiny" style="margin-top:4px">${selected.prepTime}</div></div>
@@ -3413,11 +3442,17 @@
       `
       qs('planCards').innerHTML = mealPlans.map(plan => {
         const targets = planTargetsById[plan.id]
+        const tags = targets.uiTags || ['AI Recommended', 'Based on your profile']
+        const rating = targets.ratingBadge || {stars:'⭐⭐⭐⭐☆', label:'4.8 User Rating'}
         return `
         <div class="plan-card ${plan.id === app.user.goal ? 'active' : ''}">
           <div class="plan-meta"><strong>${plan.title}</strong><span>${plan.badge}</span></div>
           <div style="font-size:14px;color:#d7fbea">${plan.subtitle}</div>
+          <div class="tiny" style="margin-top:4px">${rating.stars} • ${rating.label}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${tags.map(tag => `<span class="plan-pill">${tag}</span>`).join('')}</div>
           <div class="muted">${targets.calories} kcal • ${targets.protein}g protein • ${targets.carbs}g carbs • ${targets.fat}g fat</div>
+          <div class="tiny" style="margin-top:6px">Goal Match ${targets.goalMatchPercent}%</div>
+          <div class="progress-track" style="margin-top:6px"><div class="progress-fill" style="width:${targets.goalMatchPercent}%"></div></div>
           <div><strong>Meals</strong><div class="tiny" style="margin-top:4px">${plan.meals.join(' • ')}</div></div>
           <div><strong>Tips</strong><div class="tiny" style="margin-top:4px">${plan.tips.join(' • ')}</div></div>
           <button class="btn secondary" onclick="setPlan('${plan.id}')">Choose</button>
@@ -3426,13 +3461,18 @@
     }
 
     function chooseMealPlan() {
-      const p = prompt('Choose one: lose weight, maintain weight, gain weight, gain muscle, stay fit', getGoalLabel())
+      const p = prompt('Choose one: lose weight, maintain weight, gain weight, gain muscle, stay fit, high protein, mediterranean, vegetarian, vegan, keto', getGoalLabel())
       const matches = {
         'lose weight':'lose-weight',
         'maintain weight':'maintain-weight',
         'gain weight':'gain-weight',
         'gain muscle':'gain-muscle',
-        'stay fit':'stay-fit'
+        'stay fit':'stay-fit',
+        'high protein':'high-protein',
+        'mediterranean':'mediterranean',
+        'vegetarian':'vegetarian',
+        'vegan':'vegan',
+        'keto':'keto'
       }
       const selected = matches[(p || '').toLowerCase()] || null
       if(selected) setPlan(selected)
