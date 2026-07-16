@@ -27,6 +27,8 @@
     .btn:hover {opacity:0.95;transform:translateY(-2px)}
     .btn.secondary {background:rgba(255,255,255,0.08);color:#e6eef6}
     input, select {background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);padding:10px;border-radius:10px;color:inherit;font-size:14px;width:100%}
+    textarea {background:rgba(5,13,20,0.88);border:1px solid rgba(110,231,183,0.18);padding:10px;border-radius:10px;color:#eaf5ff;font-size:14px;width:100%}
+    textarea::placeholder {color:rgba(220,230,240,0.55)}
     .muted {color:var(--muted);font-size:13px}
     .small {font-size:13px}
     .page {animation:fadeIn 0.2s}
@@ -1913,6 +1915,9 @@
           ? '[TURKCE TARIF YAZIM SABLONU - ZORUNLU] Kullanici Turkce yazdiysa cikti tamamen Turkce olacak. Sira zorunlu: 1) Tarif Adi 2) Bu Tarif Neden Hedefine Uygun? 3) Malzemeler (Elindeki/Opsiyonel) 4) Adim Adim Pisme Plani 5) Teknik Notlar 6) Yaygin Hatalar ve Cozumleri 7) Tam Beslenme Paneli (Tahmini) 8) Alternatif Ogunler (en az 2) 9) Saklama ve Ertesi Gun Tuketim Onerisi 10) Son Koc Onerisi. Her adimda miktar+isi+yontem+sure belirt. Miktar eksikse varsayilan porsiyon varsayimini acikca yaz. Makrolar gercekci aralikta olacak; tavuk/makarna/patates gibi girdilerde asiri dusuk kalori verme. Ana tarif + en az 2 alternatif uret.'
           : 'For recipe requests, provide practical cooking steps with quantity, heat, method, and time; include realistic macro estimates and at least 2 alternatives beyond the main recipe.',
         language === 'tr'
+          ? 'Yanitlamadan once kalite kontrol yap: basliklar tam mi, adimlarda isi+süre+yontem var mi, temel malzemeler kullanildi mi, en az 2 alternatif var mi, makrolar mantikli mi. Eksikse yaniti tamamla.'
+          : 'Before finalizing response, verify section completeness, practical steps, ingredient usage, 2+ alternatives, and realistic macros.',
+        language === 'tr'
           ? 'Photo analysis raporunda kriter adlarini Turkce kullan: Makro Dengesi, Malzeme Kalitesi, Islenme Duzeyi, Hedef Uyumu, Porsiyon Kontrolu.'
           : 'For photo analysis in Turkish, output criteria names in Turkish.',
         language === 'tr'
@@ -2615,7 +2620,9 @@
         photoTitle:'Yemek Analiz Raporu',
         overview:'Tarif Özeti',
         ingredientIntel:'Malzeme Analizi',
+        preparation:'Hazırlık',
         steps:'Adım Adım Pişirme Planı',
+        service:'Servis Önerisi',
         nutrition:'Tam Beslenme Paneli (tahmini)',
         compatibility:'Diyet Uyumu',
         alternatives:'Alternatif Öğünler',
@@ -2641,7 +2648,9 @@
         photoTitle:'Food Analysis Report',
         overview:'Recipe Overview',
         ingredientIntel:'Ingredient Intelligence',
+        preparation:'Preparation',
         steps:'Step-by-Step Cooking Plan',
+        service:'Service Suggestion',
         nutrition:'Full Nutrition Panel (estimated)',
         compatibility:'Diet Compatibility',
         alternatives:'Alternative Meals',
@@ -2796,6 +2805,42 @@
       return ['Use medium heat to avoid scorching aromatics.', 'Taste and adjust seasoning at the end.']
     }
 
+    function buildPreparationSteps(ingredients, quantityMap, language = 'en') {
+      const lines = ingredients.slice(0, 6).map(item => {
+        const grams = Math.round(quantityMap?.[canonicalIngredient(item)]?.grams || ingredientData(item).defaultGram || 100)
+        return language === 'tr'
+          ? `${grams} g ${item} malzemesini ayıkla, yıka ve kullanım sırasına göre hazır et.`
+          : `Prepare ${grams} g of ${item} by cleaning and portioning before cooking.`
+      })
+      if(!lines.length) {
+        return [language === 'tr' ? 'Malzemeleri yıkayıp doğrayarak pişirmeye hazırla.' : 'Wash and prep ingredients before cooking.']
+      }
+      return lines
+    }
+
+    function buildServiceSuggestion(recipe, language = 'en') {
+      if(language === 'tr') {
+        return `Sıcak servis et. ${recipe.servings || 2} porsiyonu eşit böl; yanında limonlu yeşil salata veya yoğurt ile dengeli bir tabak oluştur.`
+      }
+      return `Serve warm in ${recipe.servings || 2} equal portions with a light salad or yogurt side.`
+    }
+
+    function enforceRecipeQuality(report) {
+      if(!report) return report
+      if(!Array.isArray(report.cookingPlan?.steps) || report.cookingPlan.steps.length < 4) {
+        report.cookingPlan = report.cookingPlan || {}
+        report.cookingPlan.steps = (report.cookingPlan.steps || []).concat(
+          report.language === 'tr'
+            ? ['Eksik adımlar otomatik tamamlandı: tavayı ısıt, protein/karbonhidratı ayrı pişir, sebzeleri son aşamada ekle.']
+            : ['Missing steps were auto-completed: heat pan, cook protein/carb separately, add vegetables last.']
+        )
+      }
+      if(!Array.isArray(report.alternativeMeals) || report.alternativeMeals.length < 2) {
+        report.alternativeMeals = report.alternativeMeals || []
+      }
+      return report
+    }
+
     function buildCommonMistakes(recipe, language = 'en') {
       if(language === 'tr') {
         const ingredients = (recipe?.ingredients || []).map(canonicalIngredient)
@@ -2811,9 +2856,10 @@
       return mistakes.slice(0, 3)
     }
 
-    function buildAlternativeMeals(recipe, language, parsedIngredients, quantityMap = {}) {
+    function buildAlternativeMeals(recipe, language, parsedIngredients, quantityMap = {}, rawInput = '') {
       const baseIngredients = recipe?.ingredients?.length ? recipe.ingredients : parsedIngredients
       const baseMacros = recipe?.nutrition?.perServing || {kcal:0, p:0, c:0, f:0}
+      const budgetRequested = /ekonomik|ucuz|cheap|budget/.test(String(rawInput || '').toLowerCase())
       const makeAlt = (name, reason, ingredientList, minutes, difficulty, method) => {
         return {
           name,
@@ -2844,8 +2890,8 @@
           'pan'
         ),
         makeAlt(
-          `${recipe.name} - ${language === 'tr' ? 'Tek Kap Versiyonu' : 'One-Pot Version'}`,
-          language === 'tr' ? 'Daha az ekipmanla pratik bir seçenek sunar.' : 'Practical option with fewer dishes to clean.',
+          `${recipe.name} - ${language === 'tr' ? (budgetRequested ? 'Ekonomik Tek Kap Versiyonu' : 'Tek Kap Versiyonu') : (budgetRequested ? 'Budget One-Pot Version' : 'One-Pot Version')}`,
+          language === 'tr' ? (budgetRequested ? 'Daha düşük maliyetli malzemelerle doyurucu ve pratik bir seçenek sunar.' : 'Daha az ekipmanla pratik bir seçenek sunar.') : (budgetRequested ? 'Uses lower-cost ingredients while staying filling and practical.' : 'Practical option with fewer dishes to clean.'),
           baseIngredients,
           20,
           language === 'tr' ? 'Kolay' : 'Easy',
@@ -2907,7 +2953,7 @@
       }
       const score = window.AIReportUtils ? window.AIReportUtils.calculateNutritionScore(scoreInput) : {macroBalance:0, ingredientQuality:0, processingLevel:0, goalAlignment:0, portionControl:0, total:0, verdict:'Needs Improvement'}
       const compatibility = detectDietCompatibility(context, topRecipe, topRecipe.ingredients, language)
-      const alternatives = buildAlternativeMeals(topRecipe, language, parsedIngredients, quantityMap)
+      const alternatives = buildAlternativeMeals(topRecipe, language, parsedIngredients, quantityMap, rawInput)
       const costTier = estimateRecipeCostTier(topRecipe.ingredients)
       const mealPrepSuitability = topRecipe.steps.length >= 5 ? 'High' : 'Medium'
       const report = {
@@ -2934,11 +2980,15 @@
           missingCriticalItems: topRecipe.missingCore && topRecipe.missingCore.length ? topRecipe.missingCore : [language === 'tr' ? 'Eksik kritik malzeme yok.' : 'No critical items missing.'],
           substitutions: topRecipe.substitutions.length ? topRecipe.substitutions : [language === 'tr' ? 'Diyet uyumuna göre küçük swaplar yapılabilir.' : 'Small swaps can be used to match your diet.']
         },
+        preparation: {
+          steps: buildPreparationSteps(topRecipe.ingredients, quantityMap, language)
+        },
         cookingPlan: {
           steps: topRecipe.steps,
           techniqueNotes: buildTechniqueNotes(topRecipe, language, preferredMethod),
           commonMistakes: buildCommonMistakes(topRecipe, language)
         },
+        serviceSuggestion: buildServiceSuggestion(topRecipe, language),
         nutritionPanel: {
           total: nutrition.total,
           perServing: nutrition.perServing
@@ -2977,7 +3027,7 @@
           : `This meal vs your goal: ${compatibility.status}`
       }
 
-      return report
+      return enforceRecipeQuality(report)
     }
 
     function buildPhotoAnalysisReportData(file, context) {
@@ -3409,7 +3459,9 @@
       const sectionNotes = report.language === 'tr' ? {
         overview:'Bir bakışta tarif özeti',
         ingredient:'Diyet dostu değişimler önce gelir.',
+        preparation:'Pişirmeden önce düzenli hazırlık, süreyi kısaltır.',
         steps:'Pratik uygulama rehberi',
+        service:'Sunum ve dengeli tüketim önerisi',
         nutrition:'Tahmini beslenme, marka ve porsiyona göre değişebilir.',
         compatibility:'Hedefin için bağlamsal uyum',
         alternatives:'Aynı malzemeleri ilginç tutmanın üç yolu',
@@ -3461,6 +3513,9 @@
                 <div><strong>${bodyLabels.substitutions}:</strong> ${(report.ingredientIntelligence.substitutions || []).join(' • ')}</div>
               </div>
             `, sectionNotes.ingredient, '◎')}
+            ${renderReportSectionCard(strings.preparation, `
+              <div class="report-note-list"><ol style="padding-left:18px;display:grid;gap:6px">${(report.preparation?.steps || []).map(step => `<li>${step}</li>`).join('')}</ol></div>
+            `, sectionNotes.preparation, '◉')}
             ${renderReportSectionCard(strings.steps, `
               <div class="report-note-list">
                 <ol style="padding-left:18px;display:grid;gap:6px">${(report.cookingPlan.steps || []).map(step => `<li>${step}</li>`).join('')}</ol>
@@ -3468,6 +3523,9 @@
                 <div><strong>${bodyLabels.mistakes}:</strong> ${(report.cookingPlan.commonMistakes || []).join(' • ')}</div>
               </div>
             `, sectionNotes.steps, '↳')}
+            ${renderReportSectionCard(strings.service, `
+              <div class="report-note-list">${report.serviceSuggestion || ''}</div>
+            `, sectionNotes.service, '☕')}
             ${renderReportSectionCard(strings.nutrition, `
               ${renderMacroTable(report.nutritionPanel.total, report.nutritionPanel.perServing, report.language)}
               ${report.quantityAssumption ? `<div class="tiny">${report.quantityAssumption} ${report.language === 'tr' ? 'Bu değerler kullanılan marka ve porsiyonlara göre değişebilir.' : 'Values may vary by brand and final portioning.'}</div>` : ''}
