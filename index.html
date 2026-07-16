@@ -85,9 +85,9 @@
     .checkbox-row {display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05)}
     .checkbox-row input[type='checkbox'] {width:auto}
     .checkbox-row label {font-size:13px;font-weight:600;color:#e6eef6}
-    .ai-grid {display:grid;grid-template-columns:1.1fr .9fr;gap:16px}
+    .ai-grid {display:grid;grid-template-columns:1fr;gap:16px}
     .ai-bubble {padding:16px;border-radius:16px;background:linear-gradient(135deg,rgba(110,231,183,0.12),rgba(56,189,248,0.08));border:1px solid rgba(110,231,183,0.16);line-height:1.6;color:#f2fff8;box-shadow:inset 0 1px 0 rgba(255,255,255,0.04)}
-    .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding:10px;max-height:320px;overflow:auto;border-radius:14px;background:rgba(2,8,12,0.72);border:1px solid rgba(255,255,255,0.06)}
+    .chat-list {display:flex;flex-direction:column;gap:10px;margin:12px 0 14px;padding:10px;max-height:420px;overflow:auto;border-radius:14px;background:rgba(2,8,12,0.72);border:1px solid rgba(255,255,255,0.06)}
     .chat-bubble {padding:12px 14px;border-radius:14px;background:rgba(6,12,18,0.9);border:1px solid rgba(255,255,255,0.08);color:#e6eef6;line-height:1.5;box-shadow:inset 0 1px 0 rgba(255,255,255,0.03)}
     .chat-bubble.user {margin-left:auto;background:linear-gradient(135deg,rgba(110,231,183,0.16),rgba(56,189,248,0.12));border-color:rgba(110,231,183,0.22);color:#f3fff9}
     .chat-bubble.assistant {background:rgba(5,10,15,0.92)}
@@ -377,7 +377,7 @@
           <div id="aiRuntimeStatus" class="status-badge warn">Cloud model not connected - fallback mode</div>
         </div>
         <div class="ai-grid">
-          <div class="card">
+          <div class="card" style="min-height:620px">
             <div class="pill">Ask NutriQuest Copilot</div>
             <div id="aiChatHistory" class="chat-list"></div>
             <div class="chat-input-row">
@@ -389,7 +389,6 @@
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button id="aiStopBtn" class="btn secondary" onclick="cancelAiRequest()" disabled>Stop</button>
                 <button id="aiRetryBtn" class="btn secondary" onclick="retryLastAiPrompt()" disabled>Retry</button>
-                <button class="btn secondary" onclick="exportAiMetricsJson()">Export metrics</button>
               </div>
             </div>
             <div class="ai-chip-row">
@@ -400,12 +399,9 @@
               <button class="ai-chip" onclick="quickAsk('fridge')">Fridge ideas</button>
               <button class="ai-chip" onclick="quickAsk('budget')">Budget meals</button>
             </div>
-            <div class="muted small" style="margin-top:10px">Responses use your profile, goals, consumed meals, activity, allergies, and conversation memory.</div>
-          </div>
-          <div class="card">
-            <div class="metric-title">Latest Coach Response</div>
             <div id="aiResponse" class="ai-bubble" style="margin-top:12px">Your coach is ready. Ask a question to get a focused recommendation.</div>
             <div id="aiQuickTips" style="margin-top:12px;display:grid;gap:8px"></div>
+            <div class="muted small" style="margin-top:10px">Responses use your profile, goals, consumed meals, activity, allergies, and conversation memory.</div>
           </div>
         </div>
 
@@ -435,20 +431,15 @@
             <div id="aiActions" style="margin-top:10px;display:grid;gap:8px"></div>
           </div>
           <div class="premium-card">
-            <div class="metric-title">AI Observability</div>
-            <div id="aiObservability" class="tiny">No requests yet.</div>
-            <div id="aiQualityMetrics" class="tiny"></div>
-          </div>
-          <div class="premium-card">
-            <div class="metric-title">Smart Grocery List</div>
-            <div class="tiny">Auto-generated from selected plan and AI-generated recipes.</div>
-            <button class="btn secondary" onclick="buildSmartGroceryList()">Build Grocery List</button>
-            <div id="aiGroceryList" class="grocery-list"></div>
-          </div>
-          <div class="premium-card">
             <div class="metric-title">Weekly AI Meal Planner</div>
-            <input id="weeklyBudget" type="number" placeholder="Weekly budget (example: 40)" />
-            <input id="weeklyMaxTime" type="number" placeholder="Max cook time per meal (minutes)" />
+            <div class="profile-field">
+              <label for="weeklyBudget">Budget</label>
+              <input id="weeklyBudget" type="number" placeholder="Example: 40" />
+            </div>
+            <div class="profile-field">
+              <label for="weeklyMaxTime">Max Cook Time</label>
+              <input id="weeklyMaxTime" type="number" placeholder="Minutes per meal" />
+            </div>
             <button class="btn secondary" onclick="generateWeeklyPlan()">Generate 7-Day Plan</button>
             <div id="weeklyPlannerOut" class="tiny"></div>
           </div>
@@ -2968,7 +2959,7 @@
       if(qs('weeklyBudget')) qs('weeklyBudget').value = app.user.aiMemory?.budget || ''
       if(qs('weeklyMaxTime')) qs('weeklyMaxTime').value = app.user.aiMemory?.maxTime || ''
       if(qs('fridgeMeta') && !qs('fridgeMeta').innerHTML.trim()) {
-        qs('fridgeMeta').innerHTML = '<div class="tiny">Generate at least one recipe set to unlock grocery and rating learning.</div>'
+        qs('fridgeMeta').innerHTML = '<div class="tiny">Generate at least one recipe set to start rating-based AI learning.</div>'
       }
       if(app.ui.aiRuntimeStatus === 'cloud') renderAiRuntimeStatus('ok', 'Cloud model active')
       else renderAiRuntimeStatus('warn', 'Cloud model not connected - fallback mode')
