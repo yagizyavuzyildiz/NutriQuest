@@ -453,7 +453,8 @@
               <div class="muted small" style="margin-top:6px">Enter ingredients you already have. Recipes use available items; any extra item is marked optional.</div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="btn" onclick="runFridgeGenerator()">Generate Recipes</button>
+              <button id="fridgeGenerateBtn" class="btn" onclick="runFridgeGenerator()">Generate Recipes</button>
+              <button id="fridgeRetryBtn" class="btn secondary" onclick="retryFridgeGenerator()" disabled>Retry</button>
               <button class="btn secondary" onclick="clearFridgeResults()">Clear</button>
             </div>
           </div>
@@ -476,7 +477,8 @@
             <div class="photo-drop">
               <input id="mealPhotoInput" type="file" accept="image/*" />
             </div>
-            <button class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
+            <button id="photoAnalyzeBtn" class="btn secondary" onclick="analyzeFoodPhoto()">Analyze Photo</button>
+            <button id="photoRetryBtn" class="btn secondary" onclick="retryPhotoAnalysis()" disabled>Retry</button>
             <div id="photoAnalysisOut" class="tiny"></div>
           </div>
         </div>
@@ -765,6 +767,8 @@
   </div>
 
   <script src="utils/nutrition.js"></script>
+  <script src="utils/safeJsonParse.js"></script>
+  <script src="utils/safeAsyncRequest.js"></script>
   <script src="utils/aiReports.js"></script>
   <script>
     const STORAGE_KEYS = {users:'nq_users',activeUser:'nq_active_user',legacyUser:'nq_user'}
@@ -785,6 +789,8 @@
         aiRequestLog: [],
         aiPending: false,
         aiAbortController: null,
+        fridgeRequest: {requestId: 0, controller: null, loading: false, failSafeTimer: null, lastInput: '', lastError: ''},
+        photoRequest: {requestId: 0, controller: null, loading: false, failSafeTimer: null, lastError: ''},
         lastUserPrompt: '',
         circuitState: {open:false, failures:0, openedAt:0, coolDownMs:45000},
         rateWindow: []
@@ -2889,7 +2895,7 @@
       `
     }
 
-    function renderMacroTable(total, perServing) {
+    function renderMacroTable(total, perServing, language = 'en') {
       return `
         <div class="macro-table">
           <div class="macro-row"><strong>${language === 'tr' ? 'Toplam Kalori' : 'Total Calories'}</strong><span>${total.kcal} kcal</span></div>
@@ -2900,6 +2906,147 @@
           <div class="macro-row"><strong>${language === 'tr' ? 'Porsiyon Başına' : 'Per Serving'}</strong><span>${perServing.kcal} kcal • P ${perServing.p}g • C ${perServing.c}g • F ${perServing.f}g</span></div>
         </div>
       `
+    }
+
+    function ensureSafeRequestHelpers() {
+      if(window.SafeAsyncUtils && typeof window.SafeAsyncUtils.safeAsyncRequest === 'function') {
+        return window.SafeAsyncUtils
+      }
+
+      class RequestTimeoutError extends Error {
+        constructor(message = 'Request timed out') {
+          super(message)
+          this.name = 'RequestTimeoutError'
+        }
+      }
+
+      async function safeAsyncRequest(requestFn, options = {}) {
+        const timeoutMs = Number(options.timeoutMs || 30000)
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
+        try {
+          if(typeof options.onStart === 'function') options.onStart()
+          const data = await requestFn(controller.signal)
+          if(typeof options.onSuccess === 'function') options.onSuccess(data)
+          return {ok:true, data}
+        } catch (err) {
+          const error = err && err.name === 'AbortError'
+            ? new RequestTimeoutError(`Request exceeded ${timeoutMs}ms`)
+            : (err instanceof Error ? err : new Error('Unknown request error'))
+          if(typeof options.onError === 'function') options.onError(error)
+          return {ok:false, error}
+        } finally {
+          clearTimeout(timeoutId)
+          if(typeof options.onFinally === 'function') options.onFinally()
+        }
+      }
+
+      return {safeAsyncRequest, RequestTimeoutError}
+    }
+
+    function safeParseJson(raw) {
+      if(window.SafeJsonUtils && typeof window.SafeJsonUtils.safeJsonParse === 'function') {
+        return window.SafeJsonUtils.safeJsonParse(raw)
+      }
+      try {
+        return {ok:true, data:JSON.parse(raw)}
+      } catch (error) {
+        return {ok:false, error: error instanceof Error ? error : new Error('Invalid JSON')}
+      }
+    }
+
+    function normalizeAsyncResponse(raw, reportKey) {
+      if(raw == null) throw new Error('Empty response from generator')
+      if(typeof raw === 'string') {
+        const parsed = safeParseJson(raw)
+        if(!parsed.ok) throw new Error(`Invalid JSON: ${parsed.error?.message || 'parse error'}`)
+        raw = parsed.data
+      }
+      if(typeof raw !== 'object') throw new Error('Response is not an object')
+      if(reportKey && !raw[reportKey]) throw new Error(`Missing ${reportKey} in response`)
+      return raw
+    }
+
+    function renderRequestError(type, message, language = 'en') {
+      const tr = language === 'tr'
+      const retryText = tr ? 'Tekrar dene' : 'Retry'
+      const title = tr ? 'İşlem tamamlanamadı' : 'Request failed'
+      const retryFn = type === 'photo' ? 'retryPhotoAnalysis()' : 'retryFridgeGenerator()'
+      return `
+        <div class="allergen-alert" role="alert">
+          <strong>${title}</strong><br>${escapeHtml(message || (tr ? 'Beklenmeyen bir hata oluştu.' : 'Unexpected error occurred.'))}
+          <div style="margin-top:8px"><button class="btn secondary" onclick="${retryFn}">${retryText}</button></div>
+        </div>
+      `
+    }
+
+    function setModuleLoadingState(moduleKey, isLoading, canRetry = false) {
+      const isFridge = moduleKey === 'fridge'
+      const mainBtn = qs(isFridge ? 'fridgeGenerateBtn' : 'photoAnalyzeBtn')
+      const retryBtn = qs(isFridge ? 'fridgeRetryBtn' : 'photoRetryBtn')
+      if(mainBtn) mainBtn.disabled = Boolean(isLoading)
+      if(retryBtn) retryBtn.disabled = Boolean(isLoading) || !canRetry
+      const state = isFridge ? app.ui.fridgeRequest : app.ui.photoRequest
+      if(state) state.loading = Boolean(isLoading)
+    }
+
+    function trackModuleRequest(moduleName, stage, meta = {}) {
+      const now = Date.now()
+      console.info(`[${moduleName}] ${stage}`, meta)
+      if(!app.user?.aiMetrics) return
+      app.ui.aiRequestLog.push({
+        module: moduleName,
+        stage,
+        latencyMs: meta.latencyMs || 0,
+        ok: stage === 'finished',
+        usedFallback: false,
+        retryCount: 0,
+        model: 'local-module',
+        provider: 'frontend',
+        answer: '',
+        inputTokensApprox: 0,
+        outputTokensApprox: 0,
+        finishReason: stage === 'finished' ? 'stop' : 'error',
+        ts: now
+      })
+      if(app.ui.aiRequestLog.length > 24) app.ui.aiRequestLog.shift()
+    }
+
+    function clearModuleFailSafeTimer(moduleKey) {
+      const state = moduleKey === 'fridge' ? app.ui.fridgeRequest : app.ui.photoRequest
+      if(state?.failSafeTimer) {
+        clearTimeout(state.failSafeTimer)
+        state.failSafeTimer = null
+      }
+    }
+
+    function armModuleFailSafe(moduleKey, requestId, timeoutMs, language) {
+      const state = moduleKey === 'fridge' ? app.ui.fridgeRequest : app.ui.photoRequest
+      clearModuleFailSafeTimer(moduleKey)
+      state.failSafeTimer = setTimeout(() => {
+        if(state.requestId !== requestId || !state.loading) return
+        state.lastError = language === 'tr'
+          ? 'İşlem beklenenden uzun sürdü. Lütfen tekrar deneyin.'
+          : 'The request took too long. Please try again.'
+        setModuleLoadingState(moduleKey, false, true)
+        if(moduleKey === 'fridge') {
+          const meta = qs('fridgeMeta')
+          if(meta) meta.innerHTML = renderRequestError('fridge', state.lastError, language)
+        } else {
+          const out = qs('photoAnalysisOut')
+          if(out) out.innerHTML = renderRequestError('photo', state.lastError, language)
+        }
+      }, timeoutMs)
+    }
+
+    function retryFridgeGenerator() {
+      const last = app.ui.fridgeRequest?.lastInput || qs('fridgeInput')?.value || ''
+      if(!String(last).trim()) return
+      runFridgeGenerator(last)
+    }
+
+    function retryPhotoAnalysis() {
+      analyzeFoodPhoto()
     }
 
     function renderCompatibilityBadge(status) {
@@ -3350,28 +3497,82 @@
 
     async function runFridgeGenerator(inputOverride = null) {
       const input = inputOverride || qs('fridgeInput')?.value || ''
+      const trimmedInput = String(input || '').trim()
       const context = getAiContext()
-      const language = detectLanguageHint(input)
+      const language = detectLanguageHint(trimmedInput)
+      if(!trimmedInput) {
+        if(qs('fridgeMeta')) qs('fridgeMeta').innerHTML = renderRequestError('fridge', language === 'tr' ? 'Önce malzemeleri yaz.' : 'Please enter ingredients first.', language)
+        return
+      }
+
+      const state = app.ui.fridgeRequest
+      state.lastInput = trimmedInput
+      state.lastError = ''
+      if(state.controller) state.controller.abort()
+      state.controller = new AbortController()
+      state.requestId += 1
+      const requestId = state.requestId
+      const startedAt = performance.now()
+
       if(qs('fridgeMeta')) qs('fridgeMeta').innerHTML = renderLoadingSkeleton('recipe')
       if(qs('fridgeRecipes')) qs('fridgeRecipes').innerHTML = ''
-      await new Promise(resolve => requestAnimationFrame(resolve))
-      const result = generateFridgeRecipes(input, context)
-      renderFridgeRecipes(result.recipes, result.parsed, context, result.report)
-      if(qs('aiResponse') && result.report) {
-        qs('aiResponse').innerHTML = escapeHtml(result.report.summaryText).replace(/\n/g, '<br>')
-      }
-      if(result.recipes.length) {
-        qs('aiResponse').innerHTML += language === 'tr'
-          ? `<br><br>Mevcut malzemelerinle ${result.recipes.length} pratik tarif olusturdum. Detayli rapor kartlar halinde yukarıda.`
-          : `<br><br>I generated ${result.recipes.length} practical recipe options using your current ingredients. The detailed report is shown above in cards.`
-      }
+      setModuleLoadingState('fridge', true, false)
+      armModuleFailSafe('fridge', requestId, 35000, language)
+      trackModuleRequest('recipe-generator', 'started', {requestId})
+
+      const {safeAsyncRequest, RequestTimeoutError} = ensureSafeRequestHelpers()
+      await safeAsyncRequest(async signal => {
+        if(signal.aborted || state.controller.signal.aborted) {
+          throw new DOMException('Aborted', 'AbortError')
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const payload = generateFridgeRecipes(trimmedInput, context)
+        return normalizeAsyncResponse(payload, 'report')
+      }, {
+        timeoutMs: 30000,
+        onSuccess: result => {
+          if(state.requestId !== requestId) return
+          renderFridgeRecipes(result.recipes, result.parsed, context, result.report)
+          if(qs('aiResponse') && result.report) {
+            qs('aiResponse').innerHTML = escapeHtml(result.report.summaryText).replace(/\n/g, '<br>')
+          }
+          if(result.recipes.length && qs('aiResponse')) {
+            qs('aiResponse').innerHTML += language === 'tr'
+              ? `<br><br>Mevcut malzemelerinle ${result.recipes.length} pratik tarif olusturdum. Detayli rapor kartlar halinde yukarıda.`
+              : `<br><br>I generated ${result.recipes.length} practical recipe options using your current ingredients. The detailed report is shown above in cards.`
+          }
+          trackModuleRequest('recipe-generator', 'finished', {requestId, latencyMs: Math.round(performance.now() - startedAt)})
+        },
+        onError: error => {
+          if(state.requestId !== requestId) return
+          const message = error instanceof RequestTimeoutError
+            ? (language === 'tr' ? 'Tarif istegi zaman asimina ugradi. Lütfen tekrar deneyin.' : 'Recipe request timed out. Please retry.')
+            : (error?.message || (language === 'tr' ? 'Tarif raporu olusturulamadi.' : 'Recipe report could not be generated.'))
+          state.lastError = message
+          const meta = qs('fridgeMeta')
+          if(meta) meta.innerHTML = renderRequestError('fridge', message, language)
+          const out = qs('fridgeRecipes')
+          if(out) out.innerHTML = ''
+          trackModuleRequest('recipe-generator', 'error', {requestId, latencyMs: Math.round(performance.now() - startedAt), message})
+        },
+        onFinally: () => {
+          if(state.requestId !== requestId) return
+          clearModuleFailSafeTimer('fridge')
+          state.controller = null
+          setModuleLoadingState('fridge', false, true)
+        }
+      })
     }
 
     function clearFridgeResults() {
+      const state = app.ui.fridgeRequest
+      if(state?.controller) state.controller.abort()
+      clearModuleFailSafeTimer('fridge')
       if(qs('fridgeInput')) qs('fridgeInput').value = ''
       if(qs('fridgeMeta')) qs('fridgeMeta').innerHTML = ''
       if(qs('fridgeRecipes')) qs('fridgeRecipes').innerHTML = ''
       app.ui.lastGeneratedRecipes = []
+      setModuleLoadingState('fridge', false, false)
     }
 
     function rateRecipe(recipeId, rating) {
@@ -3423,15 +3624,58 @@
       const file = qs('mealPhotoInput')?.files?.[0]
       const out = qs('photoAnalysisOut')
       if(!out) return
+      const language = detectLanguageHint(file?.name || app.ui.lastUserPrompt || 'en')
       if(!file) {
-        out.textContent = 'Upload a meal photo first. In this front-end demo, analysis is simulated and can be connected to a vision API backend.'
+        out.innerHTML = renderRequestError('photo', language === 'tr'
+          ? 'Önce bir yemek görseli yükle.'
+          : 'Upload a meal photo first.', language)
         return
       }
+
+      const state = app.ui.photoRequest
+      state.lastError = ''
+      if(state.controller) state.controller.abort()
+      state.controller = new AbortController()
+      state.requestId += 1
+      const requestId = state.requestId
+      const startedAt = performance.now()
       const context = getAiContext()
       out.innerHTML = renderLoadingSkeleton('photo')
-      await new Promise(resolve => requestAnimationFrame(resolve))
-      const report = buildPhotoAnalysisReportData(file, context)
-      out.innerHTML = renderPhotoAnalysisReport(report)
+      setModuleLoadingState('photo', true, false)
+      armModuleFailSafe('photo', requestId, 36000, language)
+      trackModuleRequest('photo-analysis', 'started', {requestId})
+
+      const {safeAsyncRequest, RequestTimeoutError} = ensureSafeRequestHelpers()
+      await safeAsyncRequest(async signal => {
+        if(signal.aborted || state.controller.signal.aborted) {
+          throw new DOMException('Aborted', 'AbortError')
+        }
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        const payload = {foodAnalysisReport: buildPhotoAnalysisReportData(file, context)}
+        return normalizeAsyncResponse(payload, 'foodAnalysisReport')
+      }, {
+        timeoutMs: 35000,
+        onSuccess: data => {
+          if(state.requestId !== requestId) return
+          out.innerHTML = renderPhotoAnalysisReport(data.foodAnalysisReport)
+          trackModuleRequest('photo-analysis', 'finished', {requestId, latencyMs: Math.round(performance.now() - startedAt)})
+        },
+        onError: error => {
+          if(state.requestId !== requestId) return
+          const message = error instanceof RequestTimeoutError
+            ? (language === 'tr' ? 'Foto analiz süresi doldu. Görseli yeniden deneyin.' : 'Photo analysis timed out. Please retry with the image.')
+            : (error?.message || (language === 'tr' ? 'Foto analiz sırasında hata oluştu.' : 'Photo analysis failed.'))
+          state.lastError = message
+          out.innerHTML = renderRequestError('photo', message, language)
+          trackModuleRequest('photo-analysis', 'error', {requestId, latencyMs: Math.round(performance.now() - startedAt), message})
+        },
+        onFinally: () => {
+          if(state.requestId !== requestId) return
+          clearModuleFailSafeTimer('photo')
+          state.controller = null
+          setModuleLoadingState('photo', false, true)
+        }
+      })
     }
 
     function renderChat() {
